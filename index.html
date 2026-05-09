@@ -364,6 +364,123 @@ function HvadErMoms() {
 }
 
 // ── PERIODER ──────────────────────────────────────────────────────────────────
+function CVROpslag() {
+  const [cvr, setCvr] = useState("");
+  const [resultat, setResultat] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [fejl, setFejl] = useState("");
+
+  const slaOpCVR = async () => {
+    const cleaned = cvr.replace(/\s/g,"");
+    if (!/^\d{8}$/.test(cleaned)) { setFejl("CVR-nummer skal være præcis 8 cifre."); return; }
+    setFejl(""); setLoading(true); setResultat(null);
+    try {
+      const res = await fetch(`https://data.cvr.dev/api/cvr/${cleaned}`);
+      if (!res.ok) throw new Error("Ikke fundet");
+      const data = await res.json();
+      const navn = data.name || data.virksomhedsnavn || "Ukendt virksomhed";
+      const status = data.status || "";
+      const branche = data.industryDescription || data.branchekode_tekst || "";
+      const adresse = data.address || "";
+      // Bestem momsperiode baseret på omsætning hvis tilgængelig
+      // Vi viser de tre muligheder og fremhæver den mest sandsynlige baseret på virksomhedstype
+      setResultat({ navn, status, branche, adresse, cvr: cleaned });
+    } catch(e) {
+      // Fallback: prøv officiel CVR API
+      try {
+        const res2 = await fetch(`https://cvrapi.dk/api?search=${cleaned}&country=dk`);
+        const data2 = await res2.json();
+        if (data2.error) throw new Error(data2.error);
+        setResultat({
+          navn: data2.name || "Ukendt",
+          status: data2.enddate ? "OPHØRT" : "AKTIV",
+          branche: data2.industrydesc || "",
+          adresse: `${data2.address || ""}, ${data2.zipcode || ""} ${data2.city || ""}`.trim(),
+          cvr: cleaned,
+          ansatte: data2.employees,
+        });
+      } catch(e2) {
+        setFejl("Kunne ikke finde virksomheden. Tjek CVR-nummeret og prøv igen.");
+      }
+    }
+    setLoading(false);
+  };
+
+  const bestemPeriode = (ansatte) => {
+    // Vi kan ikke kende omsætning fra CVR, så vi guider brugeren
+    return null;
+  };
+
+  return (
+    <div style={{marginBottom:"2rem"}}>
+      <Card style={{maxWidth:"700px",padding:"1.5rem"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"1rem"}}>
+          <div style={{fontSize:"28px"}}>🔍</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:"16px",color:C.navy}}>Slå din virksomhed op</div>
+            <div style={{fontSize:"13px",color:C.textSub}}>Indtast CVR-nummer for at se virksomhedsoplysninger og finde den rette momsperiode</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
+          <input
+            value={cvr}
+            onChange={e=>setCvr(e.target.value.replace(/[^0-9\s]/g,""))}
+            onKeyDown={e=>e.key==="Enter"&&slaOpCVR()}
+            placeholder="Fx 12345678"
+            maxLength={8}
+            style={{flex:1,minWidth:"160px",padding:"10px 14px",borderRadius:"8px",border:`0.5px solid ${fejl?C.red:C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"16px",letterSpacing:"1px"}}
+          />
+          <button onClick={slaOpCVR} disabled={loading} style={{background:loading?"#aaa":C.navy,color:C.white,border:"none",padding:"10px 22px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
+            {loading?"Søger...":"Slå op →"}
+          </button>
+        </div>
+        {fejl && <div style={{marginTop:"8px",fontSize:"13px",color:C.red}}>{fejl}</div>}
+
+        {resultat && (
+          <div style={{marginTop:"1.25rem",borderTop:`0.5px solid ${C.border}`,paddingTop:"1.25rem"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1rem",flexWrap:"wrap",gap:"8px"}}>
+              <div>
+                <div style={{fontWeight:700,fontSize:"17px",color:C.navy,marginBottom:"3px"}}>{resultat.navn}</div>
+                <div style={{fontSize:"13px",color:C.textSub}}>CVR: {resultat.cvr}</div>
+              </div>
+              <span style={{
+                background:resultat.status==="OPHØRT"?"rgba(239,68,68,0.1)":"rgba(34,197,94,0.12)",
+                color:resultat.status==="OPHØRT"?C.red:C.green,
+                border:`0.5px solid ${resultat.status==="OPHØRT"?C.red:C.green}`,
+                borderRadius:"20px",padding:"4px 14px",fontSize:"12px",fontWeight:700
+              }}>{resultat.status||"AKTIV"}</span>
+            </div>
+            {resultat.branche && <div style={{fontSize:"13px",color:C.textSub,marginBottom:"4px"}}>🏢 {resultat.branche}</div>}
+            {resultat.adresse && <div style={{fontSize:"13px",color:C.textSub,marginBottom:"1rem"}}>📍 {resultat.adresse}</div>}
+            {resultat.ansatte !== undefined && <div style={{fontSize:"13px",color:C.textSub,marginBottom:"1rem"}}>👥 Antal ansatte: {resultat.ansatte || "0–1"}</div>}
+
+            <div style={{background:"rgba(200,168,75,0.08)",border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"8px",padding:"12px 16px"}}>
+              <div style={{fontWeight:700,fontSize:"13px",color:C.gold,marginBottom:"8px"}}>📅 Hvilken momsperiode gælder for jer?</div>
+              <div style={{fontSize:"13px",color:C.textSub,lineHeight:1.7,marginBottom:"8px"}}>
+                Momsperioden bestemmes af den <strong>årlige omsætning</strong> — ikke af CVR-oplysningerne. Brug tabellen nedenfor:
+              </div>
+              {[
+                ["Under 5 mio. kr./år","Halvårlig","→ Vælg 'Halvårlig' i tabellen nedenfor",C.green],
+                ["5 – 50 mio. kr./år","Kvartalsvis","→ Vælg 'Kvartalsvis' i tabellen nedenfor",C.gold],
+                ["Over 50 mio. kr./år","Månedlig","→ Vælg 'Månedlig' i tabellen nedenfor",C.red],
+              ].map(([oms,per,hint,col])=>(
+                <div key={per} style={{display:"flex",gap:"10px",alignItems:"center",padding:"6px 0",borderBottom:`0.5px solid ${C.border}`}}>
+                  <div style={{width:"8px",height:"8px",borderRadius:"50%",background:col,flexShrink:0}}/>
+                  <div style={{flex:1,fontSize:"13px"}}><strong>{oms}</strong> → <span style={{color:col,fontWeight:700}}>{per}</span></div>
+                  <div style={{fontSize:"12px",color:C.textSub}}>{hint}</div>
+                </div>
+              ))}
+              <div style={{marginTop:"10px",fontSize:"12px",color:C.textSub,fontStyle:"italic"}}>
+                Er du i tvivl? Skattestyrelsen oplyser din momsperiode direkte i TastSelv Erhverv eller ved at ringe til 72 22 18 18.
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 function Perioder() {
   const [tab, setTab] = useState("kvartal");
   const now = new Date(2026,4,9);
