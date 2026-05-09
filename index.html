@@ -371,45 +371,58 @@ function CVROpslag() {
   const [fejl, setFejl] = useState("");
 
   const slaOpCVR = async () => {
-    const cleaned = cvr.replace(/\s/g,"");
-    if (!/^\d{8}$/.test(cleaned)) { setFejl("CVR-nummer skal være præcis 8 cifre."); return; }
-    setFejl(""); setLoading(true); setResultat(null);
-    try {
-      const res = await fetch(`https://data.cvr.dev/api/cvr/${cleaned}`);
-      if (!res.ok) throw new Error("Ikke fundet");
-      const data = await res.json();
-      const navn = data.name || data.virksomhedsnavn || "Ukendt virksomhed";
-      const status = data.status || "";
-      const branche = data.industryDescription || data.branchekode_tekst || "";
-      const adresse = data.address || "";
-      // Bestem momsperiode baseret på omsætning hvis tilgængelig
-      // Vi viser de tre muligheder og fremhæver den mest sandsynlige baseret på virksomhedstype
-      setResultat({ navn, status, branche, adresse, cvr: cleaned });
-    } catch(e) {
-      // Fallback: prøv officiel CVR API
-      try {
-        const res2 = await fetch(`https://cvrapi.dk/api?search=${cleaned}&country=dk`);
-        const data2 = await res2.json();
-        if (data2.error) throw new Error(data2.error);
-        setResultat({
-          navn: data2.name || "Ukendt",
-          status: data2.enddate ? "OPHØRT" : "AKTIV",
-          branche: data2.industrydesc || "",
-          adresse: `${data2.address || ""}, ${data2.zipcode || ""} ${data2.city || ""}`.trim(),
-          cvr: cleaned,
-          ansatte: data2.employees,
-        });
-      } catch(e2) {
-        setFejl("Kunne ikke finde virksomheden. Tjek CVR-nummeret og prøv igen.");
-      }
-    }
-    setLoading(false);
-  };
+  const cleaned = cvr.replace(/\D/g, "");
 
-  const bestemPeriode = (ansatte) => {
-    // Vi kan ikke kende omsætning fra CVR, så vi guider brugeren
-    return null;
-  };
+  if (!/^\d{8}$/.test(cleaned)) {
+    setFejl("CVR-nummer skal være præcis 8 cifre.");
+    return;
+  }
+
+  setFejl("");
+  setLoading(true);
+  setResultat(null);
+
+  try {
+    const res = await fetch(
+      `https://cvrapi.dk/api?search=${cleaned}&country=dk`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Kunne ikke hente CVR-data");
+    }
+
+    const data = await res.json();
+
+    console.log("CVR API RESPONSE:", data);
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    setResultat({
+      navn: data.name || "Ukendt virksomhed",
+      status: data.enddate ? "OPHØRT" : "AKTIV",
+      branche: data.industrydesc || "Ingen branche fundet",
+      adresse: `${data.address || ""}, ${data.zipcode || ""} ${data.city || ""}`.trim(),
+      cvr: cleaned,
+      ansatte: data.employees || "Ukendt",
+    });
+  } catch (err) {
+    console.error(err);
+
+    setFejl(
+      "CVR-opslag fejlede. CVR API er muligvis midlertidigt utilgængelig."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{marginBottom:"2rem"}}>
@@ -423,11 +436,12 @@ function CVROpslag() {
         </div>
         <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
           <input
-            value={cvr}
-            onChange={e=>setCvr(e.target.value.replace(/[^0-9\s]/g,""))}
-            onKeyDown={e=>e.key==="Enter"&&slaOpCVR()}
-            placeholder="Fx 12345678"
-            maxLength={8}
+            <input
+  type="text"
+  value={cvr}
+  onChange={(e) => setCvr(e.target.value.replace(/\D/g, ""))}
+  placeholder="Fx 12345678"
+  maxLength={8}
             style={{flex:1,minWidth:"160px",padding:"10px 14px",borderRadius:"8px",border:`0.5px solid ${fejl?C.red:C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"16px",letterSpacing:"1px"}}
           />
           <button onClick={slaOpCVR} disabled={loading} style={{background:loading?"#aaa":C.navy,color:C.white,border:"none",padding:"10px 22px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
