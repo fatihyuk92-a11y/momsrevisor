@@ -369,20 +369,34 @@ function CVROpslag() {
   const [cvr, setCvr] = useState("");
   const [company, setCompany] = useState(null);
 
-  const searchCVR = () => {
+const searchCVR = async () => {
 
-    if (!cvr.trim()) return;
+  if (!cvr.trim()) return;
 
-    // Fake demo data
+  try {
+
+    const res = await fetch(
+      `https://cvrapi.dk/api?search=${cvr}&country=dk`
+    );
+
+    const data = await res.json();
+
     setCompany({
-      navn: "Test Virksomhed ApS",
-      cvr: cvr,
-      branche: "IT-konsulentydelser",
-      adresse: "København",
-      ansatte: 8,
-      status: "AKTIV",
+      navn: data.name || "Ukendt virksomhed",
+      cvr: data.vat || cvr,
+      branche: data.industrydesc || "Ingen branche fundet",
+      adresse:
+        `${data.address || ""} ${data.zipcode || ""} ${data.city || ""}`,
+      ansatte: data.employees || "Ukendt",
+      status: data.status || "AKTIV",
     });
-  };
+
+  } catch (err) {
+
+    alert("Kunne ikke finde virksomheden");
+
+  }
+};
 
   return (
     <div style={{ marginBottom: "2rem" }}>
