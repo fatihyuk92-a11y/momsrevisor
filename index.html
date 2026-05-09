@@ -366,6 +366,23 @@ function HvadErMoms() {
 // ── PERIODER ──────────────────────────────────────────────────────────────────
 function CVROpslag() {
   const [showAI, setShowAI] = useState(false);
+  const [cvr, setCvr] = useState("");
+  const [company, setCompany] = useState(null);
+
+  const searchCVR = () => {
+
+    if (!cvr.trim()) return;
+
+    // Fake demo data
+    setCompany({
+      navn: "Test Virksomhed ApS",
+      cvr: cvr,
+      branche: "IT-konsulentydelser",
+      adresse: "København",
+      ansatte: 8,
+      status: "AKTIV",
+    });
+  };
 
   return (
     <div style={{ marginBottom: "2rem" }}>
@@ -373,154 +390,201 @@ function CVROpslag() {
 
         <div style={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1rem",
-          flexWrap: "wrap",
           gap: "12px",
-        }}>
-          <div>
-            <div style={{
-              fontSize: "22px",
-              fontWeight: 700,
-              color: C.navy,
-            }}>
-              Semerkand Ungdom
-            </div>
-
-            <div style={{
-              color: C.textSub,
-              marginTop: "4px",
-            }}>
-              CVR: 32702341
-            </div>
-          </div>
-
-          <div style={{
-            background: "rgba(34,197,94,0.12)",
-            color: C.green,
-            padding: "6px 14px",
-            borderRadius: "999px",
-            fontWeight: 700,
-            fontSize: "13px",
-          }}>
-            AKTIV
-          </div>
-        </div>
-
-        <div style={{
-          display: "grid",
-          gap: "10px",
           marginBottom: "1.5rem",
-          color: C.textSub,
-          fontSize: "14px",
-        }}>
-          <div>🏢 Andre organisationer og foreningers aktiviteter i.a.n.</div>
-          <div>📍 Jægerbuen 6, 2635 Ishøj</div>
-          <div>👥 Antal ansatte: 1</div>
-        </div>
-
-        <div style={{
-          background: "rgba(200,168,75,0.08)",
-          border: `1px solid rgba(200,168,75,0.25)`,
-          borderRadius: "10px",
-          padding: "1rem",
-          marginBottom: "1rem",
-        }}>
-          <div style={{
-            fontWeight: 700,
-            marginBottom: "10px",
-            color: C.gold,
-          }}>
-            Hvilken momsperiode gælder for jer?
-          </div>
-
-          <div style={{ lineHeight: 1.9 }}>
-            <div><strong>Under 5 mio. kr./år</strong> → Halvårlig</div>
-            <div><strong>5–50 mio. kr./år</strong> → Kvartalsvis</div>
-            <div><strong>Over 50 mio. kr./år</strong> → Månedlig</div>
-          </div>
-        </div>
-
-        <div style={{
-          display: "flex",
-          gap: "10px",
           flexWrap: "wrap",
         }}>
 
-          <button
-            onClick={() => setShowAI(!showAI)}
+          <input
+            value={cvr}
+            onChange={(e) => setCvr(e.target.value)}
+            placeholder="Indtast CVR-nummer"
             style={{
-              background: C.gold,
-              color: C.navy,
-              border: "none",
-              padding: "12px 18px",
+              flex: 1,
+              minWidth: "240px",
+              padding: "12px 14px",
               borderRadius: "8px",
-              fontWeight: 700,
-              cursor: "pointer",
+              border: `1px solid ${C.borderMid}`,
+              background: C.bgSecondary,
+              fontSize: "15px",
             }}
-          >
-            ✨ AI-analyser virksomheden
-          </button>
+          />
 
           <button
+            onClick={searchCVR}
             style={{
               background: C.navy,
               color: C.white,
               border: "none",
-              padding: "12px 18px",
+              padding: "12px 20px",
               borderRadius: "8px",
               fontWeight: 700,
               cursor: "pointer",
             }}
           >
-            📞 Book rådgivning
+            Slå op
           </button>
+
         </div>
 
-        {showAI && (
-          <div style={{
-            marginTop: "1rem",
-            background: C.bgSecondary,
-            borderRadius: "12px",
-            padding: "1.25rem",
-            border: `1px solid ${C.border}`,
-          }}>
+        {company && (
+          <>
 
             <div style={{
-              fontWeight: 700,
-              fontSize: "16px",
-              marginBottom: "12px",
-              color: C.navy,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+              flexWrap: "wrap",
+              gap: "12px",
             }}>
-              🤖 AI-analyse
-            </div>
-
-            <div style={{ display: "grid", gap: "12px" }}>
 
               <div>
-                <strong>Næste anbefalede handlinger:</strong>
+                <div style={{
+                  fontSize: "22px",
+                  fontWeight: 700,
+                  color: C.navy,
+                }}>
+                  {company.navn}
+                </div>
 
-                <div style={{ marginTop: "6px", lineHeight: 1.7 }}>
-                  1. Kontrollér korrekt momsregistrering<br/>
-                  2. Gennemgå fradrag for fællesudgifter<br/>
-                  3. Sikr korrekt fakturering<br/>
-                  4. Gennemgå eventuelle EU-transaktioner
+                <div style={{
+                  color: C.textSub,
+                  marginTop: "4px",
+                }}>
+                  CVR: {company.cvr}
                 </div>
               </div>
 
-              <div>
-                <strong>AI-vurdering:</strong>
+              <div style={{
+                background: "rgba(34,197,94,0.12)",
+                color: C.green,
+                padding: "6px 14px",
+                borderRadius: "999px",
+                fontWeight: 700,
+                fontSize: "13px",
+              }}>
+                {company.status}
+              </div>
+            </div>
 
-                <div style={{ marginTop: "6px", lineHeight: 1.7 }}>
-                  Denne virksomhedstype har typisk moderate momsrisici.
-                  Fokus bør særligt være på korrekt fradragshåndtering,
-                  dokumentation samt vurdering af momsfrie aktiviteter.
-                </div>
+            <div style={{
+              display: "grid",
+              gap: "10px",
+              marginBottom: "1.5rem",
+              color: C.textSub,
+              fontSize: "14px",
+            }}>
+              <div>🏢 {company.branche}</div>
+              <div>📍 {company.adresse}</div>
+              <div>👥 Antal ansatte: {company.ansatte}</div>
+            </div>
+
+            <div style={{
+              background: "rgba(200,168,75,0.08)",
+              border: `1px solid rgba(200,168,75,0.25)`,
+              borderRadius: "10px",
+              padding: "1rem",
+              marginBottom: "1rem",
+            }}>
+              <div style={{
+                fontWeight: 700,
+                marginBottom: "10px",
+                color: C.gold,
+              }}>
+                Hvilken momsperiode gælder for virksomheden?
               </div>
 
+              <div style={{ lineHeight: 1.9 }}>
+                <div><strong>Under 5 mio. kr./år</strong> → Halvårlig</div>
+                <div><strong>5–50 mio. kr./år</strong> → Kvartalsvis</div>
+                <div><strong>Over 50 mio. kr./år</strong> → Månedlig</div>
+              </div>
             </div>
-          </div>
+
+            <div style={{
+              display: "flex",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}>
+
+              <button
+                onClick={() => setShowAI(!showAI)}
+                style={{
+                  background: C.gold,
+                  color: C.navy,
+                  border: "none",
+                  padding: "12px 18px",
+                  borderRadius: "8px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                ✨ AI-analyser virksomheden
+              </button>
+
+              <button
+                style={{
+                  background: C.navy,
+                  color: C.white,
+                  border: "none",
+                  padding: "12px 18px",
+                  borderRadius: "8px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                📞 Book rådgivning
+              </button>
+
+            </div>
+
+            {showAI && (
+              <div style={{
+                marginTop: "1rem",
+                background: C.bgSecondary,
+                borderRadius: "12px",
+                padding: "1.25rem",
+                border: `1px solid ${C.border}`,
+              }}>
+
+                <div style={{
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  marginBottom: "12px",
+                  color: C.navy,
+                }}>
+                  🤖 AI-analyse
+                </div>
+
+                <div style={{ display: "grid", gap: "12px" }}>
+
+                  <div>
+                    <strong>Næste anbefalede handlinger:</strong>
+
+                    <div style={{ marginTop: "6px", lineHeight: 1.7 }}>
+                      1. Kontrollér korrekt momsregistrering<br/>
+                      2. Gennemgå fradrag for fællesudgifter<br/>
+                      3. Sikr korrekt fakturering<br/>
+                      4. Gennemgå eventuelle EU-transaktioner
+                    </div>
+                  </div>
+
+                  <div>
+                    <strong>AI-vurdering:</strong>
+
+                    <div style={{ marginTop: "6px", lineHeight: 1.7 }}>
+                      Denne virksomhedstype har typisk moderate momsrisici.
+                      Fokus bør særligt være på korrekt fradragshåndtering,
+                      dokumentation samt vurdering af momsfrie aktiviteter.
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+          </>
         )}
 
       </Card>
