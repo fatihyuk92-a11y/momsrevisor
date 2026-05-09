@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MomsRevisor A/S – Professionel momsrådgivning</title>
+<meta name="description" content="Professionel momsrådgivning med AI-rådgiver, momsberegner og periodeoversigt for danske virksomheder."/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:#ebebeb;color:#111;-webkit-font-smoothing:antialiased}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#f0f0f0}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+input,textarea,select,button{font-family:Georgia,serif}
+table{border-collapse:collapse}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+const MOMS_KNOWLEDGE = `Du er en erfaren dansk momsrevisor med dybdegående kendskab til samtlige primære retskilder på momsområdet:
+
+RETSKILDER DU ANVENDER:
+1. Momsloven (ML) — Lovbekendtgørelse nr. 1021 af 26. september 2019 med efterfølgende ændringer
+2. Momsbekendtgørelsen (MB) — Bekendtgørelse nr. 2246 af 30. november 2021 med ændringer.
+3. Momsforordningen — Rådets gennemførelsesforordning (EU) nr. 282/2011 af 15. marts 2011 med ændringer.
+4. EU's momsdirektiv — Rådets direktiv 2006/112/EF med ændringer, herunder direktiv 2018/1910 (quick fixes), direktiv 2019/1995 (e-handel).
+5. Den Juridiske Vejledning (DJV) — Skattestyrelsens vejledning, afsnit D.A.
+6. Dansk og EU-retlig praksis — Landsskatterettens kendelser og EU-Domstolens afgørelser.
+
+MOMSBEKENDTGØRELSEN (MB): MB kap. 12 (§§ 58-81): fakturakrav inkl. forenklede fakturaer under 3.000 kr. (MB § 63). MB kap. 9 (§§ 38-50): pro-rata og regulering. MB kap. 17: brugtmomsordningen/differencebeskatning. MB §§ 134-136: momsgrupper/fællesregistrering. MB §§ 119-133: OSS-regler.
+
+MOMSFORORDNINGEN (MF 282/2011): MF art. 10-13: etableringssted og fast forretningssted. MF art. 13b: definition af fast ejendom. MF art. 18: formodningsregler B2B/B2C. MF art. 45a: transportbevis ved EU-varesalg (to uafhængige beviser). MF art. 31a-31c: ydelser vedrørende fast ejendom. MF art. 33-41: elektroniske ydelser. MF art. 369a ff.: OSS detaljerede regler.
+
+QUICK FIXES (2020): Call-off stock: ML § 19a - momspligt udskydes til faktisk overdragelse. Kædetransaktioner: transport tilhører mellemhandlerens leverance. Gyldigt momsnummer er betingelse (ikke blot formalitet) for momsfrihed.
+
+KERNEREGLER:
+REGISTRERING (ML §§ 47-50): Pligt ved momspligtigt salg over 50.000 kr./kalenderår. Frivillig registrering mulig.
+MOMSFRITAGNE AKTIVITETER (ML § 13): Hospitalsbehandling, læge/tandlæge, social forsorg, skoleundervisning, kulturelle aktiviteter, forfattervirksomhed, udlejning af fast ejendom (kan gøres momspligtig for erhvervslejemål), salg af fast ejendom (undtagen byggegrunde og nye bygninger), forsikring, finansielle ydelser, spil om penge.
+MOMSFRADRAG (ML §§ 37-42, MB §§ 38-57): Fuldt fradrag til momspligtige aktiviteter. Intet fradrag til momsfrie. Pro-rata for fællesudgifter = momspligtig omsætning / samlet omsætning, afrundes opad (MB § 38, stk. 4). Acontofradrag baseret på foregående år. Endelig opgørelse i afgiftsperioden der omfatter 6. måned efter regnskabsårets afslutning.
+PERSONBILER (ML § 42, stk. 1, nr. 6-7): Intet fradrag ved køb eller drift. Undtagelse: bilforhandlere, køreskoler, udlejning. Leasing >6 måneder med min. 10% erhvervsmæssig brug: delvist fradrag (MB § 52).
+VAREBILER op til 3 tons (ML § 42, stk. 4-5): Fuldt fradrag ved køb hvis udelukkende erhvervsmæssig. Ingen fradrag ved blandet brug på købet. Fuldt fradrag på drift (krav: >50.000 kr. momspligtigt salg). Leasing blandet brug: 1/3 fradrag.
+REKLAME/REPRÆSENTATION (ML § 42, stk. 1, nr. 1-5): Fuldt fradrag for reklame. Reklameartikler under 100 kr. ekskl. moms: fuldt fradrag. Repræsentation: ingen fradrag undtagen hotel (fuldt) og restaurant (1/4). Gaver: intet fradrag.
+PERSONALEUDGIFTER: Arbejdstøj/uniformer: fradrag. Mobil udelukkende erhverv: fuldt fradrag. Mobil blandet: skønsmæssigt. Bespisning ansatte normalt ingen fradrag - undtagen møder i egne lokaler og beordret overarbejde.
+INVESTERINGSGODER (ML §§ 43-44, MB §§ 43-50): Over 100.000 kr. ekskl. moms. Reguleringsperiode: 5 år (maskiner/inventar), 10 år (fast ejendom). Regulering ved ændret anvendelse (min. 10%-point).
+BRUGTMOMSORDNINGEN (ML §§ 69-71, MB kap. 17): Moms kun af avancen (salgspris minus indkøbspris). Krav: købt fra ikke-momsregistreret person.
+EU-HANDEL: EU-varekøb: erhvervelsesmoms selvangives. EU-varesalg momsfrit ved: gyldigt momsnummer (VIES), fysisk udførsel (to beviser jf. MF art. 45a), korrekt listeindberetning. Import fra 3. lande: importmoms. Eksport: momsfrit ved dokumenteret udførsel. Ydelser B2B: leveringssted = købers land - omvendt betalingspligt (reverse charge). 
+OSS (ML §§ 66a-66e): Fjernsalg til EU-private: grænse EUR 10.000. OSS undgår registrering i hvert land.
+FAKTURAKRAV (ML § 52a, MB §§ 58-81): Fortløbende nummer, dato, sælgers navn/adresse/CVR, købers navn/adresse, leverancens art/omfang/pris, momsbeløb, leveringsdato, momssats. EU-handel: købers momsnummer + "zero-rated"/"reverse charge".
+ANGIVELSE OG BETALING (ML §§ 57-62): Under 5 mio. kr./år: halvårligt, frist 1. i 3. måned. 5-50 mio. kr./år: kvartalsvist, frist 1. i 3. måned. Over 50 mio. kr./år: månedligt, frist den 25. Juni: 17. august.
+FORÆLDELSE: 3 år fra angivelsesfristens udløb. Absolut frist 10 år.
+FAST EJENDOM (ML §§ 13, 51-51a): Udlejning momsfrit - frivillig registrering mulig for erhvervslejemål (min. 2 år). Salg momsfrit undtagen: byggegrunde, nye bygninger (første 5 år), til-/ombygning >25% (bygning+jord) eller >50% (kun bygning) af salgssum.
+
+Besvar spørgsmål på dansk med præcise henvisninger til ML §, MB §, MF art., D.A.-afsnit og relevante domme/SKM-numre. Vær konkret og praktisk. Anbefal professionel rådgivning ved komplekse sager.`;
+
+const EXAMPLES = [
+  "Kan jeg fratrække moms på køb af en firmabil?",
+  "Hvornår skal jeg momsregistreres?",
+  "Hvad er reglerne for brugtmomsordningen?",
+  "Kan jeg fradrage moms på restaurationsbesøg?",
+  "Hvad siger momsforordningen om fast forretningssted?",
+  "Hvad er fakturakravene inkl. forenklede fakturaer?",
+  "Hvad er call-off stock-reglerne efter Quick Fixes?",
+  "Hvad er pro-rata reglerne i momsbekendtgørelsen?",
+];
+
+const C = {
+  navy: "#0f2740",
+  gold: "#c8a84b",
+  white: "#ffffff",
+  bg: "#ebebeb",
+  bgCard: "#ffffff",
+  bgSecondary: "#f5f5f5",
+  text: "#111111",
+  textSub: "#555555",
+  border: "#eeeeee",
+  borderMid: "#dddddd",
+  green: "#22c55e",
+  yellow: "#f59e0b",
+  red: "#ef4444",
+};
+
+function Nav({ active, setActive }) {
+  const links = [
+    ["home","Forside"],["sporg","Spørg AI"],["hvad","Hvad er moms?"],
+    ["perioder","Perioder"],["beregner","Beregner"],["ydelser","Ydelser"],
+    ["om","Om os"],["kontakt","Kontakt"],
+  ];
+  return (
+    <nav style={{background:C.navy,padding:"0 1.5rem",display:"flex",alignItems:"center",justifyContent:"space-between",height:"60px",position:"sticky",top:0,zIndex:100,flexWrap:"wrap",gap:"0.5rem"}}>
+      <div onClick={()=>setActive("home")} style={{color:C.white,fontWeight:700,fontSize:"17px",cursor:"pointer",display:"flex",alignItems:"center",gap:"8px"}}>
+        <span style={{color:C.gold,fontSize:"20px"}}>⚖</span> MomsRevisor <span style={{fontSize:"11px",color:"rgba(255,255,255,0.4)",fontWeight:400}}>A/S</span>
+      </div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:"2px"}}>
+        {links.map(([id,lbl])=>(
+          <button key={id} onClick={()=>setActive(id)} style={{
+            background: active===id?"rgba(200,168,75,0.25)":"transparent",
+            color: active===id?C.gold:"rgba(255,255,255,0.8)",
+            border:"none",padding:"6px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"13px",transition:"all 0.15s"
+          }}>{lbl}</button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+function Card({children, style={}}) {
+  return <div style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"12px",padding:"1.5rem",...style}}>{children}</div>;
+}
+
+function SectionHeader({title}) {
+  return (
+    <>
+      <h2 style={{fontSize:"2rem",fontWeight:700,color:C.navy,marginBottom:"0.4rem"}}>{title}</h2>
+      <div style={{width:"48px",height:"3px",background:C.gold,borderRadius:"2px",marginBottom:"2rem"}}/>
+    </>
+  );
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────────
+function Home({setActive}) {
+  return (
+    <div>
+      <div style={{background:"linear-gradient(135deg,#0f2740 0%,#1a3f60 50%,#0f2740 100%)",padding:"5rem 2rem",textAlign:"center"}}>
+        <div style={{maxWidth:"700px",margin:"0 auto"}}>
+          <div style={{display:"inline-block",background:"rgba(200,168,75,0.12)",color:C.gold,border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"20px",padding:"4px 16px",fontSize:"13px",marginBottom:"1rem",fontStyle:"italic"}}>
+            Specialiseret momsrådgivning siden 2005
+          </div>
+          <h1 style={{color:C.white,fontSize:"clamp(1.8rem,5vw,3.2rem)",fontWeight:700,lineHeight:1.2,marginBottom:"1rem"}}>
+            Professionel <span style={{color:C.gold}}>Momsrådgivning</span><br/>til din virksomhed
+          </h1>
+          <p style={{color:"rgba(255,255,255,0.75)",fontSize:"17px",maxWidth:"580px",margin:"0 auto 2.5rem",lineHeight:1.6}}>
+            Vi hjælper danske virksomheder med at navigere i momslovens kompleksitet — fra daglig bogføring til komplekse EU-transaktioner.
+          </p>
+          <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>setActive("sporg")} style={{background:C.gold,color:C.navy,border:"none",padding:"13px 28px",borderRadius:"8px",fontSize:"15px",fontWeight:700,cursor:"pointer"}}>Stil et momsspørgsmål ↗</button>
+            <button onClick={()=>setActive("ydelser")} style={{background:"transparent",color:C.white,border:`1.5px solid rgba(255,255,255,0.4)`,padding:"13px 28px",borderRadius:"8px",fontSize:"15px",cursor:"pointer"}}>Se vores ydelser</button>
+          </div>
+        </div>
+      </div>
+      <div style={{background:C.navy,padding:"1.5rem 2rem"}}>
+        <div style={{maxWidth:"1000px",margin:"0 auto",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:"1rem",textAlign:"center"}}>
+          {[["500+","Tilfredse klienter"],["20 år","Erfaring"],["98%","Succesrate"],["24t","Svartid"]].map(([n,l])=>(
+            <div key={l}><div style={{color:C.gold,fontSize:"26px",fontWeight:700}}>{n}</div><div style={{color:"rgba(255,255,255,0.6)",fontSize:"12px"}}>{l}</div></div>
+          ))}
+        </div>
+      </div>
+      <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
+        <SectionHeader title="Vores ekspertise"/>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1.5rem"}}>
+          {[
+            ["⚖️","Momsregistrering","Rådgivning om hvornår og hvordan din virksomhed skal momsregistreres, herunder frivillig registrering og særordninger."],
+            ["🌍","International moms","EU-varesalg, ydelseshandel, OSS-ordningen, trekantshandel, Intrastat og tilbagesøgning af udenlandsk moms."],
+            ["🏠","Fast ejendom","Frivillig momsregistrering for udlejning, køb og salg, byggeprojekter og reguleringsforpligtelser."],
+            ["🚗","Biler og driftsmidler","Momsfradrag ved køb, leasing og drift af person- og varebiler samt reguleringsregler."],
+            ["🧾","Faktura og bogføring","Korrekte fakturakrav, bogføring af momsposteringer og delvist momsfradrag (pro-rata)."],
+            ["⚠️","Momsretssager","Repræsentation ved Skattestyrelsen, Landsskatteretten og domstolene."],
+          ].map(([ic,ti,tx])=>(
+            <Card key={ti}>
+              <div style={{width:"42px",height:"42px",background:"rgba(200,168,75,0.12)",borderRadius:"10px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"20px",marginBottom:"0.75rem"}}>{ic}</div>
+              <div style={{fontWeight:700,fontSize:"15px",marginBottom:"6px",color:C.navy}}>{ti}</div>
+              <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:0}}>{tx}</p>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────────────────
+function Chat() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const endRef = useRef(null);
+
+  useEffect(()=>{ endRef.current?.scrollIntoView({behavior:"smooth"}); },[messages,loading]);
+
+  const send = async (text) => {
+    const msg = text || input.trim();
+    if (!msg || loading) return;
+    setInput("");
+    setLoading(true);
+    const newMsgs = [...messages,{role:"user",content:msg}];
+    setMessages(newMsgs);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:MOMS_KNOWLEDGE,messages:newMsgs})
+      });
+      const data = await res.json();
+      const reply = data.content?.[0]?.text || "Beklager, teknisk fejl.";
+      setMessages([...newMsgs,{role:"assistant",content:reply}]);
+    } catch(e) {
+      setMessages([...newMsgs,{role:"assistant",content:"Der opstod en teknisk fejl. Prøv igen."}]);
+    } finally { setLoading(false); }
+  };
+
+  const fmtMsg = (text) => text.split("\n").map((l,i)=>{
+    if(!l.trim()) return <br key={i}/>;
+    return <p key={i} style={{margin:"3px 0",lineHeight:1.65}}>{l}</p>;
+  });
+
+  return (
+    <div style={{maxWidth:"860px",margin:"0 auto",padding:"2rem 1.5rem"}}>
+      <SectionHeader title="Moms AI-rådgiver"/>
+      <p style={{color:C.textSub,fontSize:"14px",marginBottom:"1.5rem"}}>
+        Baseret på momsloven, momsbekendtgørelsen, momsforordningen (282/2011), EU's momsdirektiv, Den Juridiske Vejledning og retspraksis.
+      </p>
+      <div style={{borderRadius:"12px",overflow:"hidden",boxShadow:"0 2px 20px rgba(0,0,0,0.08)"}}>
+        <div style={{background:C.navy,padding:"1.25rem 1.5rem",display:"flex",alignItems:"center",gap:"12px"}}>
+          <div style={{width:"10px",height:"10px",borderRadius:"50%",background:C.green}}/>
+          <div>
+            <div style={{color:C.white,fontWeight:700,fontSize:"15px"}}>MomsRådgiver AI</div>
+            <div style={{color:"rgba(255,255,255,0.55)",fontSize:"12px"}}>ML · MB · MF · EU-direktiv · DJV · Retspraksis</div>
+          </div>
+        </div>
+        <div style={{background:C.bgCard,minHeight:"420px",maxHeight:"500px",overflowY:"auto",padding:"1.5rem",display:"flex",flexDirection:"column",gap:"1rem"}}>
+          {messages.length===0 && (
+            <div style={{textAlign:"center",margin:"auto",padding:"2rem 0"}}>
+              <div style={{fontSize:"40px",marginBottom:"0.75rem"}}>⚖️</div>
+              <div style={{fontWeight:700,fontSize:"17px",marginBottom:"0.5rem"}}>Stil dit momsspørgsmål</div>
+              <div style={{color:C.textSub,fontSize:"13px",marginBottom:"1.5rem"}}>Eller vælg et eksempel herunder</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:"8px",justifyContent:"center"}}>
+                {EXAMPLES.map(q=>(
+                  <button key={q} onClick={()=>send(q)} style={{background:C.bgSecondary,border:`0.5px solid ${C.borderMid}`,borderRadius:"20px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",color:C.text}}>{q}</button>
+                ))}
+              </div>
+            </div>
+          )}
+          {messages.map((m,i)=>(
+            <div key={i} style={{
+              alignSelf:m.role==="user"?"flex-end":"flex-start",
+              background:m.role==="user"?C.navy:C.bgSecondary,
+              color:m.role==="user"?C.white:C.text,
+              border:m.role==="assistant"?`0.5px solid ${C.border}`:"none",
+              borderRadius:m.role==="user"?"16px 16px 4px 16px":"4px 16px 16px 16px",
+              padding:"10px 16px",maxWidth:"85%",fontSize:"14px",
+            }}>
+              {m.role==="assistant" ? fmtMsg(m.content) : m.content}
+            </div>
+          ))}
+          {loading && (
+            <div style={{alignSelf:"flex-start",background:C.bgSecondary,border:`0.5px solid ${C.border}`,borderRadius:"4px 16px 16px 16px",padding:"12px 16px"}}>
+              <div style={{display:"flex",gap:"4px"}}>
+                {[0,1,2].map(d=><div key={d} style={{width:"8px",height:"8px",borderRadius:"50%",background:C.textSub,animation:`bounce 1.2s ${d*0.2}s infinite`}}/>)}
+              </div>
+            </div>
+          )}
+          <div ref={endRef}/>
+        </div>
+        <div style={{background:C.bgCard,borderTop:`0.5px solid ${C.border}`,padding:"1rem 1.5rem",display:"flex",gap:"10px",alignItems:"flex-end"}}>
+          <textarea value={input} onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();} }}
+            placeholder="Stil dit momsspørgsmål her..."
+            rows={1} style={{flex:1,background:C.bgSecondary,border:`0.5px solid ${C.borderMid}`,borderRadius:"8px",padding:"10px 14px",fontSize:"14px",resize:"none",minHeight:"42px",maxHeight:"120px",color:C.text}}
+          />
+          <button onClick={()=>send()} disabled={loading} style={{background:loading?"#aaa":C.navy,color:C.white,border:"none",borderRadius:"8px",width:"42px",height:"42px",cursor:"pointer",fontSize:"18px",flexShrink:0}}>↑</button>
+        </div>
+      </div>
+      <div style={{marginTop:"1rem",padding:"10px 16px",background:"rgba(200,168,75,0.08)",border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"8px",fontSize:"12px",color:C.textSub,lineHeight:1.5}}>
+        <strong>Bemærk:</strong> Svarene er vejledende og baseret på momsloven, momsbekendtgørelsen, momsforordningen, EU-direktiv, Den Juridiske Vejledning og retspraksis. De udgør ikke professionel juridisk rådgivning. Kontakt en momsrevisor ved komplekse situationer.
+      </div>
+    </div>
+  );
+}
+
+// ── HVAD ER MOMS ─────────────────────────────────────────────────────────────
+function HvadErMoms() {
+  return (
+    <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Hvad er moms?"/>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"3rem"}}>
+        <div>
+          <p style={{color:C.textSub,lineHeight:1.8,fontSize:"15px",marginBottom:"1rem"}}>
+            Moms — merværdiafgift — er en forbrugsafgift der opkræves ved salg af varer og ydelser. I Danmark udgør momssatsen <strong style={{color:C.navy}}>25%</strong>, blandt de højeste i verden. Moms er en indirekte skat: virksomheden opkræver og afregner den, men den endelige forbruger betaler reelt.
+          </p>
+          <p style={{color:C.textSub,lineHeight:1.8,fontSize:"15px"}}>
+            Systemet er en <em>flerledsskat</em> — moms opkræves i hvert led, men virksomheder fratrækker den moms de selv har betalt på indkøb. Dermed beskattes kun den <em>merværdi</em> der skabes i hvert led.
+          </p>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:"0.75rem"}}>
+          {[["25%","Dansk momssats"],["~18%","Andel af skatteprovenu"],["1967","Moms indført i Danmark"],["27","EU-lande med moms"]].map(([n,l])=>(
+            <Card key={l} style={{display:"flex",gap:"16px",alignItems:"center",padding:"12px 16px"}}>
+              <div style={{fontSize:"20px",fontWeight:700,color:C.gold,minWidth:"55px"}}>{n}</div>
+              <div style={{fontSize:"13px",color:C.textSub}}>{l}</div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <h3 style={{fontSize:"1.25rem",fontWeight:700,color:C.navy,marginBottom:"0.4rem"}}>Historik</h3>
+      <div style={{width:"32px",height:"3px",background:C.gold,marginBottom:"1.5rem",borderRadius:"2px"}}/>
+      <div style={{position:"relative",paddingLeft:"2rem",maxWidth:"760px",marginBottom:"3rem"}}>
+        <div style={{position:"absolute",left:"7px",top:0,bottom:0,width:"2px",background:C.border}}/>
+        {[
+          ["1954","Frankrig indfører verdens første moms (TVA), udviklet af økonomen Maurice Lauré."],
+          ["1967","Danmark indfører moms den 3. juli som afløser for omsætningsafgiften. Startsatsen er 10%."],
+          ["1977","EU harmoniserer momsreglerne via Sjette momsdirektiv (77/388/EØF)."],
+          ["1992","Momssatsen hæves til 25%, hvor den har været siden."],
+          ["2007","EU's momssystemdirektiv (2006/112/EF) erstatter Sjette direktiv."],
+          ["2020","Quick Fixes implementeres: call-off stock, kædehandel og transportbevis."],
+          ["2021","OSS-ordningen udvides til al fjernsalg til EU-private. Grænse EUR 10.000."],
+          ["2025","SME-ordningen: virksomheder under EUR 100.000 EU-omsætning kan undgå registrering i andre EU-lande."],
+        ].map(([y,t])=>(
+          <div key={y} style={{position:"relative",paddingBottom:"1.25rem",display:"flex",gap:"1rem"}}>
+            <div style={{position:"absolute",left:"-1.75rem",top:"4px",width:"14px",height:"14px",borderRadius:"50%",background:C.gold,border:`2px solid ${C.bg}`}}/>
+            <div style={{minWidth:"40px",fontWeight:700,fontSize:"13px",color:C.gold}}>{y}</div>
+            <p style={{margin:0,fontSize:"14px",color:C.textSub,lineHeight:1.6}}>{t}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 style={{fontSize:"1.25rem",fontWeight:700,color:C.navy,marginBottom:"0.4rem"}}>Flerledssystemet</h3>
+      <div style={{width:"32px",height:"3px",background:C.gold,marginBottom:"1.5rem",borderRadius:"2px"}}/>
+      <div style={{display:"flex",overflowX:"auto",marginBottom:"1rem",maxWidth:"860px"}}>
+        {[
+          ["Råvare","100 kr.","25 kr.","25 kr. → SKAT",false],
+          ["Fabrik","200 kr.","50 kr.","25 kr. → SKAT",false],
+          ["Grossist","300 kr.","75 kr.","25 kr. → SKAT",false],
+          ["Detail","400 kr.","100 kr.","25 kr. → SKAT",false],
+          ["Forbruger","—","—","Betaler 100 kr. i alt",true],
+        ].map(([a,s,m,b,last],i)=>(
+          <div key={a} style={{minWidth:"130px",flex:1,background:last?C.navy:C.bgCard,border:`0.5px solid ${C.border}`,padding:"12px",textAlign:"center",borderRight:i<4?"none":undefined,borderRadius:i===0?"10px 0 0 10px":i===4?"0 10px 10px 0":"0"}}>
+            <div style={{fontWeight:700,fontSize:"13px",color:last?C.gold:C.text,marginBottom:"6px"}}>{a}</div>
+            <div style={{fontSize:"12px",color:last?"rgba(255,255,255,0.7)":C.textSub,lineHeight:1.6}}>
+              {s!=="—"&&<div>Sælger: <strong>{s}</strong></div>}
+              {m!=="—"&&<div>Moms: <strong style={{color:C.gold}}>{m}</strong></div>}
+              <div style={{marginTop:"3px"}}>{b}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h3 style={{fontSize:"1.25rem",fontWeight:700,color:C.navy,marginBottom:"0.4rem",marginTop:"2rem"}}>Hvorfor har vi moms?</h3>
+      <div style={{width:"32px",height:"3px",background:C.gold,marginBottom:"1.5rem",borderRadius:"2px"}}/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1rem"}}>
+        {[
+          ["💰","Stort provenu","Moms genererer ca. 18% af det samlede danske skatteprovenu — ca. 250 mia. kr. om året."],
+          ["⚖️","Neutralitet","Fradraget sikrer at afgiften kun rammer det endelige forbrug og ikke belaster erhvervslivets investeringer."],
+          ["🌍","EU-harmonisering","Fælles regler via momsdirektivet sikrer fair konkurrence på tværs af EU-landegrænser."],
+          ["🔄","Løbende opkrævning","Moms opkræves løbende ved hvert salg og giver en stabil, forudsigelig statsindtægt."],
+          ["📊","Bred skattebasis","Rammer et bredt spektrum og er mindre konjunkturpåvirket end indkomstskatter."],
+          ["🏛️","Velfærd","Momsprovenuet finansierer sundhedsvæsen, uddannelse og sociale ydelser."],
+        ].map(([ic,ti,tx])=>(
+          <Card key={ti}>
+            <div style={{fontSize:"24px",marginBottom:"0.5rem"}}>{ic}</div>
+            <div style={{fontWeight:700,fontSize:"14px",marginBottom:"6px",color:C.text}}>{ti}</div>
+            <p style={{margin:0,fontSize:"13px",color:C.textSub,lineHeight:1.6}}>{tx}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── PERIODER ──────────────────────────────────────────────────────────────────
+function Perioder() {
+  const [tab, setTab] = useState("kvartal");
+  const now = new Date(2026,4,9);
+  const y = 2026;
+
+  const halvaar = [
+    {p:`1. halvår ${y}`,fra:new Date(y,0,1),til:new Date(y,5,30),frist:new Date(y,8,1)},
+    {p:`2. halvår ${y}`,fra:new Date(y,6,1),til:new Date(y,11,31),frist:new Date(y+1,2,1)},
+  ];
+  const kvartaler = [
+    {p:`1. kvartal ${y}`,fra:new Date(y,0,1),til:new Date(y,2,31),frist:new Date(y,5,1)},
+    {p:`2. kvartal ${y}`,fra:new Date(y,3,1),til:new Date(y,5,30),frist:new Date(y,8,1)},
+    {p:`3. kvartal ${y}`,fra:new Date(y,6,1),til:new Date(y,8,30),frist:new Date(y,11,1)},
+    {p:`4. kvartal ${y}`,fra:new Date(y,9,1),til:new Date(y,11,31),frist:new Date(y+1,2,1)},
+  ];
+  const maaneder = Array.from({length:12},(_,i)=>({
+    p:new Date(y,i,1).toLocaleString("da-DK",{month:"long",year:"numeric"}),
+    fra:new Date(y,i,1),til:new Date(y,i+1,0),
+    frist:i===5?new Date(y,7,17):new Date(y,i+1,25),
+  }));
+
+  const rows = tab==="halvaar"?halvaar:tab==="kvartal"?kvartaler:maaneder;
+  const fmt = d=>d.toLocaleDateString("da-DK",{day:"numeric",month:"short",year:"numeric"});
+  const status = frist=>{
+    if(frist<now) return {lbl:"Udløbet",c:C.red,bg:"rgba(239,68,68,0.1)"};
+    const d=Math.ceil((frist-now)/86400000);
+    if(d<=14) return {lbl:`${d} dage`,c:C.yellow,bg:"rgba(245,158,11,0.1)"};
+    return {lbl:`${d} dage`,c:C.green,bg:"rgba(34,197,94,0.1)"};
+  };
+
+  return (
+    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title={`Momsindberetningsperioder ${y}`}/>
+      <div style={{background:"rgba(200,168,75,0.08)",border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"8px",padding:"10px 16px",fontSize:"13px",color:C.textSub,marginBottom:"1.5rem"}}>
+        <strong style={{color:C.gold}}>Hvem gælder hvad?</strong> · <strong>Halvårlig:</strong> under 5 mio. kr./år · <strong>Kvartalsvis:</strong> 5–50 mio. kr./år · <strong>Månedlig:</strong> over 50 mio. kr./år
+      </div>
+      <div style={{display:"flex",gap:"8px",marginBottom:"1.5rem",flexWrap:"wrap"}}>
+        {[["halvaar","Halvårlig"],["kvartal","Kvartalsvis"],["maaned","Månedlig"]].map(([id,lbl])=>(
+          <button key={id} onClick={()=>setTab(id)} style={{padding:"8px 18px",borderRadius:"6px",border:"none",cursor:"pointer",fontFamily:"Georgia,serif",fontSize:"14px",fontWeight:tab===id?700:400,background:tab===id?C.navy:C.bgSecondary,color:tab===id?C.white:C.textSub,transition:"all 0.15s"}}>{lbl}</button>
+        ))}
+      </div>
+      <div style={{overflowX:"auto",borderRadius:"10px",boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
+        <table style={{width:"100%",fontSize:"14px"}}>
+          <thead>
+            <tr style={{background:C.navy,color:C.white}}>
+              {["Periode","Fra","Til","Angivelsesfrist","Status"].map(h=>(
+                <th key={h} style={{padding:"10px 14px",textAlign:"left",fontWeight:600,fontSize:"13px"}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r,i)=>{
+              const s=status(r.frist);
+              const isAct=now>=r.fra&&now<=r.til;
+              return (
+                <tr key={i} style={{background:isAct?"rgba(200,168,75,0.07)":i%2===0?C.bgCard:C.bgSecondary,borderBottom:`0.5px solid ${C.border}`}}>
+                  <td style={{padding:"10px 14px",fontWeight:isAct?700:400}}>
+                    {r.p} {isAct&&<span style={{fontSize:"11px",background:C.gold,color:C.navy,borderRadius:"10px",padding:"2px 8px",marginLeft:"6px",fontWeight:700}}>Aktuel</span>}
+                  </td>
+                  <td style={{padding:"10px 14px",color:C.textSub}}>{fmt(r.fra)}</td>
+                  <td style={{padding:"10px 14px",color:C.textSub}}>{fmt(r.til)}</td>
+                  <td style={{padding:"10px 14px",fontWeight:600}}>{fmt(r.frist)}</td>
+                  <td style={{padding:"10px 14px"}}><span style={{background:s.bg,color:s.c,borderRadius:"12px",padding:"3px 10px",fontSize:"12px",fontWeight:600}}>{s.lbl}</span></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div style={{marginTop:"2rem",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:"1rem"}}>
+        {[
+          ["📅","Halvårlig – frister","1. halvår angives senest 1. september. 2. halvår senest 1. marts det følgende år."],
+          ["⚠️","Juni-undtagelse (månedlig)","Momsen for juni angives og betales først den 17. august — ikke den 25. juli."],
+          ["🏦","Bankdagsreglen","Falder fristen på weekend eller helligdag, udskydes den til næste bankdag."],
+          ["🆕","Nyregistrerede","Angiver kvartalsvis. Hvis forventet omsætning overstiger 55 mio. kr., er perioden månedlig."],
+        ].map(([ic,ti,tx])=>(
+          <Card key={ti} style={{display:"flex",gap:"12px",alignItems:"flex-start"}}>
+            <div style={{fontSize:"22px",flexShrink:0}}>{ic}</div>
+            <div><div style={{fontWeight:700,fontSize:"14px",marginBottom:"4px"}}>{ti}</div><p style={{margin:0,fontSize:"13px",color:C.textSub,lineHeight:1.6}}>{tx}</p></div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── BEREGNER ──────────────────────────────────────────────────────────────────
+function Beregner() {
+  const [beloeb, setBeloeb] = useState("");
+  const [retning, setRetning] = useState("tilfoej");
+  const [sats, setSats] = useState("25");
+
+  const num = parseFloat(beloeb.replace(",",".")) || 0;
+  const pct = parseFloat(sats)/100;
+  const momsBeloeb = retning==="tilfoej" ? num*pct : num-num/(1+pct);
+  const ekskl = retning==="tilfoej" ? num : num/(1+pct);
+  const inkl = retning==="tilfoej" ? num*(1+pct) : num;
+  const fmt2 = n=>n.toLocaleString("da-DK",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  const inp = {padding:"10px 14px",borderRadius:"8px",border:`0.5px solid ${C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"15px",width:"100%"};
+
+  return (
+    <div style={{maxWidth:"900px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Momsberegner"/>
+      <p style={{color:C.textSub,marginBottom:"2rem",lineHeight:1.7}}>Beregn moms hurtigt og nemt — angiv beløbet, vælg retning og momssats.</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"2rem"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
+          <div>
+            <label style={{display:"block",fontSize:"12px",fontWeight:700,color:C.textSub,marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Beløb (kr.)</label>
+            <input type="number" placeholder="Fx 10000" value={beloeb} onChange={e=>setBeloeb(e.target.value)} style={inp}/>
+          </div>
+          <div>
+            <label style={{display:"block",fontSize:"12px",fontWeight:700,color:C.textSub,marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Beregningsretning</label>
+            <div style={{display:"flex",gap:"0.75rem",flexWrap:"wrap"}}>
+              {[["tilfoej","➕ Læg moms til"],["fratræk","➖ Træk moms fra"]].map(([v,l])=>(
+                <button key={v} onClick={()=>setRetning(v)} style={{padding:"9px 16px",borderRadius:"8px",border:`1.5px solid ${retning===v?C.navy:C.borderMid}`,background:retning===v?C.navy:C.bgSecondary,color:retning===v?C.white:C.text,cursor:"pointer",fontSize:"14px",transition:"all 0.15s"}}>{l}</button>
+              ))}
+            </div>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>{retning==="tilfoej"?"Du angiver ekskl. moms — beregner inkl. moms.":"Du angiver inkl. moms — beregner momsandelen."}</p>
+          </div>
+          <div>
+            <label style={{display:"block",fontSize:"12px",fontWeight:700,color:C.textSub,marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Momssats</label>
+            <select value={sats} onChange={e=>setSats(e.target.value)} style={inp}>
+              <option value="25">25% — Standard dansk moms</option>
+              <option value="0">0% — Momsfrit / nulmoms</option>
+            </select>
+          </div>
+        </div>
+        <Card>
+          <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"1rem"}}>Resultat</div>
+          {num>0 ? (
+            <>
+              {[["Beløb ekskl. moms",fmt2(ekskl)],["Moms ("+sats+"%)",fmt2(momsBeloeb)]].map(([l,v])=>(
+                <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:`0.5px solid ${C.border}`}}>
+                  <span style={{fontSize:"14px",color:C.textSub}}>{l}</span>
+                  <span style={{fontWeight:600}}>{v} kr.</span>
+                </div>
+              ))}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 4px"}}>
+                <span style={{fontWeight:700,fontSize:"15px"}}>Beløb inkl. moms</span>
+                <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{fmt2(inkl)} kr.</span>
+              </div>
+              <div style={{marginTop:"1rem",background:"rgba(200,168,75,0.08)",border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"8px",padding:"10px 14px",fontSize:"12px",color:C.textSub}}>
+                <strong style={{color:C.gold}}>Tip:</strong> {sats==="25"?"Moms udgør altid 20% af det samlede beløb inkl. moms.":"Ingen moms ved 0%-sats."}
+              </div>
+            </>
+          ) : (
+            <div style={{textAlign:"center",padding:"2rem 0",color:C.textSub}}>
+              <div style={{fontSize:"36px",marginBottom:"0.5rem"}}>🧮</div>
+              Angiv et beløb for at se resultatet
+            </div>
+          )}
+        </Card>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1rem"}}>
+        {[
+          ["Ekskl. → Inkl.","Beløb × 1,25","10.000 × 1,25 = 12.500 kr."],
+          ["Inkl. → Ekskl.","Beløb ÷ 1,25","12.500 ÷ 1,25 = 10.000 kr."],
+          ["Isoler momsbeløbet","Beløb inkl. × 0,20","12.500 × 0,20 = 2.500 kr."],
+          ["Moms af ekskl.","Beløb ekskl. × 0,25","10.000 × 0,25 = 2.500 kr."],
+        ].map(([ti,fo,ex])=>(
+          <Card key={ti}>
+            <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"6px"}}>{ti}</div>
+            <div style={{fontSize:"20px",fontWeight:700,color:C.navy,fontFamily:"monospace",marginBottom:"4px"}}>{fo}</div>
+            <div style={{fontSize:"12px",color:C.textSub}}>{ex}</div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── YDELSER ───────────────────────────────────────────────────────────────────
+function Ydelser() {
+  return (
+    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Vores ydelser"/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))",gap:"1.5rem"}}>
+        {[
+          ["🔍","Momsgennemgang",["Gennemgang af eksisterende momsprocesser","Identifikation af fradragsmuligheder","Kontrol af bogføring og fakturering","Rapport med anbefalinger"],"Fra 8.500 kr."],
+          ["📋","Løbende rådgivning",["Månedlig gennemgang af momsposteringer","Rådgivning ved konkrete transaktioner","Adgang til rådgiver pr. telefon og e-mail","Halvårlig statusrapport"],"Fra 2.500 kr./md."],
+          ["🌐","International moms",["EU-varesalg og erhvervelse","OSS/IOSS-registrering og indberetning","Trekantshandel og call-off stock","Tilbagesøgning af udenlandsk moms"],"Aftales individuelt"],
+          ["⚖️","Momsretssager",["Klager til Skattestyrelsen","Repræsentation ved Landsskatteretten","Domstolssager i momssager","Bindende svar og forhåndssvar"],"Aftales individuelt"],
+          ["🏗️","Fast ejendom",["Frivillig momsregistrering for udlejning","Køb og salg – momsmæssig analyse","Byggeprojekter og moms","Reguleringsforpligtelser"],"Fra 5.500 kr."],
+          ["🎓","Momsundervisning",["Skræddersyede kurser for din virksomhed","Grundlæggende og videregående moms","Branchespecifik undervisning","Kursusbevis ved deltagelse"],"Fra 12.000 kr./dag"],
+        ].map(([ic,ti,its,pr])=>(
+          <Card key={ti}>
+            <div style={{width:"42px",height:"42px",background:"rgba(200,168,75,0.12)",borderRadius:"10px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",marginBottom:"0.75rem"}}>{ic}</div>
+            <div style={{fontWeight:700,fontSize:"15px",color:C.navy,marginBottom:"8px"}}>{ti}</div>
+            <ul style={{padding:"0 0 0 1rem",margin:"0 0 1rem",color:C.textSub,fontSize:"13px",lineHeight:1.7}}>
+              {its.map(i=><li key={i}>{i}</li>)}
+            </ul>
+            <div style={{fontWeight:700,color:C.gold,fontSize:"15px"}}>{pr}</div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── OM OS ─────────────────────────────────────────────────────────────────────
+function OmOs() {
+  return (
+    <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Om os"/>
+      <p style={{color:C.textSub,maxWidth:"660px",lineHeight:1.7,marginBottom:"2.5rem"}}>
+        MomsRevisor A/S er en specialiseret momsrådgivningsvirksomhed med kontorer i København og Aarhus. Vi rådgiver udelukkende om moms og indirekte skatter.
+      </p>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:"1.5rem"}}>
+        {[
+          ["TH","Thomas Holm","Partner, statsautoriseret revisor","25 års erfaring med moms, heraf 10 år i Skattestyrelsen. Specialist i fast ejendom og finansiel moms."],
+          ["MK","Maria Kjeldsen","Partner, advokat (L)","Ekspert i EU-moms, internationale transaktioner og momsretssager."],
+          ["JP","Jakob Poulsen","Senior momsrevisor","Specialist i fradragsret, bilmoms og personalegoder. Underviser regelmæssigt for brancheorganisationer."],
+          ["SR","Sara Rasmussen","Momsrevisor","Ekspert i OSS-ordningen, e-handel og digitale ydelser."],
+        ].map(([ini,na,ro,de])=>(
+          <div key={na} style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"12px",overflow:"hidden"}}>
+            <div style={{background:C.navy,padding:"1.5rem 1.5rem 1rem",display:"flex",justifyContent:"center"}}>
+              <div style={{width:"68px",height:"68px",borderRadius:"50%",background:C.gold,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"24px",fontWeight:700,color:C.navy}}>{ini}</div>
+            </div>
+            <div style={{padding:"1rem 1.5rem 1.5rem",textAlign:"center"}}>
+              <div style={{fontWeight:700,fontSize:"15px",marginBottom:"4px"}}>{na}</div>
+              <div style={{fontSize:"13px",color:C.gold,marginBottom:"0.75rem"}}>{ro}</div>
+              <p style={{margin:0,fontSize:"13px",color:C.textSub,lineHeight:1.5}}>{de}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── KONTAKT ───────────────────────────────────────────────────────────────────
+function Kontakt() {
+  return (
+    <div style={{maxWidth:"900px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Kontakt os"/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"1rem",marginBottom:"2rem"}}>
+        {[["📍","Adresse","Bredgade 20, 1260 Kbh K"],["📞","Telefon","+45 33 11 22 33"],["✉️","E-mail","info@momsrevisor.dk"],["🕐","Åbningstider","Man–fre: 8:00–17:00"]].map(([ic,lb,va])=>(
+          <Card key={lb} style={{textAlign:"center"}}>
+            <div style={{fontSize:"28px",marginBottom:"0.5rem"}}>{ic}</div>
+            <div style={{fontWeight:700,fontSize:"13px",marginBottom:"4px"}}>{lb}</div>
+            <div style={{fontSize:"13px",color:C.textSub}}>{va}</div>
+          </Card>
+        ))}
+      </div>
+      <Card style={{maxWidth:"500px"}}>
+        <h3 style={{fontWeight:700,fontSize:"16px",marginBottom:"1rem"}}>Send en besked</h3>
+        <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+          <input placeholder="Navn" style={{padding:"10px 14px",borderRadius:"8px",border:`0.5px solid ${C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"14px"}}/>
+          <input placeholder="E-mail" style={{padding:"10px 14px",borderRadius:"8px",border:`0.5px solid ${C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"14px"}}/>
+          <textarea rows={4} placeholder="Beskriv din sag..." style={{padding:"10px 14px",borderRadius:"8px",border:`0.5px solid ${C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"14px",resize:"vertical"}}/>
+          <button style={{background:C.gold,color:C.navy,border:"none",padding:"12px 24px",borderRadius:"8px",fontWeight:700,fontSize:"15px",cursor:"pointer",alignSelf:"flex-start"}}>Send besked</button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────────
+function App() {
+  const [active, setActive] = useState("home");
+  return (
+    <div style={{minHeight:"100vh",background:C.bg}}>
+      <Nav active={active} setActive={setActive}/>
+      <main>
+        {active==="home" && <Home setActive={setActive}/>}
+        {active==="sporg" && <Chat/>}
+        {active==="hvad" && <HvadErMoms/>}
+        {active==="perioder" && <Perioder/>}
+        {active==="beregner" && <Beregner/>}
+        {active==="ydelser" && <Ydelser/>}
+        {active==="om" && <OmOs/>}
+        {active==="kontakt" && <Kontakt/>}
+      </main>
+      <footer style={{background:C.navy,color:"rgba(255,255,255,0.6)",textAlign:"center",padding:"2rem",fontSize:"13px",marginTop:"3rem"}}>
+        <strong style={{color:"rgba(255,255,255,0.85)"}}>MomsRevisor A/S</strong> · Bredgade 20, 1260 København K · CVR 12345678<br/>
+        <span style={{fontSize:"11px",marginTop:"4px",display:"block"}}>© 2026 MomsRevisor A/S. AI-rådgiveren er vejledende og erstatter ikke professionel rådgivning.</span>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
