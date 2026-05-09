@@ -89,7 +89,7 @@ const C = {
 
 function Nav({ active, setActive }) {
   const links = [
-    ["home","Forside"],["sporg","Spørg AI"],["hvad","Hvad er moms?"],
+    ["home","Forside"],["sporg","Spørg AI"],["traening","Momstræning"],["hvad","Hvad er moms?"],
     ["perioder","Perioder"],["beregner","Beregner"],["ydelser","Ydelser"],
     ["om","Om os"],["kontakt","Kontakt"],
   ];
@@ -622,7 +622,325 @@ function Kontakt() {
   );
 }
 
-// ── APP ───────────────────────────────────────────────────────────────────────
+// ── MOMSTRÆNING ───────────────────────────────────────────────────────────────
+const MODULER = [
+  {
+    id:1, emoji:"🏗️", titel:"Modul 1: Grundlæggende momsbegreber",
+    intro:"Hvad er moms, hvem skal betale det, og hvad er den grundlæggende logik bag systemet?",
+    lektioner:[
+      {
+        titel:"Hvad er moms?",
+        tekst:"Moms (merværdiafgift) er en indirekte forbrugsafgift. Den opkræves ved salg af varer og ydelser i alle led af produktionskæden. Den endelige forbruger bærer den fulde momsbelastning, mens virksomheder i mellemled kan fratrække den moms de selv har betalt på indkøb — det er kerneprincippet.",
+        punkt:["Moms er 25% i Danmark — én af de højeste satser i EU","Momsen er en indirekte skat: virksomheden er opkræveren, forbrugeren er betaleren","Systemet sikrer at moms kun belaster merværdien i hvert led","Hjemmel: Momsloven (ML) § 1 og EU's momsdirektiv 2006/112/EF art. 1"],
+        eksempel:"En tøjbutik køber skjorter for 400 kr. + 100 kr. moms. De sælger skjorterne for 800 kr. + 200 kr. moms. Butikken afregner 200 - 100 = 100 kr. til SKAT. Forbrugeren betaler 200 kr. i alt.",
+        quiz:[{sp:"Hvad udgør dansk momssats?",sv:["10%","20%","25%","30%"],k:2},{sp:"Hvem bærer den endelige momsbelastning?",sv:["Virksomheden","Leverandøren","Den endelige forbruger","Staten"],k:2}]
+      },
+      {
+        titel:"Hvornår er man momspligtig?",
+        tekst:"En virksomhed er momspligtig når den driver selvstændig økonomisk virksomhed med salg af momspligtige varer og ydelser. Der er dog en registreringsgrænse.",
+        punkt:["Registreringspligt når momspligtigt salg overstiger 50.000 kr./kalenderår (ML § 47)","Frivillig momsregistrering er mulig inden grænsen nås — og kan betale sig pga. fradragsret på etableringsomkostninger","Nyregistrerede virksomheder angiver som udgangspunkt kvartalsvis","Skattestyrelsen tillader ofte momsregistrering med tilbagevirkende kraft"],
+        eksempel:"En iværksætter starter freelance IT-konsulentvirksomhed i januar. Allerede i marts har hun faktureret 52.000 kr. — hun er nu registreringspligtig og skal momsregistrere sig straks.",
+        quiz:[{sp:"Hvornår skal en virksomhed momsregistreres?",sv:["Når salget overstiger 25.000 kr.","Når salget overstiger 50.000 kr.","Fra første salg","Først efter 1 år"],k:1},{sp:"Kan man lade sig momsregistrere frivilligt inden grænsen?",sv:["Nej","Ja, altid","Kun ved fast ejendom","Kun ved EU-handel"],k:1}]
+      },
+      {
+        titel:"Momspligtige vs. momsfritagne aktiviteter",
+        tekst:"Udgangspunktet er at alt salg er momspligtigt. Momsloven § 13 indeholder en liste over specifikke undtagelser der er momsfritagne.",
+        punkt:["MOMSPLIGTIGT: alt salg af varer og ydelser mod vederlag (ML § 4)","MOMSFRITAGET (ML § 13): hospitalsbehandling, læge/tandlæge, social forsorg, skoleundervisning, kulturelle aktiviteter, forfattervirksomhed, forsikring, finansielle ydelser, udlejning af fast ejendom (som udgangspunkt), salg af fast ejendom (som udgangspunkt)","Momsfritagne virksomheder har IKKE fradragsret for købsmoms","Momsfritagne virksomheder skal betale lønsumsafgift i stedet"],
+        eksempel:"En tandlæge er momsfritaget og opkræver ikke moms på sine behandlinger. Til gengæld kan han ikke fratrække momsen på ny udstyr, der koster 100.000 kr. + 25.000 kr. moms — de 25.000 kr. er en reel omkostning for ham.",
+        quiz:[{sp:"Er salg af en ny bygning momspligtigt?",sv:["Nej, alt fast ejendom er momsfrit","Ja, nye bygninger er momspligtige","Kun hvis over 1 mio. kr.","Kun erhvervsejendomme"],k:1},{sp:"Hvad betaler momsfritagne virksomheder i stedet for moms?",sv:["Skat","Lønsumsafgift","Punktafgift","Ingenting"],k:1}]
+      },
+    ]
+  },
+  {
+    id:2, emoji:"🧾", titel:"Modul 2: Momsfradrag og pro-rata",
+    intro:"Hvornår kan virksomheder fratrække moms, og hvad sker der når aktiviteterne er blandede?",
+    lektioner:[
+      {
+        titel:"Grundlæggende fradragsret",
+        tekst:"En momsregistreret virksomhed kan fratrække moms på indkøb der anvendes til virksomhedens momspligtige aktiviteter. Fradragsretten opstår når fakturaen modtages.",
+        punkt:["Fuldt fradrag: indkøb udelukkende til momspligtige formål (ML § 37)","Intet fradrag: indkøb udelukkende til momsfrie eller private formål (ML § 42)","Fakturaen skal opfylde kravene i ML § 52a for at berettige til fradrag","Sælger har ansvaret for korrekt faktura — men køber bør også kontrollere","Fradrag kan tages i den periode fakturaen er dateret ELLER bogført — konsekvent metode kræves"],
+        eksempel:"En advokatvirksomhed køber en ny printer til 8.000 kr. + 2.000 kr. moms. Da advokaten udelukkende har momspligtige kunder, fratrækker han alle 2.000 kr. i moms på sin næste momsangivelse.",
+        quiz:[{sp:"Hvornår opstår fradragsretten?",sv:["Når fakturaen betales","Når fakturaen modtages","Når varen leveres","Når årsregnskabet laves"],k:1},{sp:"Hvad er betingelsen for fuldt momsfradrag?",sv:["Indkøbet koster over 1.000 kr.","Indkøbet bruges udelukkende til momspligtige formål","Virksomheden har over 500.000 kr. i omsætning","Indkøbet er foretaget i Danmark"],k:1}]
+      },
+      {
+        titel:"Delvist fradrag — pro-rata",
+        tekst:"Virksomheder med både momspligtige og momsfrie aktiviteter har ret til et forholdsmæssigt fradrag for fællesudgifter. Dette beregnes som en pro-rata-sats.",
+        punkt:["Pro-rata = (momspligtig omsætning / samlet omsætning) × 100, afrundes opad til nærmeste hele tal (MB § 38, stk. 4)","Acontofradrag i løbet af året baseret på foregående års procent","Endelig opgørelse angives i afgiftsperioden der omfatter 6. måned efter regnskabsårets afslutning","Fra 1. jan 2024: foreløbig fradragsprocent skal angives i TastSelv","Eksempler på fællesudgifter: kontorhold, telefoner, rengøring, revision, edb-udstyr"],
+        eksempel:"En bank har 20% momspligtig omsætning og 80% momsfri omsætning. Pro-rata = 20%. Banken køber nyt IT-udstyr for 100.000 kr. + 25.000 kr. moms. Banken kan kun fratrække 20% × 25.000 = 5.000 kr. i moms.",
+        quiz:[{sp:"Hvad afrundes pro-rata-procenten til?",sv:["Nærmeste halve tal","Nærmeste hele tal nedad","Nærmeste hele tal opad","To decimaler"],k:2},{sp:"Hvornår skal den endelige pro-rata-opgørelse angives?",sv:["31. december hvert år","I afgiftsperioden der omfatter 6. måned efter regnskabsårets afslutning","Senest 1. marts","Inden udgangen af 1. kvartal"],k:1}]
+      },
+      {
+        titel:"Ingen fradrag — de vigtigste begrænsninger",
+        tekst:"ML § 42 opstiller en række specifikke udgiftskategorier hvor momsfradrag er afskåret, uanset at udgiften er erhvervsmæssig.",
+        punkt:["Personbiler (hvide plader): INTET fradrag ved køb eller drift — undtagen bilforhandlere, køreskoler og udlejningsbiler","Repræsentation: INTET fradrag — fx vin, chokolade og blomster til kunder","Gaver: INTET fradrag","Restaurant til repræsentation: kun 1/4 fradrag","Hotel (erhvervsmæssigt): FULDT fradrag","Personalets bespisning: som udgangspunkt intet fradrag — undtagelse ved møder i egne lokaler og beordret overarbejde","Kaffe og the til ansatte: intet fradrag (men fuldt fradrag til forretningsforbindelser under møder)"],
+        eksempel:"En virksomhed inviterer en kunde i teatret (500 kr.) og derefter på restaurant (800 kr.). Teaterbilletten = underholdning, intet fradrag. Restauranten = repræsentation, 1/4 fradrag = 800 × 25% moms × 1/4 = 50 kr. i fradrag.",
+        quiz:[{sp:"Hvor stor er momsfradraget for restaurationsudgifter til repræsentation?",sv:["Intet fradrag","1/4 af momsen","1/2 af momsen","Fuldt fradrag"],k:1},{sp:"Har en virksomhed fradrag for moms ved køb af en personbil?",sv:["Ja, fuldt fradrag","Ja, 50% fradrag","Nej, intet fradrag","Kun ved leasing"],k:2}]
+      },
+    ]
+  },
+  {
+    id:3, emoji:"🚗", titel:"Modul 3: Biler og køretøjer",
+    intro:"Momsreglerne for biler er komplekse og afhænger af biltype, anvendelse og om bilen leases eller ejes.",
+    lektioner:[
+      {
+        titel:"Personbiler — de strenge regler",
+        tekst:"For personbiler (hvide plader) gælder som udgangspunkt et totalt forbud mod momsfradrag. Dette gælder uanset hvor erhvervsmæssig anvendelsen er.",
+        punkt:["Køb: INTET fradrag (ML § 42, stk. 1, nr. 6)","Drift (benzin, reparationer, forsikring, parkering): INTET fradrag","Undtagelse 1: bilforhandlere, køreskoler og udlejningsbiler — fuldt fradrag","Undtagelse 2: Øresundsbroen — fuldt fradrag for broafgift ved erhvervsmæssig kørsel","Leasing >6 måneder med min. 10% erhvervsmæssig brug: delvist fradrag med specificeret beløb på faktura (MB § 52)","Salg af personbil: momsfrit — der skal ikke lægges moms på fakturaen"],
+        eksempel:"En revisor køber en Audi A4 for 400.000 kr. + 100.000 kr. moms. Han bruger bilen 80% erhvervsmæssigt. Han kan INTET fratrække i moms. Havde han i stedet leaset bilen, kunne han få delvist fradrag.",
+        quiz:[{sp:"Kan en virksomhed fratrække moms på benzin til en personbil?",sv:["Ja, fuldt fradrag","Ja, 50% fradrag","Nej","Kun ved udelukkende erhvervsmæssig brug"],k:2},{sp:"Hvilken broafgift giver ret til momsfradrag?",sv:["Storebæltsbroen","Øresundsbroen","Lillebæltsbroen","Ingen broafgifter"],k:1}]
+      },
+      {
+        titel:"Varebiler op til 3 tons — gulpladebiler",
+        tekst:"Varebiler (gule plader, op til 3 tons totalvægt) har mere lempelige momsregler end personbiler, men reglerne afhænger af om bilen bruges privat eller ej.",
+        punkt:["Køb: FULDT fradrag hvis bilen KUN bruges erhvervsmæssigt","Køb: INTET fradrag hvis bilen også bruges privat eller til momsfrie aktiviteter","Drift: FULDT fradrag uanset blandet brug (krav: >50.000 kr. momspligtigt salg)","Leasing blandet brug: kun 1/3 fradrag af leasingydelsen","Dagsbeviser: 225 kr. (≤3 tons, fuldt momsfradrag) eller 185 kr. (>3 t og ≤4 t) for privat kørsel op til 20 dage/år","Specialindrettede biler: mere lempelige regler — kørsel hjem-arbejde tilladt"],
+        eksempel:"En håndværker køber en VW Transporter (gulplade) for 320.000 kr. + 80.000 kr. moms. Bilen bruges udelukkende erhvervsmæssigt — han fratrækker alle 80.000 kr. Han kan købe 20 dagsbeviser á 225 kr. om året for at bruge bilen privat (fx flytning) uden momsmæssige konsekvenser.",
+        quiz:[{sp:"Hvad er momsfradraget på driften af en gulpladebil ved blandet privat/erhvervsmæssig brug?",sv:["Intet fradrag","1/3 fradrag","1/2 fradrag","Fuldt fradrag"],k:3},{sp:"Hvad koster et dagsbevis til en gulpladebil under 3 tons med fuldt momsfradrag?",sv:["185 kr.","225 kr.","300 kr.","Gratis"],k:1}]
+      },
+      {
+        titel:"Varebiler over 3 tons og lastbiler",
+        tekst:"For tunge varebiler og lastbiler over 3 tons gælder endnu mere lempelige regler — her bestemmes fradraget af anvendelsesfordelingen.",
+        punkt:["Køb: FULDT fradrag ved rent erhvervsmæssig brug","Køb: FORHOLDSMÆSSIGT fradrag ved blandet momspligtig/momsfri brug (pro-rata)","Køb: SKØNSMÆSSIGT fradrag ved privat brug","Drift: samme princip som køb — fuldt/forholdsmæssigt/skønsmæssigt","Leasing: følger samme regler som køb og drift","Salg: momspligtigt hvis der var fradrag ved købet"],
+        eksempel:"Et speditionsfirma med 70% momspligtig og 30% momsfri omsætning køber en lastbil til 800.000 kr. + 200.000 kr. moms. De kan fratrække 70% × 200.000 = 140.000 kr. i moms.",
+        quiz:[{sp:"Hvad bestemmer momsfradraget ved køb af en lastbil over 3 tons?",sv:["Bilens alder","Anvendelsesfordelingen","Bilens pris","Antallet af kørte km"],k:1},{sp:"Er salget af en lastbil momspligtigt, hvis der var fradrag ved købet?",sv:["Nej","Ja","Kun ved salg over 500.000 kr.","Kun ved salg til udlandet"],k:1}]
+      },
+    ]
+  },
+  {
+    id:4, emoji:"🌍", titel:"Modul 4: International moms og EU-handel",
+    intro:"Handel over landegrænser kræver særlig opmærksomhed. Reglerne er harmoniseret i EU men indeholder mange faldgruber.",
+    lektioner:[
+      {
+        titel:"Køb og salg af varer i EU",
+        tekst:"Handel med varer mellem EU-lande følger princippet om destinationsbeskatning — moms betales i det land hvor varen ender.",
+        punkt:["KØB fra EU: erhvervelsesmoms — beregnes og selvangives af den danske køber. Angives i felt 'Moms af varekøb i udlandet' og rubrik A på momsangivelsen","SALG til EU: momsfrit ved tre betingelser: (1) gyldigt momsnummer fra køber (verificer i VIES), (2) fysisk udførsel dokumenteret med mindst to uafhængige beviser (MF art. 45a), (3) korrekt og rettidig EU-listeindberetning","Mangler blot én betingelse: dansk moms skal pålægges","Quick Fix 2020: gyldigt momsnummer er nu en materiel betingelse — ikke blot en formalitet"],
+        eksempel:"Dansk software-virksomhed sælger servere til en tysk køber med gyldigt tysk momsnummer. Varerne sendes med speditør (CMR-dokument) og salget indberettes til EU-salgslisten inden den 25. næste måned. Alle tre betingelser er opfyldt — salget er momsfrit.",
+        quiz:[{sp:"Hvad hedder momsen der selvangives ved EU-varekøb?",sv:["Importmoms","Erhvervelsesmoms","Reverse charge","Salgsmoms"],k:1},{sp:"Hvor mange uafhængige beviser kræves for at dokumentere at en vare har forladt Danmark?",sv:["Ét bevis","To beviser","Tre beviser","Ingen krav"],k:1}]
+      },
+      {
+        titel:"Handel med lande uden for EU",
+        tekst:"Import og eksport til/fra tredjelande (ikke-EU-lande) følger toldregler og særlige momsregler.",
+        punkt:["IMPORT (køb fra 3. lande): importmoms opkræves ved indførslen. Kan afregnes over momsangivelsen ved angivelse af momsnummer ved indførslen","Told er IKKE fradragsberettiget — det er en reel omkostning","EKSPORT (salg til 3. lande): momsfrit når varerne fysisk forlader EU. Dokumenteres med stemplet enhedsdokument","Leverancerne skal bogføres på 'konto for eksport'","Angives i rubrik C på momsangivelsen"],
+        eksempel:"Dansk importør køber møbler i Kina for 500.000 kr. Ved indfortoldning beregnes 10% told (50.000 kr.) og 25% importmoms af (500.000 + 50.000) = 137.500 kr. Importmomsen er fradragsberettiget — tolden er det ikke.",
+        quiz:[{sp:"Er told fradragsberettiget i moms?",sv:["Ja, fuldt fradrag","Ja, 50% fradrag","Nej","Kun ved import fra EU-lande"],k:2},{sp:"Hvad bruges som bevis ved eksport til lande uden for EU?",sv:["Faktura fra kunden","CMR-dokument","Stemplet enhedsdokument","Bankkvittering"],k:2}]
+      },
+      {
+        titel:"Køb og salg af ydelser over landegrænser",
+        tekst:"For ydelser er leveringsstedsreglerne afgørende — de bestemmer i hvilket land moms skal betales.",
+        punkt:["B2B-ydelser (til erhvervsdrivende): leveringssted = købers etableringsland. Sælger fakturerer uden moms med teksten 'omvendt betalingspligt — reverse charge' (ML § 16, stk. 1)","B2C-ydelser (til private): leveringssted = sælgers etableringsland som udgangspunkt","Undtagelser: fast ejendom (ejendommens beliggenhed), arrangementer (begivenhedens sted), restauration (udførelsessted)","Momsforordningen (MF) art. 10-13: fast forretningssted kræver tilstrækkelig tilstedeværelse af menneskelige og tekniske ressourcer","OSS-ordningen: fjernsalg til EU-private over EUR 10.000 — moms i forbrugerens land via OSS"],
+        eksempel:"Dansk reklamefirma sælger en kampagne til en fransk virksomhed. Leveringssted = Frankrig (købers land). Det danske firma fakturerer uden dansk moms og skriver 'reverse charge'. Det franske firma selvangiver fransk moms.",
+        quiz:[{sp:"Hvad skal stå på fakturaen ved B2B-ydelsessalg til udlandet?",sv:["'Momsfrit salg'","'Omvendt betalingspligt — reverse charge'","'EU-salg'","'Zero-rated'"],k:1},{sp:"Hvad er leveringsstedet for ydelser vedrørende fast ejendom?",sv:["Sælgers land","Købers land","Ejendommens beliggenhed","Altid Danmark"],k:2}]
+      },
+    ]
+  },
+  {
+    id:5, emoji:"📋", titel:"Modul 5: Fakturakrav og angivelse",
+    intro:"Korrekte fakturaer er fundamentet for momssystemet. Fejl kan koste virksomheden fradragsretten.",
+    lektioner:[
+      {
+        titel:"Fakturakrav — hvad skal stå på fakturaen?",
+        tekst:"En momsfaktura skal opfylde en lang række formkrav for at berettige til momsfradrag hos køber (ML § 52a og MB §§ 58-81).",
+        punkt:["1. Fortløbende fakturanummer","2. Udstedelsesdato","3. Sælgers navn, adresse og CVR-nummer (+ EU-landekode ved EU-handel)","4. Købers navn og adresse","5. Leverancens art, omfang og pris","6. Momsbeløb ELLER angivelse af at moms udgør 20% af totalbeløbet","7. Leveringsdato hvis forskellig fra udstedelsesdato","8. Momsgrundlag og enhedspris ekskl. moms","9. Gældende momssats (25%)","EU-handel tillige: købers momsnummer + 'zero-rated'/'reverse charge'","Forenklet faktura (MB § 63): tilladt under 3.000 kr. ekskl. moms — kræver ikke købers navn/adresse"],
+        eksempel:"En revisor udsteder en faktura på 10.000 kr. + 2.500 kr. moms. Fakturaen mangler leveringsdatoen (som er forskellig fra udstedelsesdatoen). Kunden kan risikere at Skattestyrelsen nægter fradraget for de 2.500 kr. ved en kontrol.",
+        quiz:[{sp:"Hvad er grænsen for forenklede fakturaer uden købers navn og adresse?",sv:["1.000 kr. ekskl. moms","3.000 kr. ekskl. moms","5.000 kr. ekskl. moms","10.000 kr. ekskl. moms"],k:1},{sp:"Hvad kan man skrive i stedet for det præcise momsbeløb?",sv:["'Moms er inkluderet'","'Moms udgør 20% af det samlede beløb'","'Momsfri'","'Se vedhæftede'"],k:1}]
+      },
+      {
+        titel:"Momsangivelse — frister og perioder",
+        tekst:"Fristen for at angive og betale moms afhænger af virksomhedens omsætning. Det er afgørende at overholde fristerne for at undgå renter.",
+        punkt:["Under 5 mio. kr./år: HALVÅRLIG angivelse. Frist: 1. i den 3. måned efter periodens udløb (fx 1. september for 1. halvår)","5-50 mio. kr./år: KVARTALSVIS angivelse. Frist: 1. i den 3. måned efter kvartalets udløb","Over 50 mio. kr./år: MÅNEDLIG angivelse. Frist: den 25. i den følgende måned","UNDTAGELSE: momsen for juni måned angives og betales den 17. august (ikke den 25. juli)","Bankdagsreglen: fristen udskydes til næste bankdag hvis den falder på weekend/helligdag","Renter (Opkrævningsloven § 7): påløber fra den ordinære betalingsfrist — ikke fra påkrav"],
+        eksempel:"En virksomhed med 8 mio. kr. i omsætning har kvartalsvis afregning. 1. kvartal (jan-mar) skal angives og betales senest 1. juni. Glemmer de det, løber der renter fra 1. juni — ikke fra Skattestyrelsens evt. påkrav.",
+        quiz:[{sp:"Hvornår angives momsen for juni ved månedlig afregning?",sv:["Den 25. juli","Den 1. august","Den 17. august","Den 25. august"],k:2},{sp:"Hvad er fristen for kvartalsvis afregning for 2. kvartal?",sv:["1. juli","1. august","1. september","1. oktober"],k:2}]
+      },
+      {
+        titel:"Regulering af investeringsgoder",
+        tekst:"Når en virksomhed køber et investeringsgode og fratrækker moms, forpligter den sig til at bruge det til momspligtige formål i reguleringsperioden.",
+        punkt:["Investeringsgoder: aktiver over 100.000 kr. ekskl. moms (maskiner, fast ejendom, software/rettigheder, reparation/vedligeholdelse af fast ejendom >100.000 kr./år)","Reguleringsperiode: 5 år for maskiner/inventar, 10 år for fast ejendom og til-/ombygning","Regulering kræves ved ændret anvendelse med mindst 10%-point forskel i fradragsprocent","Fra 1. juli 2021: udtagningsmoms ved overgang til FULD momsfritaget anvendelse — beregnes på markedsværdi","Reguleringsforpligtelsen kan overdrages til køber ved virksomhedsoverdragelse (MB § 46)"],
+        eksempel:"En virksomhed køber en produktionsmaskine for 500.000 kr. + 125.000 kr. moms og fratrækker fuldt. I år 3 begynder de at producere momsfrie produkter (40% af tid). Da fradragsandelen falder med mere end 10%-point, skal de regulere: tilbagebetale 2/5 × 125.000 × (100%-60%) = 20.000 kr.",
+        quiz:[{sp:"Hvad er reguleringsperioden for fast ejendom?",sv:["3 år","5 år","10 år","20 år"],k:2},{sp:"Hvornår kræves regulering?",sv:["Hvert år automatisk","Kun ved salg","Når fradragsprocenten ændrer sig med mindst 10%-point","Kun ved konkurs"],k:2}]
+      },
+    ]
+  },
+];
+
+function Momstraening() {
+  const [aktivtModul, setAktivtModul] = useState(null);
+  const [aktivLektion, setAktivLektion] = useState(0);
+  const [fase, setFase] = useState("laes"); // laes | quiz | resultat
+  const [svar, setSvar] = useState({});
+  const [gennemfoert, setGennemfoert] = useState({});
+
+  const modul = aktivtModul !== null ? MODULER[aktivtModul] : null;
+  const lektion = modul ? modul.lektioner[aktivLektion] : null;
+
+  const startQuiz = () => { setSvar({}); setFase("quiz"); };
+
+  const vælgSvar = (qi, si) => {
+    if (svar[qi] !== undefined) return;
+    setSvar(prev => ({...prev, [qi]: si}));
+  };
+
+  const afslutQuiz = () => {
+    const score = lektion.quiz.filter((q,i) => svar[i] === q.k).length;
+    const key = `${aktivtModul}-${aktivLektion}`;
+    setGennemfoert(prev => ({...prev, [key]: score}));
+    setFase("resultat");
+  };
+
+  const nesteLektion = () => {
+    if (aktivLektion < modul.lektioner.length - 1) {
+      setAktivLektion(aktivLektion + 1);
+      setFase("laes");
+      setSvar({});
+    } else {
+      setAktivtModul(null);
+      setAktivLektion(0);
+      setFase("laes");
+    }
+  };
+
+  const fremgang = () => {
+    let total = 0, done = 0;
+    MODULER.forEach((m,mi) => m.lektioner.forEach((_,li) => {
+      total++;
+      if (gennemfoert[`${mi}-${li}`] !== undefined) done++;
+    }));
+    return Math.round((done/total)*100);
+  };
+
+  // Oversigt
+  if (aktivtModul === null) return (
+    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Momstræning A–Z"/>
+      <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"1rem"}}>
+        Lær moms fra bunden med strukturerede moduler, praktiske eksempler og quizzer der tester din viden. Hvert modul bygger videre på det forrige.
+      </p>
+      <div style={{background:`rgba(200,168,75,0.08)`,border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"10px",padding:"14px 18px",marginBottom:"2rem",display:"flex",alignItems:"center",gap:"16px"}}>
+        <div style={{fontSize:"13px",color:C.textSub,flex:1}}>
+          <strong style={{color:C.gold}}>Din fremgang</strong> — {fremgang()}% gennemført
+        </div>
+        <div style={{width:"200px",height:"8px",background:C.bgSecondary,borderRadius:"4px",overflow:"hidden"}}>
+          <div style={{width:`${fremgang()}%`,height:"100%",background:C.gold,borderRadius:"4px",transition:"width 0.5s"}}/>
+        </div>
+        <div style={{fontWeight:700,color:C.gold,fontSize:"15px"}}>{fremgang()}%</div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"1.5rem"}}>
+        {MODULER.map((m,mi)=>{
+          const lDone = m.lektioner.filter((_,li)=>gennemfoert[`${mi}-${li}`]!==undefined).length;
+          const pct = Math.round((lDone/m.lektioner.length)*100);
+          return (
+            <div key={m.id} onClick={()=>{setAktivtModul(mi);setAktivLektion(0);setFase("laes");}} style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"12px",padding:"1.5rem",cursor:"pointer",transition:"all 0.15s",position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:"3px",background:C.bgSecondary}}>
+                <div style={{width:`${pct}%`,height:"100%",background:C.gold}}/>
+              </div>
+              <div style={{fontSize:"28px",marginBottom:"0.75rem"}}>{m.emoji}</div>
+              <div style={{fontWeight:700,fontSize:"15px",color:C.navy,marginBottom:"6px"}}>{m.titel}</div>
+              <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,marginBottom:"1rem"}}>{m.intro}</p>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:"12px",color:C.textSub}}>{m.lektioner.length} lektioner · {m.lektioner.length} quizzer</span>
+                <span style={{fontSize:"12px",fontWeight:700,color:pct===100?C.green:C.gold}}>{pct===100?"✓ Gennemført":lDone===0?"Start →":`${lDone}/${m.lektioner.length} done`}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // Lektionsvisning
+  return (
+    <div style={{maxWidth:"860px",margin:"0 auto",padding:"2rem 1.5rem"}}>
+      <button onClick={()=>{setAktivtModul(null);setFase("laes");}} style={{background:"none",border:"none",cursor:"pointer",color:C.textSub,fontSize:"14px",marginBottom:"1.5rem",display:"flex",alignItems:"center",gap:"6px"}}>← Tilbage til oversigt</button>
+      <div style={{display:"flex",gap:"8px",marginBottom:"1.5rem",flexWrap:"wrap"}}>
+        {modul.lektioner.map((_,li)=>{
+          const done = gennemfoert[`${aktivtModul}-${li}`] !== undefined;
+          return (
+            <button key={li} onClick={()=>{setAktivLektion(li);setFase("laes");setSvar({});}} style={{padding:"6px 14px",borderRadius:"20px",border:"none",cursor:"pointer",fontSize:"13px",fontFamily:"Georgia,serif",background:li===aktivLektion?C.navy:done?"rgba(34,197,94,0.15)":C.bgSecondary,color:li===aktivLektion?C.white:done?C.green:C.textSub,fontWeight:li===aktivLektion?700:400}}>
+              {done?"✓ ":""}{li+1}. {modul.lektioner[li].titel.substring(0,20)}...
+            </button>
+          );
+        })}
+      </div>
+
+      <Card>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:"1.5rem",gap:"1rem"}}>
+          <div>
+            <div style={{fontSize:"12px",color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"4px"}}>{modul.emoji} {modul.titel}</div>
+            <h3 style={{fontSize:"1.3rem",fontWeight:700,color:C.navy}}>{lektion.titel}</h3>
+          </div>
+          <div style={{fontSize:"24px",flexShrink:0}}>{fase==="laes"?"📖":fase==="quiz"?"🧠":"🎯"}</div>
+        </div>
+
+        {fase === "laes" && (
+          <>
+            <p style={{color:C.textSub,lineHeight:1.8,fontSize:"15px",marginBottom:"1.25rem"}}>{lektion.tekst}</p>
+            <div style={{background:C.bgSecondary,borderRadius:"8px",padding:"1rem 1.25rem",marginBottom:"1.25rem"}}>
+              <div style={{fontWeight:700,fontSize:"13px",marginBottom:"0.75rem",color:C.navy}}>Nøglepunkter</div>
+              {lektion.punkt.map((p,i)=>(
+                <div key={i} style={{display:"flex",gap:"10px",marginBottom:"6px",fontSize:"13px",color:C.textSub,lineHeight:1.5}}>
+                  <span style={{color:C.gold,flexShrink:0,marginTop:"2px"}}>→</span><span>{p}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{background:"rgba(200,168,75,0.08)",border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"8px",padding:"1rem 1.25rem",marginBottom:"1.5rem"}}>
+              <div style={{fontWeight:700,fontSize:"13px",marginBottom:"6px",color:C.gold}}>💡 Praktisk eksempel</div>
+              <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:0}}>{lektion.eksempel}</p>
+            </div>
+            <button onClick={startQuiz} style={{background:C.navy,color:C.white,border:"none",padding:"12px 28px",borderRadius:"8px",fontWeight:700,fontSize:"15px",cursor:"pointer"}}>Tag quiz →</button>
+          </>
+        )}
+
+        {fase === "quiz" && (
+          <>
+            <div style={{fontWeight:700,fontSize:"16px",marginBottom:"1.25rem",color:C.navy}}>Test din viden 🧠</div>
+            {lektion.quiz.map((q,qi)=>(
+              <div key={qi} style={{marginBottom:"1.5rem"}}>
+                <div style={{fontWeight:600,fontSize:"14px",marginBottom:"0.75rem"}}>{qi+1}. {q.sp}</div>
+                <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                  {q.sv.map((s,si)=>{
+                    const valgt = svar[qi] === si;
+                    const rigtigt = si === q.k;
+                    const visResultat = svar[qi] !== undefined;
+                    let bg = C.bgSecondary, border = C.borderMid, color = C.text;
+                    if (visResultat && rigtigt) { bg="rgba(34,197,94,0.12)"; border=C.green; color=C.green; }
+                    else if (visResultat && valgt && !rigtigt) { bg="rgba(239,68,68,0.1)"; border=C.red; color=C.red; }
+                    return (
+                      <button key={si} onClick={()=>vælgSvar(qi,si)} style={{padding:"10px 14px",borderRadius:"8px",border:`1.5px solid ${border}`,background:bg,color,cursor:visResultat?"default":"pointer",textAlign:"left",fontSize:"14px",fontFamily:"Georgia,serif",transition:"all 0.15s"}}>
+                        {visResultat && rigtigt && "✓ "}{visResultat && valgt && !rigtigt && "✗ "}{s}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            {Object.keys(svar).length === lektion.quiz.length && (
+              <button onClick={afslutQuiz} style={{background:C.gold,color:C.navy,border:"none",padding:"12px 28px",borderRadius:"8px",fontWeight:700,fontSize:"15px",cursor:"pointer",marginTop:"0.5rem"}}>Se resultat →</button>
+            )}
+          </>
+        )}
+
+        {fase === "resultat" && (()=>{
+          const score = lektion.quiz.filter((q,i)=>svar[i]===q.k).length;
+          const total = lektion.quiz.length;
+          const pct = Math.round((score/total)*100);
+          return (
+            <>
+              <div style={{textAlign:"center",padding:"1.5rem 0"}}>
+                <div style={{fontSize:"52px",marginBottom:"0.5rem"}}>{pct===100?"🏆":pct>=50?"👍":"📚"}</div>
+                <div style={{fontSize:"26px",fontWeight:700,color:pct===100?C.green:pct>=50?C.gold:C.red,marginBottom:"6px"}}>{score}/{total} rigtige</div>
+                <div style={{fontSize:"14px",color:C.textSub,marginBottom:"1.5rem"}}>{pct===100?"Perfekt! Du har styr på dette emne.":pct>=50?"Godt klaret! Læs evt. lektionen igen for at fange de sidste detaljer.":"Prøv at læse lektionen igen — det sidder snart."}</div>
+                <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>
+                  <button onClick={()=>setFase("laes")} style={{background:C.bgSecondary,color:C.text,border:`0.5px solid ${C.borderMid}`,padding:"10px 22px",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontFamily:"Georgia,serif"}}>← Læs igen</button>
+                  <button onClick={nesteLektion} style={{background:C.navy,color:C.white,border:"none",padding:"10px 22px",borderRadius:"8px",fontWeight:700,cursor:"pointer",fontSize:"14px",fontFamily:"Georgia,serif"}}>{aktivLektion < modul.lektioner.length-1 ? "Næste lektion →" : "Tilbage til oversigt →"}</button>
+                </div>
+              </div>
+            </>
+          );
+        })()}
+      </Card>
+    </div>
+  );
+}
+
+
 function App() {
   const [active, setActive] = useState("home");
   return (
@@ -634,6 +952,7 @@ function App() {
         {active==="hvad" && <HvadErMoms/>}
         {active==="perioder" && <Perioder/>}
         {active==="beregner" && <Beregner/>}
+        {active==="traening" && <Momstraening/>}
         {active==="ydelser" && <Ydelser/>}
         {active==="om" && <OmOs/>}
         {active==="kontakt" && <Kontakt/>}
