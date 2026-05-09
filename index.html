@@ -365,128 +365,86 @@ function HvadErMoms() {
 
 // ── PERIODER ──────────────────────────────────────────────────────────────────
 function CVROpslag() {
-  const [cvr, setCvr] = useState("");
-  const [resultat, setResultat] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [fejl, setFejl] = useState("");
-
-  const slaOpCVR = async () => {
-  const cleaned = cvr.replace(/\D/g, "");
-
-  if (!/^\d{8}$/.test(cleaned)) {
-    setFejl("CVR-nummer skal være præcis 8 cifre.");
-    return;
-  }
-
-  setFejl("");
-  setLoading(true);
-  setResultat(null);
-
-  try {
-    const res = await fetch(
-      `https://cvrapi.dk/api?search=${cleaned}&country=dk`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error("Kunne ikke hente CVR-data");
-    }
-
-    const data = await res.json();
-
-    console.log("CVR API RESPONSE:", data);
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    setResultat({
-      navn: data.name || "Ukendt virksomhed",
-      status: data.enddate ? "OPHØRT" : "AKTIV",
-      branche: data.industrydesc || "Ingen branche fundet",
-      adresse: `${data.address || ""}, ${data.zipcode || ""} ${data.city || ""}`.trim(),
-      cvr: cleaned,
-      ansatte: data.employees || "Ukendt",
-    });
-  } catch (err) {
-    console.error(err);
-
-    setFejl(
-      "CVR-opslag fejlede. CVR API er muligvis midlertidigt utilgængelig."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
-
-  return (
-    <div style={{marginBottom:"2rem"}}>
-      <Card style={{maxWidth:"700px",padding:"1.5rem"}}>
-        <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"1rem"}}>
-          <div style={{fontSize:"28px"}}>🔍</div>
-          <div>
-            <div style={{fontWeight:700,fontSize:"16px",color:C.navy}}>Slå din virksomhed op</div>
-            <div style={{fontSize:"13px",color:C.textSub}}>Indtast CVR-nummer for at se virksomhedsoplysninger og finde den rette momsperiode</div>
-          </div>
-        </div>
-        <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
-          <input
-  type="text"
-  value={cvr}
-  onChange={(e) => setCvr(e.target.value.replace(/\D/g, ""))}
-  placeholder="Fx 12345678"
-  maxLength={8}
-            style={{flex:1,minWidth:"160px",padding:"10px 14px",borderRadius:"8px",border:`0.5px solid ${fejl?C.red:C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"16px",letterSpacing:"1px"}}
-          />
-          <button onClick={slaOpCVR} disabled={loading} style={{background:loading?"#aaa":C.navy,color:C.white,border:"none",padding:"10px 22px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
-            {loading?"Søger...":"Slå op →"}
-          </button>
-        </div>
-        {fejl && <div style={{marginTop:"8px",fontSize:"13px",color:C.red}}>{fejl}</div>}
-
-        {resultat && (
-          <div style={{marginTop:"1.25rem",borderTop:`0.5px solid ${C.border}`,paddingTop:"1.25rem"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1rem",flexWrap:"wrap",gap:"8px"}}>
-              <div>
-                <div style={{fontWeight:700,fontSize:"17px",color:C.navy,marginBottom:"3px"}}>{resultat.navn}</div>
-                <div style={{fontSize:"13px",color:C.textSub}}>CVR: {resultat.cvr}</div>
-              </div>
-              <span style={{
-                background:resultat.status==="OPHØRT"?"rgba(239,68,68,0.1)":"rgba(34,197,94,0.12)",
-                color:resultat.status==="OPHØRT"?C.red:C.green,
-                border:`0.5px solid ${resultat.status==="OPHØRT"?C.red:C.green}`,
-                borderRadius:"20px",padding:"4px 14px",fontSize:"12px",fontWeight:700
-              }}>{resultat.status||"AKTIV"}</span>
             </div>
-            {resultat.branche && <div style={{fontSize:"13px",color:C.textSub,marginBottom:"4px"}}>🏢 {resultat.branche}</div>}
-            {resultat.adresse && <div style={{fontSize:"13px",color:C.textSub,marginBottom:"1rem"}}>📍 {resultat.adresse}</div>}
-            {resultat.ansatte !== undefined && <div style={{fontSize:"13px",color:C.textSub,marginBottom:"1rem"}}>👥 Antal ansatte: {resultat.ansatte || "0–1"}</div>}
 
-            <div style={{background:"rgba(200,168,75,0.08)",border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"8px",padding:"12px 16px"}}>
-              <div style={{fontWeight:700,fontSize:"13px",color:C.gold,marginBottom:"8px"}}>📅 Hvilken momsperiode gælder for jer?</div>
-              <div style={{fontSize:"13px",color:C.textSub,lineHeight:1.7,marginBottom:"8px"}}>
-                Momsperioden bestemmes af den <strong>årlige omsætning</strong> — ikke af CVR-oplysningerne. Brug tabellen nedenfor:
-              </div>
-              {[
-                ["Under 5 mio. kr./år","Halvårlig","→ Vælg 'Halvårlig' i tabellen nedenfor",C.green],
-                ["5 – 50 mio. kr./år","Kvartalsvis","→ Vælg 'Kvartalsvis' i tabellen nedenfor",C.gold],
-                ["Over 50 mio. kr./år","Månedlig","→ Vælg 'Månedlig' i tabellen nedenfor",C.red],
-              ].map(([oms,per,hint,col])=>(
-                <div key={per} style={{display:"flex",gap:"10px",alignItems:"center",padding:"6px 0",borderBottom:`0.5px solid ${C.border}`}}>
-                  <div style={{width:"8px",height:"8px",borderRadius:"50%",background:col,flexShrink:0}}/>
-                  <div style={{flex:1,fontSize:"13px"}}><strong>{oms}</strong> → <span style={{color:col,fontWeight:700}}>{per}</span></div>
-                  <div style={{fontSize:"12px",color:C.textSub}}>{hint}</div>
+            <div style={{
+              display: "flex",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}>
+
+              <button
+                onClick={() => setShowAI(!showAI)}
+                style={{
+                  background: C.gold,
+                  color: C.navy,
+                  border: "none",
+                  padding: "12px 18px",
+                  borderRadius: "8px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                ✨ AI-analyser virksomheden
+              </button>
+
+              <button
+                style={{
+                  background: C.navy,
+                  color: C.white,
+                  border: "none",
+                  padding: "12px 18px",
+                  borderRadius: "8px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                📞 Book rådgivning
+              </button>
+            </div>
+
+            {showAI && (
+              <div style={{
+                marginTop: "1rem",
+                background: C.bgSecondary,
+                borderRadius: "12px",
+                padding: "1.25rem",
+                border: `1px solid ${C.border}`,
+              }}>
+
+                <div style={{
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  marginBottom: "12px",
+                  color: C.navy,
+                }}>
+                  🤖 AI-analyse
                 </div>
-              ))}
-              <div style={{marginTop:"10px",fontSize:"12px",color:C.textSub,fontStyle:"italic"}}>
-                Er du i tvivl? Skattestyrelsen oplyser din momsperiode direkte i TastSelv Erhverv eller ved at ringe til 72 22 18 18.
+
+                <div style={{ display: "grid", gap: "12px" }}>
+
+                  <div>
+                    <strong>Næste anbefalede handlinger:</strong>
+                    <div style={{ marginTop: "6px", lineHeight: 1.7 }}>
+                      1. Kontrollér korrekt momsregistrering<br/>
+                      2. Gennemgå fradrag for fællesudgifter<br/>
+                      3. Sikr korrekt fakturering<br/>
+                      4. Gennemgå eventuelle EU-transaktioner
+                    </div>
+                  </div>
+
+                  <div>
+                    <strong>AI-vurdering:</strong>
+                    <div style={{ marginTop: "6px", lineHeight: 1.7 }}>
+                      Denne virksomhedstype har typisk moderate momsrisici.
+                      Fokus bør særligt være på korrekt fradragshåndtering,
+                      dokumentation samt vurdering af momsfrie aktiviteter.
+                    </div>
+                  </div>
+
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </Card>
