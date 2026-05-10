@@ -609,7 +609,8 @@ const searchCVR = async () => {
 
 function Perioder() {
   const [tab, setTab] = useState("kvartal");
-  const now = new Date();
+ const now = new Date();
+now.setHours(0,0,0,0);
   const y = 2026;
 
   const halvaar = [
