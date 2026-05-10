@@ -89,7 +89,7 @@ const C = {
 
 function Nav({ active, setActive }) {
   const links = [
-    ["home","Forside"],["sporg","Spørg AI"],["traening","Momstræning"],["hvad","Hvad er moms?"],
+    ["home","Forside"],["sporg","Spørg AI"],["compliance","Moms Compliance"],["traening","Momstræning"],["hvad","Hvad er moms?"],
     ["perioder","Perioder"],["beregner","Beregner"],["ydelser","Ydelser"],
     ["om","Om os"],["kontakt","Kontakt"],
   ];
@@ -1185,13 +1185,383 @@ function Momstraening() {
 }
 
 
-function App() {
+// ── MOMS COMPLIANCE ────────────────────────────────────────────────────────────
+function MomsCompliance() {
+  const [fase, setFase] = useState("start"); // start | cvr | analyse | upload | rapport
+  const [cvr, setCvr] = useState("");
+  const [cvrData, setCvrData] = useState(null);
+  const [cvrLoading, setCvrLoading] = useState(false);
+  const [cvrFejl, setCvrFejl] = useState("");
+  const [aiAnalyse, setAiAnalyse] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [filer, setFiler] = useState([]);
+  const [filAnalyse, setFilAnalyse] = useState("");
+  const [filLoading, setFilLoading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const filRef = useRef(null);
+
+  // ── CVR opslag ──
+  const slaOpCVR = async () => {
+    const cleaned = cvr.replace(/\D/g,"");
+    if (!/^\d{8}$/.test(cleaned)) { setCvrFejl("CVR-nummer skal være præcis 8 cifre."); return; }
+    setCvrFejl(""); setCvrLoading(true); setCvrData(null); setAiAnalyse("");
+    try {
+      const res = await fetch(`https://cvrapi.dk/api?search=${cleaned}&country=dk`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const virk = {
+        navn: data.name || "Ukendt",
+        cvr: cleaned,
+        status: data.enddate ? "OPHØRT" : "AKTIV",
+        branche: data.industrydesc || "",
+        brancheKode: data.industrycode || "",
+        adresse: `${data.address||""}, ${data.zipcode||""} ${data.city||""}`.trim().replace(/^,\s*/,""),
+        ansatte: data.employees,
+        stiftet: data.startdate || "",
+        ejerform: data.companytype || "",
+      };
+      setCvrData(virk);
+      setFase("analyse");
+      hentAiAnalyse(virk);
+    } catch(e) {
+      setCvrFejl("Kunne ikke finde virksomheden. Tjek CVR-nummeret og prøv igen. (API: cvrapi.dk)");
+    }
+    setCvrLoading(false);
+  };
+
+  // ── AI compliance-analyse baseret på CVR-data ──
+  const hentAiAnalyse = async (virk) => {
+    setAiLoading(true);
+    const prompt = `Du er en erfaren dansk momsrevisor. Analysér følgende virksomhed og giv en konkret moms compliance-vurdering.
+
+VIRKSOMHEDSDATA FRA CVR:
+- Navn: ${virk.navn}
+- CVR: ${virk.cvr}
+- Status: ${virk.status}
+- Branche: ${virk.branche} (kode: ${virk.brancheKode})
+- Adresse: ${virk.adresse}
+- Antal ansatte: ${virk.ansatte !== undefined ? virk.ansatte : "ukendt"}
+- Stiftet: ${virk.stiftet}
+- Ejerform: ${virk.ejerform}
+
+Giv en struktureret moms compliance-analyse med:
+
+1. **Momsstatus** — Er denne type virksomhed typisk momspligtig, momsfritaget eller blandet? Henvis til ML § 13 hvis relevant.
+
+2. **Branchespecifikke momsrisici** — Hvilke typiske momsfejl ses i denne branche? Fx fradrag for personbiler, repræsentation, manglende reverse charge ved EU-køb, forkert behandling af fast ejendom osv.
+
+3. **Anbefalede tjekpunkter** — 5-7 konkrete ting virksomheden bør kontrollere i sin bogføring.
+
+4. **Momsperiode** — Hvad er den sandsynlige momsperiode baseret på virksomhedens størrelse/type?
+
+5. **Særlige opmærksomhedspunkter** — Eventuelle særlige regler der gælder for denne branche (fx lønsumsafgift, brugtmoms, OSS, frivillig registrering for udlejning osv.)
+
+Vær konkret, praktisk og henvis til relevante lovparagraffer (ML, MB, MF).`;
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{role:"user", content: prompt}]
+        })
+      });
+      const data = await res.json();
+      setAiAnalyse(data.content?.[0]?.text || "Analyse ikke tilgængelig.");
+    } catch(e) {
+      setAiAnalyse("Der opstod en fejl ved AI-analysen. Prøv igen.");
+    }
+    setAiLoading(false);
+  };
+
+  // ── Fil-upload og analyse ──
+  const behandlFiler = (nyeFiler) => {
+    const tilladte = Array.from(nyeFiler).filter(f =>
+      f.type === "application/pdf" ||
+      f.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      f.type === "application/vnd.ms-excel" ||
+      f.name.endsWith(".xlsx") || f.name.endsWith(".xls") || f.name.endsWith(".pdf") || f.name.endsWith(".csv")
+    );
+    if (tilladte.length === 0) return;
+    setFiler(prev => [...prev, ...tilladte.map(f => ({fil:f, navn:f.name, str: (f.size/1024).toFixed(0)+"KB", type: f.name.endsWith(".pdf")?"PDF":"Excel/CSV"}))]);
+  };
+
+  const analyserFiler = async () => {
+    if (filer.length === 0) return;
+    setFilLoading(true); setFilAnalyse("");
+
+    // Læs filer som tekst/base64
+    const filIndhold = await Promise.all(filer.map(async ({fil, navn, type}) => {
+      if (type === "PDF") {
+        const b64 = await new Promise(res => {
+          const r = new FileReader();
+          r.onload = () => res(r.result.split(",")[1]);
+          r.readAsDataURL(fil);
+        });
+        return { navn, type, b64, erPdf: true };
+      } else {
+        const tekst = await new Promise(res => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.readAsText(fil);
+        });
+        return { navn, type, tekst: tekst.substring(0, 8000), erPdf: false };
+      }
+    }));
+
+    const virksomhedInfo = cvrData ? `Virksomhed: ${cvrData.navn} (CVR: ${cvrData.cvr}), Branche: ${cvrData.branche}` : "Ukendt virksomhed";
+
+    // Byg messages med filer
+    const content = [];
+    filIndhold.forEach(({navn, type, b64, tekst, erPdf}) => {
+      if (erPdf && b64) {
+        content.push({ type:"document", source:{ type:"base64", media_type:"application/pdf", data:b64 }, title: navn });
+      } else if (tekst) {
+        content.push({ type:"text", text:`FILINDHOLD (${navn}):\n${tekst}` });
+      }
+    });
+    content.push({ type:"text", text:`
+${virksomhedInfo}
+
+Du er en erfaren dansk momsrevisor. Analyser ovenstående regnskabsmateriale (saldobalance, kontokort eller kassekladdeposter) og identificer konkrete moms fejl, mangler og risici.
+
+Strukturér din analyse i følgende afsnit:
+
+**🔴 KRITISKE MOMSFEJL** — Fejl der vil medføre efterbetaling eller bøde ved kontrol (angiv kontonummer/beløb hvis synligt)
+
+**🟡 POTENTIELLE PROBLEMER** — Poster der bør undersøges nærmere
+
+**🟢 ANBEFALINGER** — Konkrete handlinger virksomheden skal foretage
+
+**📊 MOMSAFSTEMNING** — Vurdering af om moms er korrekt afstemt
+
+**⚖️ LOVHENVISNINGER** — Hvilke regler i ML, MB og MF er relevante for de fundne fejl
+
+Vær præcis og henvis til specifikke konti, beløb eller posteringer fra materialet når muligt. Angiv altid lovhjemmel (ML §, MB §).` });
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{role:"user", content}]
+        })
+      });
+      const data = await res.json();
+      setFilAnalyse(data.content?.[0]?.text || "Analyse ikke tilgængelig.");
+      setFase("rapport");
+    } catch(e) {
+      setFilAnalyse("Der opstod en fejl. Prøv igen.");
+    }
+    setFilLoading(false);
+  };
+
+  const fmtTekst = (tekst) => {
+    if (!tekst) return null;
+    return tekst.split("\n").map((l,i) => {
+      if (!l.trim()) return <br key={i}/>;
+      if (l.startsWith("**") && l.endsWith("**")) return <div key={i} style={{fontWeight:700,fontSize:"15px",color:C.navy,margin:"1rem 0 4px"}}>{l.slice(2,-2)}</div>;
+      if (l.match(/^\*\*(.*?)\*\*/)) {
+        const parts = l.split(/\*\*(.*?)\*\*/g);
+        return <p key={i} style={{margin:"3px 0",lineHeight:1.7,fontSize:"14px"}}>{parts.map((p,j)=>j%2===1?<strong key={j}>{p}</strong>:p)}</p>;
+      }
+      return <p key={i} style={{margin:"3px 0",lineHeight:1.7,fontSize:"14px",color:C.textSub}}>{l}</p>;
+    });
+  };
+
+  return (
+    <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Moms Compliance"/>
+      <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"2rem"}}>
+        Slå din virksomhed op på CVR og få en øjeblikkelig AI-drevet moms compliance-analyse. Upload derefter din saldobalance eller kontokort for at få AI til at spotte konkrete momsfejl og mangler.
+      </p>
+
+      {/* ── Trin-indikator ── */}
+      <div style={{display:"flex",gap:"0",marginBottom:"2.5rem",maxWidth:"600px"}}>
+        {[["1","CVR-opslag",["start","cvr"]],["2","AI-analyse",["analyse"]],["3","Upload filer",["upload"]],["4","Rapport",["rapport"]]].map(([nr,lbl,faser],i,arr)=>{
+          const aktiv = faser.includes(fase);
+          const done = arr.slice(0,i).some(([,,fs])=>fs.some(f=>["analyse","upload","rapport"].includes(fase) && i < arr.findIndex(([,,ff])=>ff.includes(fase))));
+          const passeret = i < arr.findIndex(([,,fs])=>fs.includes(fase));
+          return (
+            <React.Fragment key={nr}>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",flex:1}}>
+                <div style={{width:"36px",height:"36px",borderRadius:"50%",background:aktiv?C.navy:passeret?C.green:C.bgSecondary,border:`2px solid ${aktiv?C.navy:passeret?C.green:C.borderMid}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",fontWeight:700,color:aktiv||passeret?C.white:C.textSub,marginBottom:"6px"}}>
+                  {passeret?"✓":nr}
+                </div>
+                <div style={{fontSize:"12px",fontWeight:aktiv?700:400,color:aktiv?C.navy:C.textSub,textAlign:"center"}}>{lbl}</div>
+              </div>
+              {i<arr.length-1 && <div style={{height:"2px",flex:1,background:passeret?C.green:C.border,marginTop:"17px",alignSelf:"flex-start"}}/>}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      {/* ── TRIN 1: CVR-opslag ── */}
+      {(fase==="start"||fase==="cvr") && (
+        <Card style={{maxWidth:"600px"}}>
+          <div style={{display:"flex",gap:"12px",alignItems:"center",marginBottom:"1.25rem"}}>
+            <div style={{fontSize:"32px"}}>🔍</div>
+            <div><div style={{fontWeight:700,fontSize:"17px",color:C.navy}}>Søg på CVR-nummer</div>
+            <div style={{fontSize:"13px",color:C.textSub}}>Vi henter virksomhedsoplysninger fra det officielle CVR-register</div></div>
+          </div>
+          <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
+            <input value={cvr} onChange={e=>setCvr(e.target.value.replace(/\D/g,""))} onKeyDown={e=>e.key==="Enter"&&slaOpCVR()}
+              placeholder="Indtast 8-cifret CVR-nummer" maxLength={8}
+              style={{flex:1,minWidth:"200px",padding:"12px 16px",borderRadius:"8px",border:`1.5px solid ${cvrFejl?C.red:C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"16px",letterSpacing:"2px"}}
+            />
+            <button onClick={slaOpCVR} disabled={cvrLoading} style={{background:cvrLoading?"#aaa":C.navy,color:C.white,border:"none",padding:"12px 24px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              {cvrLoading?"⏳ Søger...":"Analysér →"}
+            </button>
+          </div>
+          {cvrFejl && <div style={{marginTop:"8px",fontSize:"13px",color:C.red,display:"flex",gap:"6px",alignItems:"center"}}>⚠️ {cvrFejl}</div>}
+          <div style={{marginTop:"1rem",fontSize:"12px",color:C.textSub,lineHeight:1.6}}>
+            Data hentes fra <strong>cvrapi.dk</strong> — det officielle danske CVR-register. Oplysninger om navn, branche, adresse og virksomhedstype bruges til AI-analysen.
+          </div>
+        </Card>
+      )}
+
+      {/* ── TRIN 2: CVR-data + AI-analyse ── */}
+      {fase==="analyse" && cvrData && (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1.5rem",marginBottom:"1.5rem"}}>
+          <Card>
+            <div style={{fontWeight:700,fontSize:"15px",color:C.navy,marginBottom:"1rem",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span>📋 Virksomhedsoplysninger</span>
+              <span style={{background:cvrData.status==="AKTIV"?"rgba(34,197,94,0.12)":"rgba(239,68,68,0.1)",color:cvrData.status==="AKTIV"?C.green:C.red,border:`0.5px solid ${cvrData.status==="AKTIV"?C.green:C.red}`,borderRadius:"20px",padding:"3px 12px",fontSize:"12px",fontWeight:700}}>{cvrData.status}</span>
+            </div>
+            {[["Navn",cvrData.navn],["CVR",cvrData.cvr],["Branche",cvrData.branche||"—"],["Branchekode",cvrData.brancheKode||"—"],["Adresse",cvrData.adresse||"—"],["Ansatte",cvrData.ansatte!==undefined?String(cvrData.ansatte):"—"],["Stiftet",cvrData.stiftet||"—"],["Ejerform",cvrData.ejerform||"—"]].map(([l,v])=>(
+              <div key={l} style={{display:"flex",gap:"10px",padding:"6px 0",borderBottom:`0.5px solid ${C.border}`}}>
+                <span style={{fontSize:"13px",color:C.textSub,minWidth:"90px",flexShrink:0}}>{l}</span>
+                <span style={{fontSize:"13px",fontWeight:600,color:C.text}}>{v}</span>
+              </div>
+            ))}
+            <button onClick={()=>{setCvrData(null);setCvr("");setFase("start");setAiAnalyse("");setFiler([]);setFilAnalyse("");}} style={{marginTop:"1rem",background:"none",border:`0.5px solid ${C.borderMid}`,borderRadius:"6px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",color:C.textSub}}>← Søg nyt CVR</button>
+          </Card>
+
+          <Card>
+            <div style={{fontWeight:700,fontSize:"15px",color:C.navy,marginBottom:"1rem"}}>🤖 AI Moms Compliance-analyse</div>
+            {aiLoading ? (
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"2rem 0",gap:"1rem"}}>
+                <div style={{width:"32px",height:"32px",border:`3px solid ${C.border}`,borderTop:`3px solid ${C.navy}`,borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
+                <div style={{fontSize:"13px",color:C.textSub}}>Analyserer virksomheden...</div>
+              </div>
+            ) : (
+              <div style={{maxHeight:"400px",overflowY:"auto",fontSize:"14px",lineHeight:1.7}}>
+                {fmtTekst(aiAnalyse)}
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* ── TRIN 3: Upload filer ── */}
+      {fase==="analyse" && !aiLoading && aiAnalyse && (
+        <Card style={{marginBottom:"1.5rem"}}>
+          <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"0.5rem"}}>📁 Upload regnskabsmateriale til dybere analyse</div>
+          <p style={{fontSize:"13px",color:C.textSub,marginBottom:"1.25rem",lineHeight:1.6}}>
+            Upload saldobalance, kontokort eller kassekladdeposter (PDF eller Excel/CSV) — AI'en scanner materialet og spotter konkrete momsfejl, manglende fradrag og posteringsfejl.
+          </p>
+
+          {/* Dropzone */}
+          <div
+            onDragOver={e=>{e.preventDefault();setDragOver(true)}}
+            onDragLeave={()=>setDragOver(false)}
+            onDrop={e=>{e.preventDefault();setDragOver(false);behandlFiler(e.dataTransfer.files)}}
+            onClick={()=>filRef.current.click()}
+            style={{border:`2px dashed ${dragOver?C.navy:C.borderMid}`,borderRadius:"12px",padding:"2rem",textAlign:"center",cursor:"pointer",background:dragOver?"rgba(15,39,64,0.04)":C.bgSecondary,transition:"all 0.15s",marginBottom:"1rem"}}
+          >
+            <div style={{fontSize:"36px",marginBottom:"0.5rem"}}>📂</div>
+            <div style={{fontWeight:700,fontSize:"15px",color:C.navy,marginBottom:"4px"}}>Træk filer hertil eller klik for at vælge</div>
+            <div style={{fontSize:"13px",color:C.textSub}}>Understøtter PDF, Excel (.xlsx, .xls) og CSV</div>
+            <input ref={filRef} type="file" multiple accept=".pdf,.xlsx,.xls,.csv" style={{display:"none"}} onChange={e=>behandlFiler(e.target.files)}/>
+          </div>
+
+          {/* Fil-liste */}
+          {filer.length > 0 && (
+            <div style={{marginBottom:"1.25rem"}}>
+              {filer.map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"8px",marginBottom:"6px"}}>
+                  <span style={{fontSize:"20px"}}>{f.type==="PDF"?"📄":"📊"}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:"14px",fontWeight:600}}>{f.navn}</div>
+                    <div style={{fontSize:"12px",color:C.textSub}}>{f.type} · {f.str}</div>
+                  </div>
+                  <button onClick={()=>setFiler(prev=>prev.filter((_,j)=>j!==i))} style={{background:"none",border:"none",cursor:"pointer",fontSize:"18px",color:C.textSub,padding:"4px"}}>×</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
+            <button onClick={analyserFiler} disabled={filer.length===0||filLoading} style={{background:filer.length===0?"#aaa":C.gold,color:C.navy,border:"none",padding:"12px 28px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:filer.length===0?"default":"pointer"}}>
+              {filLoading?"⏳ Analyserer...":"🔍 Analyser filer"}
+            </button>
+            <button onClick={()=>setFase("rapport")} style={{background:"none",border:`0.5px solid ${C.borderMid}`,borderRadius:"8px",padding:"12px 20px",fontSize:"14px",cursor:"pointer",color:C.textSub}}>Spring over →</button>
+          </div>
+          {filLoading && (
+            <div style={{marginTop:"1rem",padding:"12px 16px",background:"rgba(200,168,75,0.08)",border:`0.5px solid rgba(200,168,75,0.3)`,borderRadius:"8px",fontSize:"13px",color:C.textSub}}>
+              ⏳ AI-en gennemgår dit regnskabsmateriale og leder efter momsfejl... Dette kan tage 15-30 sekunder.
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* ── TRIN 4: Fuld rapport ── */}
+      {fase==="rapport" && (
+        <div style={{display:"flex",flexDirection:"column",gap:"1.5rem"}}>
+          {cvrData && (
+            <div style={{background:C.navy,borderRadius:"12px",padding:"1.5rem",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"1rem"}}>
+              <div>
+                <div style={{color:"rgba(255,255,255,0.6)",fontSize:"12px",marginBottom:"4px"}}>COMPLIANCE RAPPORT</div>
+                <div style={{color:C.white,fontWeight:700,fontSize:"20px"}}>{cvrData.navn}</div>
+                <div style={{color:"rgba(255,255,255,0.6)",fontSize:"13px"}}>CVR {cvrData.cvr} · {cvrData.branche}</div>
+              </div>
+              <div style={{display:"flex",gap:"10px"}}>
+                <button onClick={()=>window.print()} style={{background:"rgba(255,255,255,0.1)",color:C.white,border:"0.5px solid rgba(255,255,255,0.3)",padding:"8px 18px",borderRadius:"8px",fontSize:"13px",cursor:"pointer"}}>🖨 Print rapport</button>
+                <button onClick={()=>{setCvrData(null);setCvr("");setFase("start");setAiAnalyse("");setFiler([]);setFilAnalyse("");}} style={{background:C.gold,color:C.navy,border:"none",padding:"8px 18px",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer"}}>Ny analyse</button>
+              </div>
+            </div>
+          )}
+
+          {aiAnalyse && (
+            <Card>
+              <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"1.25rem",display:"flex",alignItems:"center",gap:"8px"}}>
+                <span>🤖</span> AI Compliance-analyse — Branchebaseret
+              </div>
+              <div style={{fontSize:"14px",lineHeight:1.8}}>{fmtTekst(aiAnalyse)}</div>
+            </Card>
+          )}
+
+          {filAnalyse && (
+            <Card>
+              <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"1.25rem",display:"flex",alignItems:"center",gap:"8px"}}>
+                <span>📊</span> Regnskabsanalyse — Fundne momsfejl og mangler
+              </div>
+              <div style={{fontSize:"14px",lineHeight:1.8}}>{fmtTekst(filAnalyse)}</div>
+            </Card>
+          )}
+
+          <Card style={{background:"rgba(200,168,75,0.06)",border:`0.5px solid rgba(200,168,75,0.3)`}}>
+            <div style={{fontWeight:700,fontSize:"14px",color:C.gold,marginBottom:"6px"}}>⚠️ Ansvarsfraskrivelse</div>
+            <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:0}}>Denne rapport er genereret automatisk af AI baseret på de indsendte oplysninger. Den erstatter ikke professionel revisorrådgivning og bør følges op af en kvalificeret momsrevisor. Kontakt os for en dybdegående gennemgang.</p>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
   const [active, setActive] = useState("home");
   return (
     <div style={{minHeight:"100vh",background:C.bg}}>
       <Nav active={active} setActive={setActive}/>
       <main>
         {active==="home" && <Home setActive={setActive}/>}
+        {active==="compliance" && <MomsCompliance/>}
         {active==="sporg" && <Chat/>}
         {active==="hvad" && <HvadErMoms/>}
         {active==="perioder" && <Perioder/>}
