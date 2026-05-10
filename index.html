@@ -812,26 +812,211 @@ function Ydelser() {
 // ── OM OS ─────────────────────────────────────────────────────────────────────
 function OmOs() {
   return (
-    <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
+    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
       <SectionHeader title="Om os"/>
-      <p style={{color:C.textSub,maxWidth:"660px",lineHeight:1.7,marginBottom:"2.5rem"}}>
-        MomsRevisor A/S er en specialiseret momsrådgivningsvirksomhed med kontorer i København og Aarhus. Vi rådgiver udelukkende om moms og indirekte skatter.
-      </p>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:"1.5rem"}}>
-        {[
-          ["TH","Thomas Holm","Partner, statsautoriseret revisor","25 års erfaring med moms, heraf 10 år i Skattestyrelsen. Specialist i fast ejendom og finansiel moms."],
-          ["MK","Maria Kjeldsen","Partner, advokat (L)","Ekspert i EU-moms, internationale transaktioner og momsretssager."],
-          ["JP","Jakob Poulsen","Senior momsrevisor","Specialist i fradragsret, bilmoms og personalegoder. Underviser regelmæssigt for brancheorganisationer."],
-          ["SR","Sara Rasmussen","Momsrevisor","Ekspert i OSS-ordningen, e-handel og digitale ydelser."],
-        ].map(([ini,na,ro,de])=>(
-          <div key={na} style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"12px",overflow:"hidden"}}>
-            <div style={{background:C.navy,padding:"1.5rem 1.5rem 1rem",display:"flex",justifyContent:"center"}}>
-              <div style={{width:"68px",height:"68px",borderRadius:"50%",background:C.gold,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"24px",fontWeight:700,color:C.navy}}>{ini}</div>
+
+      <div style={{
+        display:"grid",
+        gridTemplateColumns:"1.4fr 0.9fr",
+        gap:"2rem",
+        alignItems:"center",
+        marginBottom:"3rem"
+      }}>
+        
+        <div>
+          <p style={{
+            color:C.textSub,
+            lineHeight:1.8,
+            fontSize:"17px",
+            maxWidth:"700px"
+          }}>
+            MomsRevisor A/S er en specialiseret momsrådgivningsvirksomhed
+            med kontorer i København og Aarhus.
+          </p>
+
+          <p style={{
+            color:C.textSub,
+            lineHeight:1.8,
+            fontSize:"17px",
+            marginTop:"1rem",
+            maxWidth:"700px"
+          }}>
+            Vi hjælper virksomheder med at navigere sikkert i momsregler,
+            regnskab og compliance — fra daglig drift til komplekse
+            problemstillinger indenfor moms og indirekte skatter.
+          </p>
+        </div>
+
+        <div style={{
+          background:C.bgCard,
+          border:`1px solid ${C.border}`,
+          borderRadius:"16px",
+          padding:"2rem",
+          display:"flex",
+          gap:"1rem",
+          alignItems:"center"
+        }}>
+          <div style={{
+            width:"72px",
+            height:"72px",
+            borderRadius:"50%",
+            background:"rgba(200,168,75,0.15)",
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"center",
+            fontSize:"34px",
+            flexShrink:0
+          }}>
+            ⚖️
+          </div>
+
+          <div>
+            <div style={{
+              fontWeight:700,
+              fontSize:"22px",
+              color:C.navy,
+              marginBottom:"6px"
+            }}>
+              Specialister i moms
             </div>
-            <div style={{padding:"1rem 1.5rem 1.5rem",textAlign:"center"}}>
-              <div style={{fontWeight:700,fontSize:"15px",marginBottom:"4px"}}>{na}</div>
-              <div style={{fontSize:"13px",color:C.gold,marginBottom:"0.75rem"}}>{ro}</div>
-              <p style={{margin:0,fontSize:"13px",color:C.textSub,lineHeight:1.5}}>{de}</p>
+
+            <div style={{
+              color:C.textSub,
+              lineHeight:1.6,
+              fontSize:"14px"
+            }}>
+              Erfaring med moms, regnskab,
+              controlling og skat i både små og store virksomheder.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{
+        display:"grid",
+        gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",
+        gap:"1.5rem",
+        marginBottom:"2rem"
+      }}>
+
+        {[
+          [
+            "⭐",
+            "Flere års erfaring",
+            "Vi har mange års erfaring med moms og regnskab, herunder erfaring fra Skattestyrelsen samt arbejde med både små, mellemstore og børsnoterede virksomheder."
+          ],
+          [
+            "🎓",
+            "Høj faglighed",
+            "Vores team består af kompetente profiler med cand.merc.aud.-baggrund og solid erfaring indenfor moms, skat, regnskab og controlling."
+          ],
+          [
+            "📊",
+            "Bred ekspertise",
+            "Vi arbejder med alt fra daglig momscompliance og bogføring til internationale momsforhold, EU-handel og komplekse rådgivningsopgaver."
+          ],
+          [
+            "🤝",
+            "Praktisk rådgivning",
+            "Vi fokuserer på løsninger der kan bruges i praksis — med høj kvalitet, forståelig kommunikation og fokus på forretningen."
+          ],
+        ].map(([icon,title,text]) => (
+
+          <div
+            key={title}
+            style={{
+              background:C.bgCard,
+              border:`1px solid ${C.border}`,
+              borderRadius:"16px",
+              padding:"2rem",
+              display:"flex",
+              gap:"1.25rem",
+              alignItems:"flex-start",
+              transition:"all 0.2s"
+            }}
+          >
+            <div style={{
+              width:"72px",
+              height:"72px",
+              borderRadius:"50%",
+              background:"rgba(200,168,75,0.15)",
+              display:"flex",
+              alignItems:"center",
+              justifyContent:"center",
+              fontSize:"30px",
+              flexShrink:0
+            }}>
+              {icon}
+            </div>
+
+            <div>
+              <div style={{
+                fontWeight:700,
+                fontSize:"22px",
+                color:C.navy,
+                marginBottom:"10px"
+              }}>
+                {title}
+              </div>
+
+              <div style={{
+                width:"40px",
+                height:"3px",
+                background:C.gold,
+                borderRadius:"2px",
+                marginBottom:"14px"
+              }}/>
+
+              <p style={{
+                margin:0,
+                color:C.textSub,
+                lineHeight:1.8,
+                fontSize:"14px"
+              }}>
+                {text}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        background:"linear-gradient(135deg,#0f2740 0%,#163a5c 100%)",
+        borderRadius:"18px",
+        padding:"2rem",
+        display:"grid",
+        gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",
+        gap:"1.5rem",
+        marginTop:"2rem"
+      }}>
+
+        {[
+          ["⚖️","Specialister i moms og indirekte skatter"],
+          ["🏢","Erfaring fra Skattestyrelsen og erhvervslivet"],
+          ["🎓","Cand.merc.aud. og høj faglighed"],
+          ["📈","Fokus på kvalitet, værdi og resultater"]
+        ].map(([icon,text]) => (
+
+          <div
+            key={text}
+            style={{
+              display:"flex",
+              gap:"12px",
+              alignItems:"center"
+            }}
+          >
+            <div style={{
+              fontSize:"28px"
+            }}>
+              {icon}
+            </div>
+
+            <div style={{
+              color:C.white,
+              fontSize:"15px",
+              lineHeight:1.5
+            }}>
+              {text}
             </div>
           </div>
         ))}
