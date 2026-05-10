@@ -632,7 +632,7 @@ function Perioder() {
   const fmt = d=>d.toLocaleDateString("da-DK",{day:"numeric",month:"short",year:"numeric"});
   const status = frist=>{
     if(frist<now) return {lbl:"Udløbet",c:C.red,bg:"rgba(239,68,68,0.1)"};
-    const d=Math.ceil((frist-now)/86400000);
+    const d = Math.max(0, Math.floor((frist - now) / 86400000));
     if(d<=14) return {lbl:`${d} dage`,c:C.yellow,bg:"rgba(245,158,11,0.1)"};
     return {lbl:`${d} dage`,c:C.green,bg:"rgba(34,197,94,0.1)"};
   };
