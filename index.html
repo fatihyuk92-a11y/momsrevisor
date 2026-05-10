@@ -630,12 +630,33 @@ function Perioder() {
 
   const rows = tab==="halvaar"?halvaar:tab==="kvartal"?kvartaler:maaneder;
   const fmt = d=>d.toLocaleDateString("da-DK",{day:"numeric",month:"short",year:"numeric"});
-  const status = frist=>{
-    if(frist<now) return {lbl:"Udløbet",c:C.red,bg:"rgba(239,68,68,0.1)"};
-    const d = Math.max(0, Math.floor((frist - now) / 86400000));
-    if(d<=14) return {lbl:`${d} dage`,c:C.yellow,bg:"rgba(245,158,11,0.1)"};
-    return {lbl:`${d} dage`,c:C.green,bg:"rgba(34,197,94,0.1)"};
+  const status = frist => {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const due = new Date(frist);
+  due.setHours(0,0,0,0);
+
+  const d = Math.floor((due - today) / 86400000);
+
+  if(d < 0) return {
+    lbl:"Udløbet",
+    c:C.red,
+    bg:"rgba(239,68,68,0.1)"
   };
+
+  if(d <= 14) return {
+    lbl:`${d} dage`,
+    c:C.yellow,
+    bg:"rgba(245,158,11,0.1)"
+  };
+
+  return {
+    lbl:`${d} dage`,
+    c:C.green,
+    bg:"rgba(34,197,94,0.1)"
+  };
+};
 
   return (
     <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
