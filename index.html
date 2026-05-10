@@ -1036,6 +1036,64 @@ const MODULER = [
       },
     ]
   },
+  {
+    id:6, emoji:"💼", titel:"Modul 6: Lønsumsafgift",
+    intro:"Lønsumsafgift er en særskat for virksomheder med momsfritagne aktiviteter. Lær hvem der skal betale, hvordan det beregnes og hvilke metoder der gælder.",
+    lektioner:[
+      {
+        titel:"Hvad er lønsumsafgift og hvem skal betale?",
+        tekst:"Lønsumsafgift er en afgift som virksomheder med momsfritagne aktiviteter skal betale som kompensation for det manglende momsprovenu. Afgiften beregnes af lønsummen og/eller overskuddet i virksomheden.",
+        punkt:[
+          "Hjemmel: Lønsumsafgiftsloven (LSAL) — Lovbekendtgørelse nr. 1079 af 22. august 2023",
+          "Hvem skal betale: Virksomheder der leverer momsfritagne ydelser efter ML § 13, herunder banker, forsikringsselskaber, hospitaler, læger, tandlæger, skoler, forfattere, aviser og dagblade",
+          "Registreringspligt: Når lønsumsafgiftspligtige aktiviteter påbegyndes (LSAL § 2)",
+          "Virksomheder med BÅDE momspligtige og momsfrie aktiviteter skal kun betale lønsumsafgift af den momsfritagne del",
+          "Lønsumsafgift er en fradragsberettiget driftsomkostning i skattemæssig forstand",
+          "Afgiften angives og betales til Skattestyrelsen via TastSelv Erhverv",
+        ],
+        eksempel:"Et forsikringsselskab har udelukkende momsfritagne aktiviteter (ML § 13, stk. 1, nr. 10). De skal ikke opkræve moms, men betaler i stedet lønsumsafgift af deres lønsummen og overskud. En lægeklinik med momsfritaget behandling (ML § 13, stk. 1, nr. 1) er ligeledes lønsumsafgiftspligtig.",
+        quiz:[
+          {sp:"Hvad er lønsumsafgift en kompensation for?",sv:["Manglende indkomstskat","Manglende momsprovenu fra momsfritagne aktiviteter","Manglende told","Manglende energiafgift"],k:1},
+          {sp:"Hvilken lov regulerer lønsumsafgiften?",sv:["Momsloven","Selskabsskatteloven","Lønsumsafgiftsloven","Kildeskatteloven"],k:2}
+        ]
+      },
+      {
+        titel:"De fire beregningsmetoder",
+        tekst:"Lønsumsafgiften beregnes efter én af fire metoder afhængigt af virksomhedens aktivitetstype. Metodevalget er afgørende for størrelsen af afgiften.",
+        punkt:[
+          "METODE 1 (LSAL § 4, stk. 1): Finansielle virksomheder (banker, realkreditinstitutter, forsikring mv.). Afgiftsgrundlag = lønsum + overskud/underskud. Sats: 15,3% (2026)",
+          "METODE 2 (LSAL § 4, stk. 2): Virksomheder med blandet momspligtig/momsfri omsætning (fx rådgivningsvirksomheder med momsfrie aktiviteter). Afgiftsgrundlag = lønsum × momsfri omsætningsandel. Sats: 6,37% (2026)",
+          "METODE 3 (LSAL § 4, stk. 3): Dagblade og aviser. Afgiftsgrundlag = lønsum. Sats: 3,54% (2026)",
+          "METODE 4 (LSAL § 4, stk. 4): Øvrige virksomheder med momsfritagne aktiviteter (læger, tandlæger, hospitaler, skoler, forfattere, kulturelle institutioner mv.). Afgiftsgrundlag = lønsum. Sats: 6,37% (2026)",
+          "Satser reguleres hvert år — tjek altid de aktuelle satser på skat.dk",
+          "Virksomheder med metode 2 skal regulere den endelige lønsumsafgift når momsfradragsprocenten kendes ved årets udgang — parallelt med momspro-rata-opgørelsen",
+        ],
+        eksempel:"En praktiserende læge (metode 4) har en lønsum på 2.000.000 kr. i 2026. Lønsumsafgiften beregnes som: 2.000.000 × 6,37% = 127.400 kr. En bank (metode 1) med lønsum på 10.000.000 kr. og overskud på 5.000.000 kr. betaler: (10.000.000 + 5.000.000) × 15,3% = 2.295.000 kr.",
+        quiz:[
+          {sp:"Hvilken metode gælder for banker og forsikringsselskaber?",sv:["Metode 1","Metode 2","Metode 3","Metode 4"],k:0},
+          {sp:"Hvad er satsen for metode 4 (læger, skoler mv.) i 2026?",sv:["3,54%","6,37%","10,0%","15,3%"],k:1}
+        ]
+      },
+      {
+        titel:"Angivelse, betaling og frister",
+        tekst:"Lønsumsafgiften angives og betales løbende til Skattestyrelsen. Fristerne afhænger af hvilken metode virksomheden anvender.",
+        punkt:[
+          "METODE 1 og 4: Månedlig foreløbig betaling baseret på lønsum. Endelig årsopgørelse senest 15. august det følgende år (LSAL § 6)",
+          "METODE 2: Foreløbige betalinger kvartalsvis eller månedligt. Endelig opgørelse senest i den afgiftsperiode der encompasser 6. måned efter regnskabsårets afslutning — samme tidspunkt som endelig momspro-rata (vigtigt samspil!)",
+          "METODE 3: Halvårlig betaling",
+          "Renter: Ved for sen betaling beregnes renter fra forfaldsdato (Opkrævningsloven § 7)",
+          "Forældelse: 3 år fra angivelsesfristens udløb — samme regler som moms",
+          "Nye virksomheder skal registrere sig via virk.dk inden aktiviteterne påbegyndes",
+          "Samspil med moms: Virksomheder med delvis fradragsret (metode 2) skal koordinere den endelige lønsumsafgiftsopgørelse med den endelige momspro-rata for at undgå renter",
+        ],
+        eksempel:"En advokat med en blandet praksis (60% momspligtig, 40% momsfri) anvender metode 2. I løbet af 2026 betaler han foreløbig lønsumsafgift baseret på forrige års momsfri andel. Når 2026-regnskabet er afsluttet og den endelige momspro-rata kendes, reguleres lønsumsafgiften i samme afgiftsperiode som momskorrektionen — for en virksomhed med kalenderårsregnskab vil det være i juni (halvårlig), 2. kvartal (kvartalsvis) eller senest i den periode der løber til 30. juni.",
+        quiz:[
+          {sp:"Hvornår skal den endelige lønsumsafgift for metode 2 angives?",sv:["31. december","15. august det følgende år","Samme periode som den endelige momspro-rata (6. måned efter regnskabsårets afslutning)","1. marts det følgende år"],k:2},
+          {sp:"Hvad sker der ved for sen betaling af lønsumsafgift?",sv:["Ingen konsekvenser første gang","Der beregnes renter fra forfaldsdato","Der gives automatisk henstand","Skattefradrag bortfalder"],k:1}
+        ]
+      },
+    ]
+  },
 ];
 
 function Momstraening() {
