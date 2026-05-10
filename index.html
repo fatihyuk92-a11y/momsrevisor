@@ -812,59 +812,68 @@ function Ydelser() {
 // ── OM OS ─────────────────────────────────────────────────────────────────────
 function OmOs() {
   return (
-    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
+    <div style={{
+      maxWidth:"1250px",
+      margin:"0 auto",
+      padding:"4rem 3rem"
+    }}>
+
       <SectionHeader title="Om os"/>
 
+      {/* TOP SEKTION */}
       <div style={{
         display:"grid",
-        gridTemplateColumns:"1.4fr 0.9fr",
-        gap:"2rem",
+        gridTemplateColumns:"1.3fr 0.8fr",
+        gap:"3rem",
         alignItems:"center",
         marginBottom:"3rem"
       }}>
-        
+
         <div>
           <p style={{
+            fontSize:"20px",
+            lineHeight:1.9,
             color:C.textSub,
-            lineHeight:1.8,
-            fontSize:"17px",
-            maxWidth:"700px"
+            maxWidth:"760px",
+            marginBottom:"1.5rem"
           }}>
-            MomsRevisor A/S er en specialiseret momsrådgivningsvirksomhed
-            med kontorer i København og Aarhus.
+            MomsRevisor A/S er en specialiseret
+            momsrådgivningsvirksomhed med kontorer i
+            København og Aarhus.
           </p>
 
           <p style={{
+            fontSize:"20px",
+            lineHeight:1.9,
             color:C.textSub,
-            lineHeight:1.8,
-            fontSize:"17px",
-            marginTop:"1rem",
-            maxWidth:"700px"
+            maxWidth:"760px"
           }}>
-            Vi hjælper virksomheder med at navigere sikkert i momsregler,
-            regnskab og compliance — fra daglig drift til komplekse
-            problemstillinger indenfor moms og indirekte skatter.
+            Vi hjælper virksomheder med at navigere sikkert i
+            momsregler, regnskab og compliance — fra daglig drift
+            til komplekse problemstillinger indenfor moms og
+            indirekte skatter.
           </p>
         </div>
 
         <div style={{
           background:C.bgCard,
-          border:`1px solid ${C.border}`,
-          borderRadius:"16px",
-          padding:"2rem",
+          borderRadius:"24px",
+          padding:"2.5rem",
           display:"flex",
-          gap:"1rem",
-          alignItems:"center"
+          alignItems:"center",
+          gap:"1.5rem",
+          boxShadow:"0 4px 20px rgba(0,0,0,0.04)"
         }}>
+
           <div style={{
-            width:"72px",
-            height:"72px",
+            width:"90px",
+            height:"90px",
             borderRadius:"50%",
             background:"rgba(200,168,75,0.15)",
             display:"flex",
             alignItems:"center",
             justifyContent:"center",
-            fontSize:"34px",
+            fontSize:"42px",
             flexShrink:0
           }}>
             ⚖️
@@ -872,38 +881,41 @@ function OmOs() {
 
           <div>
             <div style={{
+              fontSize:"2rem",
               fontWeight:700,
-              fontSize:"22px",
               color:C.navy,
-              marginBottom:"6px"
+              marginBottom:"10px"
             }}>
               Specialister i moms
             </div>
 
             <div style={{
-              color:C.textSub,
-              lineHeight:1.6,
-              fontSize:"14px"
+              fontSize:"17px",
+              lineHeight:1.8,
+              color:C.textSub
             }}>
               Erfaring med moms, regnskab,
-              controlling og skat i både små og store virksomheder.
+              controlling og skat i både små
+              og store virksomheder.
             </div>
           </div>
+
         </div>
       </div>
 
+      {/* INFO KORT */}
       <div style={{
         display:"grid",
-        gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",
-        gap:"1.5rem",
-        marginBottom:"2rem"
+        gridTemplateColumns:"repeat(2,minmax(0,1fr))",
+        gap:"2rem",
+        marginBottom:"3rem"
       }}>
 
         {[
           [
             "⭐",
             "Flere års erfaring",
-            "Vi har mange års erfaring med moms og regnskab, herunder erfaring fra Skattestyrelsen samt arbejde med både små, mellemstore og børsnoterede virksomheder."
+            "Vi har mange års erfaring med moms og regnskab, herunder erfaring fra Skattestyrelsen og arbejde med både små, mellemstore og børsnoterede virksomheder."
           ],
           [
             "🎓",
@@ -917,77 +929,84 @@ function OmOs() {
           ],
           [
             "🤝",
-            "Praktisk rådgivning",
-            "Vi fokuserer på løsninger der kan bruges i praksis — med høj kvalitet, forståelig kommunikation og fokus på forretningen."
-          ],
+            "Dedikeret rådgivning",
+            "Vi lægger vægt på kvalitet, tilgængelighed og langvarige relationer. Vores mål er at skabe tryghed og overblik i en kompleks hverdag."
+          ]
         ].map(([icon,title,text]) => (
 
           <div
             key={title}
             style={{
               background:C.bgCard,
-              border:`1px solid ${C.border}`,
-              borderRadius:"16px",
-              padding:"2rem",
+              borderRadius:"24px",
+              padding:"2.5rem",
               display:"flex",
-              gap:"1.25rem",
+              gap:"1.75rem",
               alignItems:"flex-start",
-              transition:"all 0.2s"
+              boxShadow:"0 4px 20px rgba(0,0,0,0.04)"
             }}
           >
+
             <div style={{
-              width:"72px",
-              height:"72px",
+              width:"100px",
+              height:"100px",
               borderRadius:"50%",
               background:"rgba(200,168,75,0.15)",
               display:"flex",
               alignItems:"center",
               justifyContent:"center",
-              fontSize:"30px",
+              fontSize:"46px",
               flexShrink:0
             }}>
               {icon}
             </div>
 
             <div>
+
               <div style={{
+                fontSize:"2rem",
                 fontWeight:700,
-                fontSize:"22px",
                 color:C.navy,
+                lineHeight:1.2,
                 marginBottom:"10px"
               }}>
                 {title}
               </div>
 
               <div style={{
-                width:"40px",
-                height:"3px",
+                width:"60px",
+                height:"4px",
                 background:C.gold,
-                borderRadius:"2px",
-                marginBottom:"14px"
+                borderRadius:"4px",
+                marginBottom:"1.25rem"
               }}/>
 
               <p style={{
-                margin:0,
+                fontSize:"16px",
+                lineHeight:1.9,
                 color:C.textSub,
-                lineHeight:1.8,
-                fontSize:"14px"
+                margin:0
               }}>
                 {text}
               </p>
+
             </div>
+
           </div>
+
         ))}
+
       </div>
 
+      {/* BUND BAR */}
       <div style={{
         background:"linear-gradient(135deg,#0f2740 0%,#163a5c 100%)",
-        borderRadius:"18px",
-        padding:"2rem",
+        borderRadius:"24px",
+        padding:"2rem 2.5rem",
         display:"grid",
-        gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",
-        gap:"1.5rem",
-        marginTop:"2rem"
+        gridTemplateColumns:"repeat(4,1fr)",
+        gap:"2rem",
+        alignItems:"center"
       }}>
 
         {[
@@ -1001,26 +1020,34 @@ function OmOs() {
             key={text}
             style={{
               display:"flex",
-              gap:"12px",
-              alignItems:"center"
+              alignItems:"center",
+              gap:"1rem"
             }}
           >
+
             <div style={{
-              fontSize:"28px"
+              fontSize:"32px",
+              color:C.gold,
+              flexShrink:0
             }}>
               {icon}
             </div>
 
             <div style={{
               color:C.white,
-              fontSize:"15px",
-              lineHeight:1.5
+              fontSize:"16px",
+              lineHeight:1.6,
+              fontWeight:500
             }}>
               {text}
             </div>
+
           </div>
+
         ))}
+
       </div>
+
     </div>
   );
 }
