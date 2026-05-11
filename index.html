@@ -349,7 +349,222 @@ function SectionHeader({title, sub}) {
   );
 }
 
-// ── HOME ──────────────────────────────────────────────────────────────────────
+// ── AI DEMO ───────────────────────────────────────────────────────────────────
+const DEMO_SEKVENSER = [
+  {
+    spm: "Kan jeg fratrække moms på køb af en firmabil?",
+    svar: "Nej — som udgangspunkt har virksomheder intet momsfradrag ved køb af personbiler (hvide plader), heller ikke selvom bilen bruges 100% erhvervsmæssigt.\n\nHjemmel: ML § 42, stk. 1, nr. 6.\n\nUndtagelser gælder kun for: bilforhandlere, køreskoler og udlejningsvirksomheder.\n\nSkattemæssigt er billedet anderledes — der er fuldt fradrag for erhvervsmæssige driftsomkostninger, men fri bil beskattes efter LL § 16, stk. 4.",
+  },
+  {
+    spm: "Hvad er fristen for momsangivelse for en virksomhed med 8 mio. kr. i omsætning?",
+    svar: "En virksomhed med 8 mio. kr. i omsætning er kvartalsafregnende (5–50 mio. kr./år).\n\nFrist: Senest den 1. i den 3. måned efter kvartalets udløb.\n\nEksempel: 1. kvartal (jan–mar) skal angives og betales senest 1. juni 2026.\n\nHjemmel: ML § 57, stk. 3 og MB § 82.",
+  },
+  {
+    spm: "Hvad er forskellen på moms og skat for repræsentation?",
+    svar: "Her er der vigtig asymmetri:\n\nMOMS (ML § 42, stk. 1, nr. 2): Intet fradrag for repræsentation. Restaurant til forretningsforbindelser: kun 1/4 momsfradrag.\n\nSKAT (LL § 8, stk. 4): 25% skattefradrag af udgiften — dvs. 75% nægtes fradrag.\n\nKonklusion: En restaurantregning på 1.000 kr. giver 25% momsfradrag OG 25% skattefradrag — men gaver og teaterbesøg giver 0% i begge systemer.",
+  },
+];
+
+function AIDemo({ navigate }) {
+  const [fase, setFase] = useState("intro"); // intro | typing | thinking | svar | pause
+  const [sekvens, setSekvens] = useState(0);
+  const [typetTekst, setTypetTekst] = useState("");
+  const [svarTekst, setSvarTekst] = useState("");
+  const [svarIndex, setSvarIndex] = useState(0);
+  const [korer, setKorer] = useState(true);
+
+  const aktuel = DEMO_SEKVENSER[sekvens];
+
+  useEffect(() => {
+    if (!korer) return;
+    let timeout;
+
+    if (fase === "intro") {
+      timeout = setTimeout(() => { setTypetTekst(""); setFase("typing"); }, 1200);
+    }
+
+    else if (fase === "typing") {
+      if (typetTekst.length < aktuel.spm.length) {
+        timeout = setTimeout(() => {
+          setTypetTekst(aktuel.spm.slice(0, typetTekst.length + 1));
+        }, 38);
+      } else {
+        timeout = setTimeout(() => setFase("thinking"), 600);
+      }
+    }
+
+    else if (fase === "thinking") {
+      timeout = setTimeout(() => { setSvarTekst(""); setSvarIndex(0); setFase("svar"); }, 1400);
+    }
+
+    else if (fase === "svar") {
+      if (svarIndex < aktuel.svar.length) {
+        timeout = setTimeout(() => {
+          setSvarTekst(aktuel.svar.slice(0, svarIndex + 1));
+          setSvarIndex(i => i + 1);
+        }, 12);
+      } else {
+        timeout = setTimeout(() => setFase("pause"), 3500);
+      }
+    }
+
+    else if (fase === "pause") {
+      timeout = setTimeout(() => {
+        const next = (sekvens + 1) % DEMO_SEKVENSER.length;
+        setSekvens(next);
+        setTypetTekst("");
+        setSvarTekst("");
+        setSvarIndex(0);
+        setFase("intro");
+      }, 1000);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [fase, typetTekst, svarIndex, korer, sekvens]);
+
+  const fmtSvar = (tekst) => tekst.split("\n").map((l,i) => {
+    if (!l.trim()) return <br key={i}/>;
+    if (l.startsWith("Hjemmel:") || l.startsWith("Konklusion:") || l.startsWith("MOMS") || l.startsWith("SKAT") || l.startsWith("Undtagelser") || l.startsWith("Eksempel:") || l.startsWith("Frist:")) {
+      return <p key={i} style={{margin:"4px 0",fontSize:"13px",lineHeight:1.65,fontWeight:600,color:"#1a3558"}}>{l}</p>;
+    }
+    return <p key={i} style={{margin:"3px 0",fontSize:"13px",lineHeight:1.65,color:"#444"}}>{l}</p>;
+  });
+
+  return (
+    <div style={{background:"linear-gradient(180deg,#f0ede8 0%,#e8e3db 100%)",padding:"4rem 2rem"}}>
+      <div style={{maxWidth:"1100px",margin:"0 auto"}}>
+
+        {/* Overskrift */}
+        <div style={{textAlign:"center",marginBottom:"3rem"}}>
+          <div style={{display:"inline-block",background:"rgba(196,151,62,0.12)",color:"#c4973e",border:"0.5px solid rgba(196,151,62,0.35)",borderRadius:"20px",padding:"4px 16px",fontSize:"12px",fontWeight:600,letterSpacing:"0.5px",marginBottom:"1rem",textTransform:"uppercase"}}>
+            Se hvordan det virker
+          </div>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.6rem,3.5vw,2.4rem)",fontWeight:700,color:"#0c1f35",marginBottom:"0.75rem",lineHeight:1.2}}>
+            AI-rådgiveren i aktion
+          </h2>
+          <p style={{color:"#666",fontSize:"15px",maxWidth:"520px",margin:"0 auto",lineHeight:1.6}}>
+            Stil spørgsmål om moms og skat og få øjeblikkelige svar baseret på dansk og EU-ret — præcis som en rigtig revisor.
+          </p>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3rem",alignItems:"center"}}>
+
+          {/* Venstre: forklaring */}
+          <div>
+            <div style={{display:"flex",flexDirection:"column",gap:"1.5rem",marginBottom:"2rem"}}>
+              {[
+                ["⚖️","Baseret på 6+ retskilder","Momsloven, momsbekendtgørelsen, momsforordningen, EU-direktiv, Den Juridiske Vejledning og retspraksis."],
+                ["🔄","Moms og skat i samspil","Rådgiveren forstår asymmetrien — og gør opmærksom når en momsafgørelse også har skattemæssige konsekvenser."],
+                ["📋","Konkrete lovhenvisninger","Hvert svar indeholder præcise §-henvisninger så du kan efterprøve og bruge det i praksis."],
+                ["⚡","Øjeblikkelige svar","Ingen ventetid, ingen booking — svar på sekunder, 24 timer i døgnet."],
+              ].map(([ic,ti,tx])=>(
+                <div key={ti} style={{display:"flex",gap:"14px",alignItems:"flex-start"}}>
+                  <div style={{width:"40px",height:"40px",borderRadius:"10px",background:"rgba(196,151,62,0.12)",border:"0.5px solid rgba(196,151,62,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0}}>{ic}</div>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:"14px",color:"#0c1f35",marginBottom:"3px"}}>{ti}</div>
+                    <div style={{fontSize:"13px",color:"#666",lineHeight:1.55}}>{tx}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={()=>navigate("sporg")} style={{background:"#0c1f35",color:"#fff",border:"none",padding:"13px 28px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",display:"flex",alignItems:"center",gap:"8px"}}>
+              Prøv AI-rådgiveren selv <span style={{fontSize:"18px"}}>→</span>
+            </button>
+          </div>
+
+          {/* Højre: animeret chat-vindue */}
+          <div style={{position:"relative"}}>
+            {/* Browser-chrome */}
+            <div style={{background:"#e2ddd8",borderRadius:"14px 14px 0 0",padding:"10px 14px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid rgba(0,0,0,0.08)",borderBottom:"none"}}>
+              <div style={{display:"flex",gap:"5px"}}>
+                {["#ff5f57","#febc2e","#28c840"].map(c=><div key={c} style={{width:"11px",height:"11px",borderRadius:"50%",background:c}}/>)}
+              </div>
+              <div style={{flex:1,background:"rgba(255,255,255,0.6)",borderRadius:"6px",padding:"3px 12px",fontSize:"11px",color:"#888",textAlign:"center"}}>
+                momsrevisor.dk/sporg-ai
+              </div>
+            </div>
+
+            {/* Chat vindue */}
+            <div style={{background:"#fff",border:"1px solid rgba(0,0,0,0.08)",borderTop:"none",borderRadius:"0 0 14px 14px",boxShadow:"0 12px 40px rgba(0,0,0,0.12)",overflow:"hidden"}}>
+              {/* Chat header */}
+              <div style={{background:"#0c1f35",padding:"12px 16px",display:"flex",alignItems:"center",gap:"10px"}}>
+                <div style={{width:"8px",height:"8px",borderRadius:"50%",background:"#28c840"}}/>
+                <div>
+                  <div style={{color:"#fff",fontWeight:700,fontSize:"13px"}}>Moms & Skat AI-rådgiver</div>
+                  <div style={{color:"rgba(255,255,255,0.5)",fontSize:"10px"}}>ML · MB · MF · LL · SEL · DJV</div>
+                </div>
+                <div style={{marginLeft:"auto",background:"rgba(40,200,64,0.2)",color:"#28c840",fontSize:"10px",fontWeight:700,padding:"2px 8px",borderRadius:"10px",border:"0.5px solid #28c840"}}>LIVE</div>
+              </div>
+
+              {/* Chat body */}
+              <div style={{padding:"16px",minHeight:"260px",display:"flex",flexDirection:"column",gap:"10px",background:"#f8f7f5"}}>
+
+                {/* Spørgsmål */}
+                {(fase === "typing" || fase === "thinking" || fase === "svar" || fase === "pause") && typetTekst && (
+                  <div style={{alignSelf:"flex-end",maxWidth:"85%"}}>
+                    <div style={{background:"#0c1f35",color:"#fff",borderRadius:"16px 16px 4px 16px",padding:"10px 14px",fontSize:"13px",lineHeight:1.5}}>
+                      {typetTekst}
+                      {fase === "typing" && <span style={{borderRight:"2px solid rgba(255,255,255,0.7)",marginLeft:"1px",animation:"blink 0.7s infinite"}}/>}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tænke-animation */}
+                {fase === "thinking" && (
+                  <div style={{alignSelf:"flex-start",background:"#fff",border:"0.5px solid #e0dbd4",borderRadius:"4px 16px 16px 16px",padding:"12px 16px"}}>
+                    <div style={{display:"flex",gap:"5px",alignItems:"center"}}>
+                      {[0,1,2].map(d=>(
+                        <div key={d} style={{width:"7px",height:"7px",borderRadius:"50%",background:"#c4973e",animation:`bounce 1.2s ${d*0.2}s infinite`}}/>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Svar */}
+                {(fase === "svar" || fase === "pause") && svarTekst && (
+                  <div style={{alignSelf:"flex-start",maxWidth:"90%",background:"#fff",border:"0.5px solid #e0dbd4",borderRadius:"4px 16px 16px 16px",padding:"12px 16px"}}>
+                    {fmtSvar(svarTekst)}
+                    {fase === "svar" && <span style={{borderRight:"1.5px solid #c4973e",marginLeft:"1px",animation:"blink 0.7s infinite"}}/>}
+                  </div>
+                )}
+              </div>
+
+              {/* Input boks */}
+              <div style={{padding:"10px 12px",background:"#fff",borderTop:"0.5px solid #e0dbd4",display:"flex",gap:"8px",alignItems:"center"}}>
+                <div style={{flex:1,background:"#f8f7f5",border:"0.5px solid #ddd",borderRadius:"8px",padding:"8px 12px",fontSize:"12px",color:"#aaa"}}>
+                  Stil dit moms- eller skattespørgsmål her...
+                </div>
+                <div style={{width:"32px",height:"32px",borderRadius:"7px",background:"#0c1f35",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:"14px"}}>↑</div>
+              </div>
+            </div>
+
+            {/* Pause/play knap */}
+            <button
+              onClick={()=>setKorer(k=>!k)}
+              style={{position:"absolute",bottom:"12px",right:"12px",background:"rgba(255,255,255,0.9)",border:"0.5px solid rgba(0,0,0,0.1)",borderRadius:"20px",padding:"4px 12px",fontSize:"11px",cursor:"pointer",color:"#666",display:"flex",alignItems:"center",gap:"5px"}}
+            >
+              {korer ? "⏸ Pause" : "▶ Afspil"}
+            </button>
+
+            {/* Sekvens-indikator */}
+            <div style={{display:"flex",justifyContent:"center",gap:"6px",marginTop:"12px"}}>
+              {DEMO_SEKVENSER.map((_,i)=>(
+                <div key={i} onClick={()=>{setSekvens(i);setTypetTekst("");setSvarTekst("");setSvarIndex(0);setFase("intro");setKorer(true);}}
+                  style={{width:i===sekvens?"20px":"7px",height:"7px",borderRadius:"4px",background:i===sekvens?"#c4973e":"rgba(196,151,62,0.3)",transition:"all 0.3s",cursor:"pointer"}}/>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+      `}</style>
+    </div>
+  );
+}
+
+
 function Home({navigate}) {
   return (
     <div>
@@ -458,6 +673,9 @@ function Home({navigate}) {
           </div>
         </div>
       </div>
+
+      {/* AI Demo sektion */}
+      <AIDemo navigate={navigate}/>
 
       {/* Expertise grid */}
       <div style={{maxWidth:"1100px",margin:"0 auto",padding:"5rem 2rem 3rem"}}>
