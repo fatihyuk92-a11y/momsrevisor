@@ -82,6 +82,22 @@ table{border-collapse:collapse}
 .btn-gold{transition:all 0.2s ease}
 .btn-gold:hover{background:#d4aa5a !important;transform:translateY(-1px);box-shadow:0 6px 20px rgba(196,151,62,0.35) !important}
 .btn-ghost:hover{background:rgba(255,255,255,0.15) !important;border-color:rgba(255,255,255,0.7) !important}
+/* ── MOBILE RESPONSIVENESS ── */
+@media (max-width: 768px) {
+  .desktop-nav { display: none !important; }
+  .hamburger { display: block !important; }
+  div[style*="5rem 2rem"] { padding: 2.5rem 1rem !important; }
+  div[style*="maxWidth:\"1100px\""] { padding: 1.5rem 1rem !important; }
+  div[style*="maxWidth:\"1000px\""] { padding: 1.5rem 1rem !important; }
+  div[style*="maxWidth:\"860px\""] { padding: 1.5rem 1rem !important; }
+  div[style*="maxWidth:\"900px\""] { padding: 1.5rem 1rem !important; }
+  div[style*="overflowX:\"auto\""] { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 560px; }
+}
+@media (min-width: 769px) {
+  .hamburger { display: none !important; }
+  .desktop-nav { display: flex !important; }
+}
 </style>
 </head>
 <body>
@@ -89,50 +105,124 @@ table{border-collapse:collapse}
 <script type="text/babel">
 const { useState, useRef, useEffect } = React;
 
-const MOMS_KNOWLEDGE = `Du er en erfaren dansk momsrevisor med dybdegående kendskab til samtlige primære retskilder på momsområdet:
+const AI_KNOWLEDGE = `Du er en erfaren dansk skatte- og momsrådgiver med dybdegående kendskab til samtlige primære retskilder inden for både moms og skat. Du forstår samspillet mellem moms og skat, og du gør altid opmærksom på når en momsafgørelse også har skattemæssige konsekvenser og omvendt.
 
-RETSKILDER DU ANVENDER:
-1. Momsloven (ML) — Lovbekendtgørelse nr. 1021 af 26. september 2019 med efterfølgende ændringer
-2. Momsbekendtgørelsen (MB) — Bekendtgørelse nr. 2246 af 30. november 2021 med ændringer.
-3. Momsforordningen — Rådets gennemførelsesforordning (EU) nr. 282/2011 af 15. marts 2011 med ændringer.
-4. EU's momsdirektiv — Rådets direktiv 2006/112/EF med ændringer, herunder direktiv 2018/1910 (quick fixes), direktiv 2019/1995 (e-handel).
-5. Den Juridiske Vejledning (DJV) — Skattestyrelsens vejledning, afsnit D.A.
-6. Dansk og EU-retlig praksis — Landsskatterettens kendelser og EU-Domstolens afgørelser.
+SENESTE GÆLDENDE LOVGIVNING (pr. 2026):
 
-MOMSBEKENDTGØRELSEN (MB): MB kap. 12 (§§ 58-81): fakturakrav inkl. forenklede fakturaer under 3.000 kr. (MB § 63). MB kap. 9 (§§ 38-50): pro-rata og regulering. MB kap. 17: brugtmomsordningen/differencebeskatning. MB §§ 134-136: momsgrupper/fællesregistrering. MB §§ 119-133: OSS-regler.
+MOMSRETSKILDER:
+1. Momsloven (ML) — Lovbekendtgørelse nr. 1179 af 24. september 2024
+2. Momsbekendtgørelsen (MB) — Bekendtgørelse nr. 2246 af 30. november 2021 med ændringer (senest bek. nr. 1053 af 22. juni 2023)
+3. Momsforordningen (MF) — Rådets gennemførelsesforordning (EU) nr. 282/2011 med ændringer (1042/2013, 2019/2026, 2022/432)
+4. EU's momsdirektiv — Rådets direktiv 2006/112/EF med ændringer inkl. ViDA-pakken (direktiv 2024/522)
+5. Den Juridiske Vejledning moms (DJV) — Skattestyrelsens vejledning 2026-1, afsnit D.A.
+6. Lønsumsafgiftsloven (LSAL) — Lovbekendtgørelse nr. 1079 af 22. august 2023
 
-MOMSFORORDNINGEN (MF 282/2011): MF art. 10-13: etableringssted og fast forretningssted. MF art. 13b: definition af fast ejendom. MF art. 18: formodningsregler B2B/B2C. MF art. 45a: transportbevis ved EU-varesalg (to uafhængige beviser). MF art. 31a-31c: ydelser vedrørende fast ejendom. MF art. 33-41: elektroniske ydelser. MF art. 369a ff.: OSS detaljerede regler.
+SKATTERETSKILDER:
+7. Statsskatteloven (SL) — Lovbekendtgørelse nr. 149 af 10. april 1922 (grundlæggende indkomstbegreb, § 4 indtægter, § 6 fradrag)
+8. Ligningsloven (LL) — Lovbekendtgørelse nr. 42 af 13. januar 2023 med ændringer. Centrale bestemmelser: LL § 9 (lønmodtagerfradrag), LL § 9B (befordring), LL § 9C (kørselsfradrag), LL § 16 (personalegoder — fri bil, telefon, kost/logi), LL § 16A (maskeret udbytte), LL § 2 (transfer pricing/armslængdeprincippet)
+9. Selskabsskatteloven (SEL) — Lovbekendtgørelse nr. 1241 af 22. august 2022 med ændringer. SEL § 1 (skattepligtige selskaber), SEL § 8 (skattepligtig indkomst), SEL § 11-11C (tynd kapitalisering og rentefradragsbegrænsning), SEL § 13 (skattefri udbytter)
+10. Personskatteloven (PSL) — Lovbekendtgørelse nr. 1284 af 17. august 2023. PSL § 3 (personlig indkomst), PSL § 4 (kapitalindkomst), PSL § 4a (aktieindkomst)
+11. Virksomhedsskatteloven (VSL) — Lovbekendtgørelse nr. 1429 af 9. december 2019. VSL § 1 (virksomhedsordningen), VSL § 22a (kapitalafkastordningen)
+12. Afskrivningsloven (AL) — Lovbekendtgørelse nr. 24 af 6. januar 2022. AL § 2 (driftsmidler), AL § 14-25 (bygninger og installationer), AL §§ 40-44 (goodwill og immaterielle aktiver)
+13. Kildeskatteloven (KSL) — Lovbekendtgørelse nr. 460 af 31. maj 2024. KSL § 43 (A-indkomst), KSL § 65 (udbytteskat)
+14. Kursgevinstloven (KGL) — Lovbekendtgørelse nr. 1209 af 31. august 2020
+15. Aktieavancebeskatningsloven (ABL) — Lovbekendtgørelse nr. 172 af 29. januar 2021
+16. Skatteforvaltningsloven (SFL) — Lovbekendtgørelse nr. 835 af 3. juni 2022 (forældelse, genoptagelse, klage)
+17. Den Juridiske Vejledning skat (DJV) — afsnit C (erhverv), afsnit A (personlig beskatning), afsnit B (selskaber)
 
-QUICK FIXES (2020): Call-off stock: ML § 19a - momspligt udskydes til faktisk overdragelse. Kædetransaktioner: transport tilhører mellemhandlerens leverance. Gyldigt momsnummer er betingelse (ikke blot formalitet) for momsfrihed.
+SAMSPIL MELLEM MOMS OG SKAT — KRITISKE FORSKELLE:
 
-KERNEREGLER:
-REGISTRERING (ML §§ 47-50): Pligt ved momspligtigt salg over 50.000 kr./kalenderår. Frivillig registrering mulig.
-MOMSFRITAGNE AKTIVITETER (ML § 13): Hospitalsbehandling, læge/tandlæge, social forsorg, skoleundervisning, kulturelle aktiviteter, forfattervirksomhed, udlejning af fast ejendom (kan gøres momspligtig for erhvervslejemål), salg af fast ejendom (undtagen byggegrunde og nye bygninger), forsikring, finansielle ydelser, spil om penge.
-MOMSFRADRAG (ML §§ 37-42, MB §§ 38-57): Fuldt fradrag til momspligtige aktiviteter. Intet fradrag til momsfrie. Pro-rata for fællesudgifter = momspligtig omsætning / samlet omsætning, afrundes opad (MB § 38, stk. 4). Acontofradrag baseret på foregående år. Endelig opgørelse i afgiftsperioden der omfatter 6. måned efter regnskabsårets afslutning.
-PERSONBILER (ML § 42, stk. 1, nr. 6-7): Intet fradrag ved køb eller drift. Undtagelse: bilforhandlere, køreskoler, udlejning. Leasing >6 måneder med min. 10% erhvervsmæssig brug: delvist fradrag (MB § 52).
-VAREBILER op til 3 tons (ML § 42, stk. 4-5): Fuldt fradrag ved køb hvis udelukkende erhvervsmæssig. Ingen fradrag ved blandet brug på købet. Fuldt fradrag på drift (krav: >50.000 kr. momspligtigt salg). Leasing blandet brug: 1/3 fradrag.
-REKLAME/REPRÆSENTATION (ML § 42, stk. 1, nr. 1-5): Fuldt fradrag for reklame. Reklameartikler under 100 kr. ekskl. moms: fuldt fradrag. Repræsentation: ingen fradrag undtagen hotel (fuldt) og restaurant (1/4). Gaver: intet fradrag.
-PERSONALEUDGIFTER: Arbejdstøj/uniformer: fradrag. Mobil udelukkende erhverv: fuldt fradrag. Mobil blandet: skønsmæssigt. Bespisning ansatte normalt ingen fradrag - undtagen møder i egne lokaler og beordret overarbejde.
-INVESTERINGSGODER (ML §§ 43-44, MB §§ 43-50): Over 100.000 kr. ekskl. moms. Reguleringsperiode: 5 år (maskiner/inventar), 10 år (fast ejendom). Regulering ved ændret anvendelse (min. 10%-point).
-BRUGTMOMSORDNINGEN (ML §§ 69-71, MB kap. 17): Moms kun af avancen (salgspris minus indkøbspris). Krav: købt fra ikke-momsregistreret person.
-EU-HANDEL: EU-varekøb: erhvervelsesmoms selvangives. EU-varesalg momsfrit ved: gyldigt momsnummer (VIES), fysisk udførsel (to beviser jf. MF art. 45a), korrekt listeindberetning. Import fra 3. lande: importmoms. Eksport: momsfrit ved dokumenteret udførsel. Ydelser B2B: leveringssted = købers land - omvendt betalingspligt (reverse charge). 
-OSS (ML §§ 66a-66e): Fjernsalg til EU-private: grænse EUR 10.000. OSS undgår registrering i hvert land.
-FAKTURAKRAV (ML § 52a, MB §§ 58-81): Fortløbende nummer, dato, sælgers navn/adresse/CVR, købers navn/adresse, leverancens art/omfang/pris, momsbeløb, leveringsdato, momssats. EU-handel: købers momsnummer + "zero-rated"/"reverse charge".
-ANGIVELSE OG BETALING (ML §§ 57-62): Under 5 mio. kr./år: halvårligt, frist 1. i 3. måned. 5-50 mio. kr./år: kvartalsvist, frist 1. i 3. måned. Over 50 mio. kr./år: månedligt, frist den 25. Juni: 17. august.
-FORÆLDELSE: 3 år fra angivelsesfristens udløb. Absolut frist 10 år.
-FAST EJENDOM (ML §§ 13, 51-51a): Udlejning momsfrit - frivillig registrering mulig for erhvervslejemål (min. 2 år). Salg momsfrit undtagen: byggegrunde, nye bygninger (første 5 år), til-/ombygning >25% (bygning+jord) eller >50% (kun bygning) af salgssum.
+BILER — moms og skat behandles forskelligt:
+- Personbil MOMS: Intet fradrag ved køb og drift (ML § 42) UANSET erhvervsmæssig anvendelse
+- Personbil SKAT: Fuldt fradrag for erhvervsmæssige driftsomkostninger. Fri bil beskattes efter LL § 16, stk. 4 (min. 25% af nyvognspris under 300.000 kr. + 20% over 300.000 kr., min. 160.000 kr. pr. år + grøn ejerafgift)
+- Varebil MOMS: Op til fuldt fradrag afhængig af anvendelse (ML § 42, stk. 4-5)
+- Varebil SKAT: Privat anvendelse beskattes — 20% af varebilens værdi pr. år ved privat brug (LL § 16, stk. 5). Medarbejders egenbetaling reducerer beskatningen
 
-Besvar spørgsmål på dansk med præcise henvisninger til ML §, MB §, MF art., D.A.-afsnit og relevante domme/SKM-numre. Vær konkret og praktisk. Anbefal professionel rådgivning ved komplekse sager.`;
+REPRÆSENTATION — asymmetrisk behandling:
+- MOMS: Intet fradrag for repræsentation til forretningsforbindelser (ML § 42, stk. 1, nr. 2). Restaurant: kun 1/4 fradrag
+- SKAT: 25% fradrag for repræsentationsudgifter (LL § 8, stk. 4) — dvs. 75% ikke fradragsberettiget
+- VIGTIGT: Moms og skat giver IKKE samme fradragsprocent — en udgift kan have momsfradrag men begrænset skattefradrag og omvendt
+
+GAVER OG PERSONALEGODER:
+- Gaver til forretningsforbindelser MOMS: Intet fradrag (ML § 42, stk. 1, nr. 3)
+- Gaver til ansatte SKAT: Skattefri hvis under 1.200 kr./år pr. ansat (2026) — julegave mv. LL § 16
+- Reklameartikler under 100 kr. ekskl. moms: Fuldt momsfradrag. Skattemæssigt: fuldt fradrag som reklameudgift
+- Jubilæumsgratiale og fratrædelsesgodtgørelse: Særregler i LL § 7 U og § 30
+
+FAST EJENDOM — kompleks sammenkobling:
+- MOMS: Udlejning momsfrit som udgangspunkt (ML § 13, stk. 1, nr. 8). Salg af ny bygning/byggegrund momspligtigt
+- SKAT: Udlejningsindtægt er skattepligtig. Afskrivning på erhvervsejendomme 4% lineært (AL § 14). Salg: ejendomsavancebeskatningsloven (EBL)
+- VIGTIGT SAMSPIL: Moms ved køb af erhvervsejendom kan fratrækkes (ved momspligtig udlejning), men påvirker ikke skattemæssig anskaffelsessum. Momsreguleringsperioden (10 år) og skattemæssig afskrivningsperiode løber uafhængigt
+
+LØN VS. HONORAR — afgørende for moms og skat:
+- Lønmodtager: Ingen moms. A-indkomst beskattes med AM-bidrag 8% + indkomstskat
+- Selvstændig honorarmodtager: Momspligt (medmindre under 50.000 kr.). B-indkomst. Kan anvende VSO
+- VIGTIGT: Sondringen lønmodtager/selvstændig (cirkulære nr. 129 af 4. juli 1994) gælder PARALLELT for moms og skat men vurderes uafhængigt
+
+DRIFTSOMKOSTNINGER — skattemæssigt fradrag (SL § 6a) vs. momsfradrag:
+- Generelt: Skattemæssigt fradrag kræver erhvervsmæssig tilknytning. Momsfradrag kræver momspligtig aktivitet
+- Dobbelt-tjek altid: Kan udgiften fratrækkes skattemæssigt? Kan momsen fratrækkes? Svarene er IKKE altid ens
+- Etableringsomkostninger: SKAT — ikke fradragsberettiget (aktiveringspligt). MOMS — fradragsberettiget ved momsregistrering
+
+AFSKRIVNINGER:
+- Driftsmidler SKAT: 25% saldoafskrivning (AL § 5). Straksafskrivning under 32.900 kr. (2026, AL § 6)
+- Driftsmidler MOMS: Ingen afskrivning — fuld momsfradrag ved anskaffelsen (hvis momspligtig formål)
+- Bygninger SKAT: 4% lineær afskrivning på erhvervsbygninger (AL § 14-17)
+- Bygninger MOMS: Ingen afskrivning — reguleringsperiode 10 år
+
+TRANSFER PRICING (LL § 2):
+- Transaktioner mellem koncernforbundne selskaber skal ske på armslængdevilkår
+- Forkerte afregningspriser kan give skattekorrektion OG momskorrektion
+- Dokumentationspligt for virksomheder over visse grænser
+
+UNDERSKUDSFREMFØRSEL (SEL § 12, LL § 15):
+- Skattemæssige underskud kan fremføres uden tidsbegrænsning (men max 60% af årets indkomst over 8,7 mio. kr.)
+- Ingen tilsvarende "underskud" i momssystemet — negativ moms udbetales løbende
+
+UDBYTTEBESKATNING OG MASKERET UDBYTTE:
+- LL § 16A: Udlodninger fra selskab til aktionær beskattes som udbytte (aktieindkomst: 27%/42%)
+- Maskeret udbytte: Udgifter afholdt i selskabets navn men til private formål. Dobbelt konsekvens: (1) ikke skattefradrag i selskabet, (2) beskattes som udbytte hos aktionær. MOMS: Eventuelt tilbageføring af momsfradrag
+
+KONKRETE SKAT/MOMS-SAMMENHÆNGE DER OFTE OVERSES:
+1. Sponsorater: MOMS — fuldt fradrag som reklame. SKAT — fuldt fradrag som reklame (LL § 8, stk. 1)
+2. Kantineordning: MOMS — særregler om kantinemoms (DJV D.A.5.13). SKAT — personalegodebeskatning hvis under markedspris (LL § 16)
+3. Sundhedsforsikring: MOMS — ingen fradragsret (LL § 30A skat). SKAT — fradragsberettiget for arbejdsgiver (LL § 30)
+4. Hjemmekontor: MOMS — delvis fradrag ved erhvervsmæssig brug. SKAT — fradrag for faktiske udgifter eller standardfradrag
+5. Rejseudgifter: MOMS — fuldt fradrag for erhvervsmæssige rejser. SKAT — standardsatser eller faktiske udgifter (LL § 9A)
+6. Tab på debitorer: MOMS — fradrag for konstaterede tab (ML § 27, stk. 6). SKAT — fradrag som tab på fordringer (KGL § 17 for erhverv)
+
+MOMS OG SKAT — KERNEREGLER:
+
+MOMS REGISTRERING (ML §§ 47-50): Pligt ved momspligtigt salg over 50.000 kr./kalenderår.
+MOMSFRITAGNE AKTIVITETER (ML § 13): Hospitalsbehandling, læge/tandlæge, social forsorg, skoleundervisning, kulturelle aktiviteter, forsikring, finansielle ydelser, fast ejendom (som udgangspunkt). NB: Momsfritagne aktiviteter betaler LØNSUMSAFGIFT og kan have skattemæssige fradragsbegrænsninger.
+MOMSFRADRAG (ML §§ 37-42): Pro-rata for fællesudgifter. Særlige begrænsninger for personbiler, repræsentation, gaver.
+EU-HANDEL: Erhvervelsesmoms, reverse charge, OSS. Skattemæssigt: transfer pricing ved koncerninterne handler.
+FAKTURAKRAV (ML § 52a, MB §§ 58-81): Korrekt faktura er forudsætning for momsfradrag — og danner grundlag for skatteregnskabet.
+ANGIVELSE MOMS: Halvårlig (<5 mio.), kvartalsvis (5-50 mio.), månedlig (>50 mio.). Juni: 17. august.
+SKATTEANSÆTTELSE: Ordinær genoptagelse 3 år (SFL § 26). Ekstraordinær 10 år ved svig (SFL § 27). Samme frister som moms — koordiner altid.
+
+AKTUELLE SATSER 2026:
+- Momssats: 25%
+- Selskabsskat: 22% (SEL § 17)
+- Topskat: 15% over ca. 615.000 kr. (PSL § 7)
+- AM-bidrag: 8% (AMBL § 5)
+- Aktieindkomst: 27% op til 61.000 kr. (par: 122.000 kr.), 42% derover (PSL § 8a)
+- Afskrivning driftsmidler: 25% saldo
+- Straksafskrivning: Under 32.900 kr. (2026)
+- Repræsentationsfradrag skat: 25% af udgiften (LL § 8, stk. 4)
+- Lønsumsafgift metode 1: 15,3% | metode 2/4: 6,37% | metode 3: 3,54%
+
+INSTRUKTION: Besvar altid på dansk. Angiv præcist hvilke love der er relevante for det konkrete spørgsmål — BÅDE moms og skat hvis begge er berørt. Henvis til §-numre og lovbekendtgørelsesnumre. Gør altid eksplicit opmærksom på hvis en momsafgørelse har skattemæssige konsekvenser eller omvendt. Vær konkret og praktisk. Anbefal professionel rådgivning ved komplekse sager.`;
 
 const EXAMPLES = [
   "Kan jeg fratrække moms på køb af en firmabil?",
-  "Hvornår skal jeg momsregistreres?",
-  "Hvad er reglerne for brugtmomsordningen?",
+  "Hvad er forskellen på moms og skat for repræsentation?",
+  "Hvad er reglerne for fri bil i skat?",
   "Kan jeg fradrage moms på restaurationsbesøg?",
-  "Hvad siger momsforordningen om fast forretningssted?",
+  "Hvordan afskrives driftsmidler skattemæssigt?",
   "Hvad er fakturakravene inkl. forenklede fakturaer?",
-  "Hvad er call-off stock-reglerne efter Quick Fixes?",
-  "Hvad er pro-rata reglerne i momsbekendtgørelsen?",
+  "Hvad er selskabsskattesatsen i 2026?",
+  "Hvornår giver moms også skattemæssige konsekvenser?",
 ];
 
 const C = {
@@ -159,7 +249,7 @@ const RUTER = {
   "home":       "/",
   "sporg":      "/sporg-ai",
   "compliance": "/moms-compliance",
-  "traening":   "/momstraening",
+  "traening":   "/akademiet",
   "hvad":       "/hvad-er-moms",
   "perioder":   "/momsperioder",
   "beregner":   "/momsberegner",
@@ -176,44 +266,62 @@ function hentAktivSide() {
 }
 
 function Nav({ active, navigate }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const links = [
-    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["traening","Momstræning"],["hvad","Hvad er moms?"],
+    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["traening","Akademiet"],["hvad","Hvad er moms?"],
     ["perioder","Perioder"],["beregner","Beregner"],["ydelser","Ydelser"],
     ["om","Om os"],["kontakt","Kontakt"],
   ];
+  const navTo = (id) => { navigate(id); setMenuOpen(false); };
   return (
     <nav style={{
       background:"rgba(12,31,53,0.97)",
       backdropFilter:"blur(20px)",
       WebkitBackdropFilter:"blur(20px)",
       borderBottom:"1px solid rgba(196,151,62,0.15)",
-      padding:"0 2rem",
+      padding:"0 1.5rem",
       display:"flex",alignItems:"center",justifyContent:"space-between",
-      height:"64px",position:"sticky",top:0,zIndex:100,
+      minHeight:"60px",position:"sticky",top:0,zIndex:100,flexWrap:"wrap",
     }}>
-      <div onClick={()=>navigate("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:"10px",flexShrink:0}}>
-        <div style={{
-          width:"34px",height:"34px",borderRadius:"8px",
-          background:"linear-gradient(135deg,rgba(196,151,62,0.2),rgba(196,151,62,0.05))",
-          border:"1px solid rgba(196,151,62,0.35)",
-          display:"flex",alignItems:"center",justifyContent:"center",fontSize:"17px",
-        }}>⚖</div>
+      {/* Logo */}
+      <div onClick={()=>navTo("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:"10px",flexShrink:0,padding:"10px 0"}}>
+        <div style={{width:"34px",height:"34px",borderRadius:"8px",background:"linear-gradient(135deg,rgba(196,151,62,0.2),rgba(196,151,62,0.05))",border:"1px solid rgba(196,151,62,0.35)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"17px"}}>⚖</div>
         <div>
-          <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:600,fontSize:"15px",lineHeight:1.1,letterSpacing:"0.01em"}}>MomsRevisor</div>
-          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.7)",letterSpacing:"0.12em",textTransform:"uppercase",fontWeight:500}}>A/S · Professionel Rådgivning</div>
+          <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:600,fontSize:"15px",lineHeight:1.1}}>MomsRevisor</div>
+          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.7)",letterSpacing:"0.12em",textTransform:"uppercase"}}>A/S · Professionel Rådgivning</div>
         </div>
       </div>
-      <div style={{display:"flex",flexWrap:"wrap",gap:"1px",alignItems:"center"}}>
+
+      {/* Desktop links */}
+      <div style={{display:"flex",flexWrap:"wrap",gap:"2px",alignItems:"center"}} className="desktop-nav">
         {links.map(([id,lbl])=>(
-          <button key={id} onClick={()=>navigate(id)} className="nav-link" style={{
-            background: active===id?"rgba(196,151,62,0.15)":"transparent",
-            color: active===id?C.gold:"rgba(255,255,255,0.7)",
-            border:"none",padding:"6px 11px",borderRadius:"6px",cursor:"pointer",
-            fontSize:"12.5px",fontWeight:active===id?600:400,letterSpacing:"0.01em",
-            transition:"all 0.15s",
+          <button key={id} onClick={()=>navTo(id)} style={{
+            background:active===id?"rgba(196,151,62,0.15)":"transparent",
+            color:active===id?C.gold:"rgba(255,255,255,0.75)",
+            border:"none",padding:"6px 10px",borderRadius:"6px",cursor:"pointer",fontSize:"12px",
+            fontFamily:"Georgia,serif",fontWeight:active===id?700:400,transition:"all 0.15s",whiteSpace:"nowrap",
           }}>{lbl}</button>
         ))}
       </div>
+
+      {/* Mobile hamburger */}
+      <button onClick={()=>setMenuOpen(!menuOpen)} style={{display:"none",background:"none",border:`1px solid rgba(196,151,62,0.4)`,color:C.gold,padding:"6px 10px",borderRadius:"6px",cursor:"pointer",fontSize:"18px",lineHeight:1}} className="hamburger">
+        {menuOpen ? "✕" : "☰"}
+      </button>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div style={{width:"100%",borderTop:"1px solid rgba(196,151,62,0.15)",padding:"0.5rem 0",display:"flex",flexWrap:"wrap",gap:"4px"}}>
+          {links.map(([id,lbl])=>(
+            <button key={id} onClick={()=>navTo(id)} style={{
+              background:active===id?"rgba(196,151,62,0.15)":"transparent",
+              color:active===id?C.gold:"rgba(255,255,255,0.8)",
+              border:"none",padding:"8px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"13px",
+              fontFamily:"Georgia,serif",fontWeight:active===id?700:400,
+            }}>{lbl}</button>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }
@@ -402,7 +510,7 @@ function Chat() {
       const res = await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:MOMS_KNOWLEDGE,messages:newMsgs})
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:AI_KNOWLEDGE,messages:newMsgs})
       });
       const data = await res.json();
       const reply = data.content?.[0]?.text || "Beklager, teknisk fejl.";
@@ -427,8 +535,8 @@ function Chat() {
         <div style={{background:"linear-gradient(135deg,#0c1f35,#1a3558)",padding:"1.25rem 1.5rem",display:"flex",alignItems:"center",gap:"12px",borderRadius:"16px 16px 0 0"}}>
           <div style={{width:"8px",height:"8px",borderRadius:"50%",background:"#22c55e",boxShadow:"0 0 8px rgba(34,197,94,0.6)"}}/>
           <div style={{flex:1}}>
-            <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:600,fontSize:"15px"}}>MomsRådgiver AI</div>
-            <div style={{color:"rgba(255,255,255,0.45)",fontSize:"11px",letterSpacing:"0.05em"}}>ML · MB · MF · EU-DIREKTIV · DJV · RETSPRAKSIS</div>
+            <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:600,fontSize:"15px"}}>Moms & Skat AI-rådgiver</div>
+            <div style={{color:"rgba(255,255,255,0.45)",fontSize:"11px",letterSpacing:"0.05em"}}>ML · MB · MF · LL · SEL · DJV · Retspraksis</div>
           </div>
           <div style={{fontSize:"10px",color:"rgba(196,151,62,0.7)",background:"rgba(196,151,62,0.08)",border:"1px solid rgba(196,151,62,0.2)",borderRadius:"100px",padding:"3px 10px",letterSpacing:"0.06em",fontWeight:600}}>LIVE</div>
         </div>
@@ -1303,6 +1411,124 @@ const MODULER = [
       },
     ]
   },
+  {
+    id:7, emoji:"💰", titel:"Modul 7: Erhvervsbeskatning — grundbegreber",
+    intro:"Forstå grundlaget for dansk erhvervsbeskatning — hvem betaler skat, hvad beskattes, og hvilke fradrag er der?",
+    lektioner:[
+      {
+        titel:"Skattepligtig indkomst og fradrag (SL §§ 4-6)",
+        tekst:"Statsskatteloven fra 1922 er stadig fundamentet for dansk beskatning. § 4 definerer hvad der er skattepligtig indkomst, mens § 6 angiver hvad der kan fradrages.",
+        punkt:[
+          "SL § 4: Skattepligtig indkomst = alle indtægter i penge eller pengenes værdi uanset kilde",
+          "SL § 6a: Fradrag for udgifter der er anvendt til at erhverve, sikre og vedligeholde indkomsten — det grundlæggende fradragsprincip",
+          "SL § 6b: Fradrag for tab ved salg af aktiver der anvendes erhvervsmæssigt",
+          "Grundregel: Udgiften skal have DIREKTE tilknytning til den skattepligtige indkomst — private udgifter er IKKE fradragsberettigede",
+          "Selskabsskat 2026: 22% (SEL § 17). Topskat for personer: 15% over ca. 615.000 kr.",
+          "AM-bidrag: 8% af bruttoindkomst (AMBL § 5) — fratrækkes inden indkomstskat",
+        ],
+        eksempel:"Et IT-konsulentfirma (ApS) tjener 2.000.000 kr. og har 800.000 kr. i fradragsberettigede udgifter (løn, husleje, software, rejser). Skattepligtig indkomst = 1.200.000 kr. Selskabsskat = 1.200.000 × 22% = 264.000 kr. Bemærk: momsen er et separat system — de 2.000.000 kr. er ekskl. moms.",
+        quiz:[
+          {sp:"Hvad er den danske selskabsskattesats i 2026?",sv:["20%","22%","25%","28%"],k:1},
+          {sp:"Hvad er grundbetingelsen for skattemæssigt fradrag (SL § 6a)?",sv:["Udgiften er betalt","Udgiften er bruges til at erhverve, sikre og vedligeholde indkomsten","Udgiften er over 1.000 kr.","Udgiften er godkendt af revisor"],k:1}
+        ]
+      },
+      {
+        titel:"Afskrivninger — AL og skattemæssige regler",
+        tekst:"Investeringer i aktiver kan som regel ikke fradrages fuldt ud i anskaffelsesåret skattemæssigt — de skal afskrives over tid. Dette er forskelligt fra momssystemet.",
+        punkt:[
+          "Driftsmidler (AL § 5): 25% saldoafskrivning — afskrives af saldoen hvert år",
+          "Straksafskrivning (AL § 6): Anskaffelsessum under 32.900 kr. (2026) kan fradrages fuldt i anskaffelsesåret",
+          "Bygninger (AL §§ 14-17): 4% lineær afskrivning på erhvervsbygninger. Boliger kan IKKE afskrives",
+          "Goodwill og immaterielle aktiver (AL §§ 40-44): Op til 1/7 fradrag pr. år (min. 7 år)",
+          "VIGTIGT SAMSPIL MED MOMS: Skattemæssig afskrivning og momsreguleringsperiode er UAFHÆNGIGE systemer. En maskine til 500.000 kr. giver fuldt momsfradrag straks (ML § 37) men afskrives over mange år skattemæssigt (25% saldo)",
+          "Foretagne afskrivninger reducerer skattemæssig avance ved salg",
+        ],
+        eksempel:"Virksomhed køber en CNC-maskine for 400.000 kr. ekskl. moms. MOMS: Fuldt fradrag på 100.000 kr. straks (forudsat momspligtig aktivitet). SKAT: År 1: 400.000 × 25% = 100.000 kr. fradrag. Saldo: 300.000 kr. År 2: 300.000 × 25% = 75.000 kr. fradrag. Osv. To helt forskellige systemer!",
+        quiz:[
+          {sp:"Hvad er afskrivningssatsen for driftsmidler (saldometoden)?",sv:["10%","15%","25%","40%"],k:2},
+          {sp:"Hvad er grænsen for straksafskrivning i 2026?",sv:["10.000 kr.","25.000 kr.","32.900 kr.","50.000 kr."],k:2}
+        ]
+      },
+      {
+        titel:"Selskab vs. personlig virksomhed — skattemæssige valg",
+        tekst:"Valget af virksomhedsform har stor betydning for beskatningen. De tre primære former er: personlig virksomhed, virksomhedsordningen (VSO) og selskab (ApS/A/S).",
+        punkt:[
+          "Personlig virksomhed (PMV): Overskud beskattes som personlig indkomst — op til ca. 55% inkl. AM-bidrag og topskat",
+          "Virksomhedsordningen (VSL § 1): Giver mulighed for at opspare overskud til virksomhedsskattesats (22%) og spare topskat indtil hævning",
+          "Kapitalafkastordningen (VSL § 22a): Enklere alternativ til VSO — beregner et kapitalafkast der flyttes til kapitalindkomst",
+          "ApS/A/S (SEL § 1): Selskabsskat 22%. Udbytte beskattes hos aktionær: 27% op til 61.000 kr., 42% derover (PSL § 8a)",
+          "Samspil moms: Momsregistrering er uafhængig af virksomhedsformen — både personlig virksomhed og selskab kan/skal momsregistreres",
+          "Holdingstruktur: Skattefrit udbytte mellem danske selskaber (SEL § 13) — men påvirker ikke momssystemet",
+        ],
+        eksempel:"To iværksættere med samme overskud på 600.000 kr.: (A) driver personlig virksomhed — betaler op til 55% i skat = ca. 330.000 kr. (B) driver ApS og lader 400.000 kr. stå i selskabet — selskabsskat 22% = 88.000 kr. på den del. Besparelse ved selskab: op til 242.000 kr. i udskudt skat. Moms er identisk for begge.",
+        quiz:[
+          {sp:"Hvad beskattes opsparet overskud i virksomhedsordningen med?",sv:["0%","22%","27%","55%"],k:1},
+          {sp:"Hvad er skatten på aktieindkomst over grænsen (2026)?",sv:["22%","27%","33%","42%"],k:3}
+        ]
+      },
+    ]
+  },
+  {
+    id:8, emoji:"🔄", titel:"Modul 8: Moms og skat — samspil og asymmetri",
+    intro:"Forstå de kritiske forskelle og sammenhænge mellem moms og skat. Mange fejl opstår fordi virksomheder tror reglerne er ens — det er de ikke.",
+    lektioner:[
+      {
+        titel:"Biler — den store asymmetri",
+        tekst:"Ingen anden udgiftstype illustrerer asymmetrien mellem moms og skat bedre end biler. Reglerne er fundamentalt forskellige.",
+        punkt:[
+          "Personbil MOMS (ML § 42): INTET fradrag ved køb og drift uanset erhvervsmæssig anvendelse",
+          "Personbil SKAT: Erhvervsmæssige driftsomkostninger er FULDT fradragsberettigede (SL § 6a)",
+          "Fri bil SKAT (LL § 16, stk. 4): Beskattes med min. 25% af nyvognspris under 300.000 kr. + 20% af det over 300.000 kr. Minimum 160.000 kr./år + grøn ejerafgift",
+          "Varebil MOMS: Op til fuldt fradrag afhængig af anvendelse",
+          "Varebil SKAT (LL § 16, stk. 5): Privat anvendelse beskattes med 20% af bilens værdi pr. år",
+          "Kørselsgodtgørelse MOMS: Intet fradrag (ikke en momspligtig ydelse). SKAT: Udbetaling op til statens sats (2026: 3,81 kr./km for de første 20.000 km) er skattefri for modtager",
+          "Konklusion: Man kan have fuld skattemæssig fradragsret for bilomkostninger og NULSTILLET momsfradrag — på SAMME bil",
+        ],
+        eksempel:"Direktør bruger sin private BMW til 80% erhvervsmæssig kørsel. MOMS: Selskabet har INTET fradrag for bilens moms eller driftsomkostninger. SKAT: (1) Selskabet kan fratrække 80% af driftsomkostningerne, (2) Direktøren beskattes af fri bil: 25% × nyvognspris 600.000 = 150.000 kr. + 20% × 300.000 = 60.000 kr. + grøn ejerafgift = ca. 214.000 kr./år i beskatningsgrundlag.",
+        quiz:[
+          {sp:"Har et selskab momsfradrag for driften af en personbil der bruges 90% erhvervsmæssigt?",sv:["Ja, 90% fradrag","Ja, fuldt fradrag","Nej, intet fradrag","Ja, 50% fradrag"],k:2},
+          {sp:"Med hvilken sats beskattes privat brug af en firmavarebil (LL § 16, stk. 5)?",sv:["10% af bilens værdi","20% af bilens værdi","25% af bilens værdi","Markedslejen"],k:1}
+        ]
+      },
+      {
+        titel:"Repræsentation, gaver og sponsorater",
+        tekst:"Repræsentation er et af de mest komplekse områder fordi moms og skat giver helt forskellige fradragsprocenter.",
+        punkt:[
+          "Repræsentation MOMS (ML § 42, stk. 1, nr. 2): INTET fradrag. Restaurant til forretningsforbindelser: kun 1/4 fradrag",
+          "Repræsentation SKAT (LL § 8, stk. 4): 25% fradrag — dvs. 75% af udgiften er IKKE fradragsberettiget",
+          "ASYMMETRI: Restaurantbesøg for forretningsforbindelser = 1/4 momsfradrag (25%) og 25% skattefradrag — næsten identisk! Men gaver = 0% moms og 0% skat",
+          "Sponsorater MOMS: Fuldt fradrag som reklame hvis modydelse (omdømme, logo mv.)",
+          "Sponsorater SKAT (LL § 8, stk. 1): Fuldt fradrag hvis erhvervsmæssig begrundelse",
+          "Gaver til ansatte SKAT (LL § 16): Skattefri op til 1.200 kr./år (2026) inkl. julegave",
+          "Personalearrangementer SKAT: Skattefri op til 1.200 kr./deltager/år for julefrokost mv.",
+          "Blomster/vin til forretningsforbindelse: 0% momsfradrag + 25% skattefradrag = IKKE et symmetrisk problem",
+        ],
+        eksempel:"Virksomhed afholder repræsentationsmiddag for 5 kunder: 10.000 kr. + 2.500 kr. moms. MOMS: Fradrag = 1/4 × 2.500 = 625 kr. SKAT: Fradrag = 25% × 10.000 = 2.500 kr. — men 7.500 kr. kan IKKE fratrækkes. Samlet momsomkostning = 1.875 kr. Samlet skattemæssig fradragsbegrænsning = 7.500 kr. × 22% = 1.650 kr. Tab: 3.525 kr. der ikke kan fratrækkes.",
+        quiz:[
+          {sp:"Hvad er den skattemæssige fradragsprocent for repræsentationsudgifter (LL § 8, stk. 4)?",sv:["10%","25%","50%","100%"],k:1},
+          {sp:"Op til hvilken grænse er gaver til ansatte skattefri i 2026?",sv:["500 kr./år","800 kr./år","1.200 kr./år","2.000 kr./år"],k:2}
+        ]
+      },
+      {
+        titel:"Driftsomkostninger vs. etableringsomkostninger",
+        tekst:"Et klassisk problem er sondringen mellem løbende driftsomkostninger (fradragsberettigede) og etableringsomkostninger (aktiveringspligtige skattemæssigt). Moms behandler dem ens — skat gør det ikke.",
+        punkt:[
+          "Driftsomkostninger SKAT: Fuldt fradrag i afholdelsesåret (SL § 6a) — forudsat direkte tilknytning til indkomsterhvervelsen",
+          "Etableringsomkostninger SKAT: Ikke fradragsberettigede — skal aktiveres (behandles som del af anskaffelsessummen)",
+          "Etableringsomkostninger MOMS: Fuldt fradragsberettiget fra momsregistreringsdatoen! (ML § 37 + DJV D.A.11.1.3)",
+          "ASYMMETRI: Stiftelsesomkostninger ved opstart = momsfradrag JA + skattefradrag NEJ",
+          "Advokat- og revisorrådgivning ved virksomhedskøb: MOMS — fradrag (hvis momspligtig aktivitet). SKAT — aktiveres som del af købesummen",
+          "Løbende revisor/advokat ved drift: Fuldt fradrag BÅDE moms og skat",
+          "Forskning og udvikling (LL § 8B): Kan fradrages fuldt i SKAT selvom det er etablering af ny aktivitet — undtagelse fra aktiveringspligten",
+        ],
+        eksempel:"Ny virksomhed bruger 50.000 kr. ekskl. moms på stiftelsesomkostninger (advokat, revisor, registrering). MOMS: Kan fratrækkes 12.500 kr. i moms ved første momsangivelse. SKAT: De 50.000 kr. kan IKKE fratrækkes — de aktiveres som goodwill/etableringsomkostning og kan afskrives over min. 7 år (AL § 40) = ca. 7.140 kr./år i fradrag.",
+        quiz:[
+          {sp:"Hvad gælder for moms på etableringsomkostninger?",sv:["Intet fradrag","Fuldt fradrag fra momsregistreringsdatoen","Kun 50% fradrag","Fradrag over 5 år"],k:1},
+          {sp:"Hvad sker skattemæssigt med stiftelsesomkostninger?",sv:["Fuldt fradrag i stiftelsesåret","De aktiveres og kan ikke fradrages","De aktiveres og afskrives over min. 7 år","De fordeles over 3 år"],k:2}
+        ]
+      },
+    ]
+  },
 ];
 
 function Momstraening() {
@@ -1353,9 +1579,9 @@ function Momstraening() {
   // Oversigt
   if (aktivtModul === null) return (
     <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
-      <SectionHeader title="Momstræning A–Z"/>
+      <SectionHeader title="Akademiet — Moms & Skat A–Z"/>
       <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"1rem"}}>
-        Lær moms fra bunden med strukturerede moduler, praktiske eksempler og quizzer der tester din viden. Hvert modul bygger videre på det forrige.
+        Lær moms og skat fra bunden med strukturerede moduler, praktiske eksempler og quizzer der tester din viden. Hvert modul bygger videre på det forrige.
       </p>
       <div style={{background:`rgba(196,151,62,0.08)`,border:`0.5px solid rgba(196,151,62,0.3)`,borderRadius:"10px",padding:"14px 18px",marginBottom:"2rem",display:"flex",alignItems:"center",gap:"16px"}}>
         <div style={{fontSize:"13px",color:C.textSub,flex:1}}>
@@ -1542,7 +1768,7 @@ function MomsCompliance() {
   const hentAiAnalyse = async (virk) => {
     setAiLoading(true);
     const ansatteStr = virk.ansatte !== undefined ? String(virk.ansatte) : "ukendt";
-    const prompt = "Du er en erfaren dansk momsrevisor. Analysér følgende virksomhed og giv en konkret moms compliance-vurdering.\n\n"
+    const prompt = "Du er en erfaren dansk moms- og skatterådgiver. Analysér følgende virksomhed og giv en konkret compliance-vurdering for BÅDE moms og skat.\n\n"
       + "VIRKSOMHEDSDATA FRA CVR:\n"
       + "- Navn: " + virk.navn + "\n"
       + "- CVR: " + virk.cvr + "\n"
@@ -1552,13 +1778,14 @@ function MomsCompliance() {
       + "- Antal ansatte: " + ansatteStr + "\n"
       + "- Stiftet: " + virk.stiftet + "\n"
       + "- Ejerform: " + virk.ejerform + "\n\n"
-      + "Giv en struktureret moms compliance-analyse med disse 5 afsnit:\n\n"
-      + "1. MOMSSTATUS - Er denne type virksomhed typisk momspligtig, momsfritaget eller blandet? Henvis til ML § 13 hvis relevant.\n\n"
-      + "2. BRANCHESPECIFIKKE MOMSRISICI - Hvilke typiske momsfejl ses i denne branche? Fx fradrag for personbiler, repræsentation, manglende reverse charge ved EU-køb, forkert behandling af fast ejendom osv.\n\n"
-      + "3. ANBEFALEDE TJEKPUNKTER - 5-7 konkrete ting virksomheden bør kontrollere i sin bogføring.\n\n"
-      + "4. MOMSPERIODE - Hvad er den sandsynlige momsperiode baseret på virksomhedens størrelse/type?\n\n"
-      + "5. SÆRLIGE OPMÆRKSOMHEDSPUNKTER - Eventuelle særlige regler der gælder for denne branche (fx lønsumsafgift, brugtmoms, OSS, frivillig registrering for udlejning osv.)\n\n"
-      + "Vær konkret, praktisk og henvis til relevante lovparagraffer (ML, MB, MF).";
+      + "Giv en struktureret compliance-analyse med disse 6 afsnit:\n\n"
+      + "1. MOMSSTATUS - Er virksomheden momspligtig, momsfritaget eller blandet? Sandsynlig momsperiode? Lønsumsafgiftspligt? (ML § 13, LSAL)\n\n"
+      + "2. SKATTEMÆSSIG STATUS - Selskab eller personlig virksomhed? Relevant beskatningsform (SEL, PSL, VSL)? Skattepligtig indkomst og relevante fradrag?\n\n"
+      + "3. BRANCHESPECIFIKKE RISICI (moms) - Typiske momsfejl i denne branche? Fradragsbegrænsninger, reverse charge, fast ejendom osv.\n\n"
+      + "4. BRANCHESPECIFIKKE RISICI (skat) - Typiske skattemæssige fejl? Afskrivninger, personalegoder (LL § 16), repræsentation (LL § 8), transfer pricing osv.\n\n"
+      + "5. SAMSPIL MOMS/SKAT - Hvor er der asymmetri? Hvad giver fradrag i moms men ikke skat (eller omvendt)? Fx biler, repræsentation, etableringsomkostninger.\n\n"
+      + "6. TOP 5 ANBEFALINGER - De vigtigste konkrete handlinger virksomheden bør foretage med lovhenvisninger (ML §, LL §, SEL §).\n\n"
+      + "Vær konkret og henvis altid til relevante lovparagraffer.";
 
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1624,7 +1851,7 @@ function MomsCompliance() {
         content.push({ type:"text", text:`FILINDHOLD (${navn}):\n${tekst}` });
       }
     });
-    content.push({ type:"text", text: virksomhedInfo + "\n\nDu er en erfaren dansk momsrevisor. Analyser ovenstående regnskabsmateriale (saldobalance, kontokort eller kassekladdeposter) og identificer konkrete moms fejl, mangler og risici.\n\nStrukturér din analyse i følgende afsnit:\n\nKRITISKE MOMSFEJL - Fejl der vil medføre efterbetaling eller bøde ved kontrol (angiv kontonummer/beløb hvis synligt)\n\nPOTENTIELLE PROBLEMER - Poster der bør undersøges nærmere\n\nANBEFALINGER - Konkrete handlinger virksomheden skal foretage\n\nMOMSAFSTEMNING - Vurdering af om moms er korrekt afstemt\n\nLOVHENVISNINGER - Hvilke regler i ML, MB og MF er relevante for de fundne fejl\n\nVær præcis og henvis til specifikke konti, beløb eller posteringer fra materialet når muligt. Angiv altid lovhjemmel (ML §, MB §)." });
+    content.push({ type:"text", text: virksomhedInfo + "\n\nDu er en erfaren dansk moms- og skatterådgiver. Analyser ovenstående regnskabsmateriale og identificer konkrete fejl og risici inden for BÅDE moms og skat.\n\nStrukturér analysen:\n\nKRITISKE MOMSFEJL - Fejl der giver efterbetaling/bøde (angiv kontonummer/beløb hvis synligt)\n\nKRITISKE SKATTEFEJL - Fejl i skattemæssige fradrag, afskrivninger, personalegoder mv.\n\nASYMMETRI MOMS/SKAT - Poster der behandles forskelligt moms- og skattemæssigt (fx repræsentation, biler)\n\nANBEFALINGER - Konkrete handlinger prioriteret efter risiko\n\nLOVHENVISNINGER - Relevante ML §, MB §, LL §, SEL §, AL § for fundne fejl\n\nVær præcis og henvis til specifikke konti og beløb fra materialet." });
 
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1660,9 +1887,9 @@ function MomsCompliance() {
 
   return (
     <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
-      <SectionHeader title="Moms Compliance"/>
+      <SectionHeader title="Moms & Skat Compliance"/>
       <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"2rem"}}>
-        Slå din virksomhed op på CVR og få en øjeblikkelig AI-drevet moms compliance-analyse. Upload derefter din saldobalance eller kontokort for at få AI til at spotte konkrete momsfejl og mangler.
+        Slå din virksomhed op på CVR og få en øjeblikkelig AI-drevet compliance-analyse for BÅDE moms og skat. Upload saldobalance eller kontokort for at spotte konkrete fejl og skattemæssige risici.
       </p>
 
       {/* ── Trin-indikator ── */}
@@ -1733,7 +1960,7 @@ function MomsCompliance() {
           </Card>
 
           <Card>
-            <div style={{fontWeight:700,fontSize:"15px",color:C.navy,marginBottom:"1rem"}}>🤖 AI Moms Compliance-analyse</div>
+            <div style={{fontWeight:700,fontSize:"15px",color:C.navy,marginBottom:"1rem"}}>🤖 AI Compliance-analyse — Moms & Skat</div>
             {aiLoading ? (
               <div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"2rem 0",gap:"1rem"}}>
                 <div style={{width:"32px",height:"32px",border:`3px solid ${C.border}`,borderTop:`3px solid ${C.navy}`,borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
