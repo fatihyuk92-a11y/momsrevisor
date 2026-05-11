@@ -99,7 +99,6 @@ table{border-collapse:collapse}
   .desktop-nav { display: flex !important; }
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -1824,104 +1823,162 @@ function Momstraening() {
   const altFaerdig = fremgang() === 100;
   const [bevisNavn, setBevisNavn] = useState("");
 
+  const [visBevis, setVisBevis] = useState(false);
+
   const genererBevis = () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation:"landscape", unit:"mm", format:"a4" });
-    const W = 297, H = 210;
+    setVisBevis(true);
+    // Giv React tid til at rendere bevis-overlay, så print virker korrekt
+    setTimeout(() => window.print(), 300);
+  };
 
-    // Baggrund
-    doc.setFillColor(12, 31, 53);
-    doc.rect(0, 0, W, H, "F");
+  // ── Print-only CSS ──
+  const printCSS = `
+    @media print {
+      body > * { display: none !important; }
+      #bevis-print { display: flex !important; }
+    }
+    @media screen {
+      #bevis-print { display: none; }
+    }
+  `;
 
-    // Ydre guldramme
-    doc.setDrawColor(196, 151, 62);
-    doc.setLineWidth(1.2);
-    doc.rect(8, 8, W-16, H-16);
-    doc.setLineWidth(0.35);
-    doc.rect(12, 12, W-24, H-24);
-
-    // Hjørneornamenter
-    [[12,12,1,1],[W-12,12,-1,1],[12,H-12,1,-1],[W-12,H-12,-1,-1]].forEach(([x,y,dx,dy])=>{
-      doc.setDrawColor(196,151,62); doc.setLineWidth(0.7);
-      doc.line(x,y,x+dx*14,y); doc.line(x,y,x,y+dy*14);
-    });
-
-    // Øverst: logo-cirkel
-    doc.setDrawColor(196,151,62); doc.setLineWidth(0.6);
-    doc.setFillColor(20,45,75); doc.circle(W/2, 37, 13, "FD");
-    doc.setTextColor(196,151,62); doc.setFontSize(16); doc.setFont("helvetica","bold");
-    doc.text("\u2696", W/2, 41, {align:"center"});
-
-    // Firma
-    doc.setTextColor(196,151,62); doc.setFontSize(9); doc.setFont("helvetica","bold");
-    doc.setCharSpace(2);
-    doc.text("MOMSREVISOR ApS", W/2, 57, {align:"center"});
-    doc.setCharSpace(0);
-
-    // Titel
-    doc.setTextColor(255,255,255); doc.setFontSize(30); doc.setFont("helvetica","bold");
-    doc.text("KURSUSBEVIS", W/2, 73, {align:"center"});
-
-    // Guld linje
-    doc.setDrawColor(196,151,62); doc.setLineWidth(0.7);
-    doc.line(W/2-45, 77, W/2+45, 77);
-
-    // Attestering
-    doc.setTextColor(160,160,160); doc.setFontSize(10); doc.setFont("helvetica","normal");
-    doc.text("Dette attesterer at", W/2, 88, {align:"center"});
-
-    // Navn
+  // ── Bevis overlay (kun synlig ved print) ──
+  const BevisOverlay = () => {
     const navn = bevisNavn.trim() || "Kursusdeltager";
-    doc.setTextColor(255,255,255); doc.setFontSize(24); doc.setFont("helvetica","bold");
-    doc.text(navn, W/2, 100, {align:"center"});
-    doc.setDrawColor(196,151,62); doc.setLineWidth(0.25);
-    const nw = doc.getTextWidth(navn);
-    doc.line(W/2-nw/2, 103, W/2+nw/2, 103);
-
-    // Beskrivelse
-    doc.setTextColor(160,160,160); doc.setFontSize(10); doc.setFont("helvetica","normal");
-    doc.text("har gennemfort og besta\u0308t alle moduler i", W/2, 112, {align:"center"});
-
-    // Kursustitel
-    doc.setTextColor(196,151,62); doc.setFontSize(15); doc.setFont("helvetica","bold");
-    doc.text("Akademiet \u2014 Moms & Skat", W/2, 122, {align:"center"});
-
-    // Modul-liste
-    doc.setTextColor(130,130,130); doc.setFontSize(7); doc.setFont("helvetica","normal");
-    const modulTekst = MODULER.map(m=>m.titel.replace(/Modul \d+: /,"")).join(" \u00B7 ");
-    doc.text(doc.splitTextToSize(modulTekst, 210), W/2, 131, {align:"center"});
-
-    // Stats
-    doc.setTextColor(196,151,62); doc.setFontSize(9); doc.setFont("helvetica","bold");
-    doc.text(MODULER.length + " moduler  \u00B7  " + totalLektioner + " lektioner  \u00B7  " + totalLektioner + " quizzer bestået", W/2, 143, {align:"center"});
-
-    // Dato
     const dato = new Date().toLocaleDateString("da-DK",{day:"numeric",month:"long",year:"numeric"});
-    doc.setTextColor(150,150,150); doc.setFontSize(9); doc.setFont("helvetica","normal");
-    doc.text("Udstedt den " + dato, W/2, 152, {align:"center"});
+    const bevisNr = "BEV-" + Date.now().toString(36).toUpperCase();
+    const modulTekst = MODULER.map(m=>m.titel.replace(/Modul \d+: /,"")).join(" · ");
+    return (
+      <div id="bevis-print" style={{
+        position:"fixed",top:0,left:0,width:"100vw",height:"100vh",
+        background:"#0c1f35",display:"flex",alignItems:"center",justifyContent:"center",
+        zIndex:9999,fontFamily:"Georgia,serif",
+      }}>
+        <style>{`
+          @page { size: A4 landscape; margin: 0; }
+          @media print {
+            body > * { display: none !important; }
+            #bevis-print { display: flex !important; position: fixed; top:0; left:0; width:100%; height:100%; }
+          }
+        `}</style>
+        {/* Bevis-kort */}
+        <div style={{
+          width:"270mm",height:"190mm",background:"#0c1f35",position:"relative",
+          border:"1.5px solid #c4973e",outline:"0.5px solid #c4973e",outlineOffset:"-6px",
+          display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+          padding:"0 20mm",
+        }}>
+          {/* Hjørnedekorationer */}
+          {[[0,0],[1,0],[0,1],[1,1]].map(([rx,ry],i)=>(
+            <div key={i} style={{
+              position:"absolute",
+              top: ry ? "auto" : "6mm", bottom: ry ? "6mm" : "auto",
+              left: rx ? "auto" : "6mm", right: rx ? "6mm" : "auto",
+              width:"12mm",height:"12mm",
+              borderTop: ry ? "none" : "1.5px solid #c4973e",
+              borderBottom: ry ? "1.5px solid #c4973e" : "none",
+              borderLeft: rx ? "none" : "1.5px solid #c4973e",
+              borderRight: rx ? "1.5px solid #c4973e" : "none",
+            }}/>
+          ))}
 
-    // Signaturlinjer
-    doc.setDrawColor(196,151,62); doc.setLineWidth(0.3);
-    doc.line(W/2-65,170,W/2-15,170);
-    doc.line(W/2+15,170,W/2+65,170);
-    doc.setTextColor(140,140,140); doc.setFontSize(8);
-    doc.text("MomsRevisor ApS", W/2-40, 175, {align:"center"});
-    doc.text("Akademiet", W/2+40, 175, {align:"center"});
+          {/* Logo */}
+          <div style={{
+            width:"22mm",height:"22mm",borderRadius:"50%",
+            background:"rgba(196,151,62,0.15)",border:"1.5px solid #c4973e",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            fontSize:"14mm",marginBottom:"4mm",color:"#c4973e",
+          }}>⚖</div>
 
-    // Bevisnummer
-    doc.setFontSize(7); doc.setTextColor(80,80,80);
-    doc.text("Bevisnr: BEV-" + Date.now().toString(36).toUpperCase(), W/2, 185, {align:"center"});
+          {/* Firma */}
+          <div style={{color:"#c4973e",fontSize:"8pt",fontWeight:700,letterSpacing:"3px",marginBottom:"3mm",textTransform:"uppercase"}}>
+            MomsRevisor ApS
+          </div>
 
-    doc.save("Kursusbevis_MomsRevisor_" + navn.replace(/\s+/g,"_") + ".pdf");
+          {/* Titel */}
+          <div style={{color:"white",fontSize:"24pt",fontWeight:700,marginBottom:"2mm",letterSpacing:"2px"}}>
+            KURSUSBEVIS
+          </div>
+
+          {/* Guld linje */}
+          <div style={{width:"80mm",height:"1px",background:"#c4973e",marginBottom:"5mm"}}/>
+
+          {/* Attestering */}
+          <div style={{color:"#999",fontSize:"10pt",marginBottom:"3mm"}}>
+            Dette attesterer at
+          </div>
+
+          {/* Navn */}
+          <div style={{color:"white",fontSize:"20pt",fontWeight:700,marginBottom:"1mm",borderBottom:"1px solid #c4973e",paddingBottom:"1mm",minWidth:"60mm",textAlign:"center"}}>
+            {navn}
+          </div>
+
+          {/* Beskrivelse */}
+          <div style={{color:"#999",fontSize:"9pt",margin:"3mm 0 1mm"}}>
+            har gennemført og bestået alle moduler i
+          </div>
+
+          {/* Kursustitel */}
+          <div style={{color:"#c4973e",fontSize:"13pt",fontWeight:700,marginBottom:"3mm"}}>
+            Akademiet — Moms &amp; Skat
+          </div>
+
+          {/* Modul-liste */}
+          <div style={{color:"#666",fontSize:"6.5pt",textAlign:"center",maxWidth:"220mm",marginBottom:"3mm",lineHeight:1.6}}>
+            {modulTekst}
+          </div>
+
+          {/* Stats */}
+          <div style={{color:"#c4973e",fontSize:"8pt",fontWeight:700,marginBottom:"4mm"}}>
+            {MODULER.length} moduler &nbsp;·&nbsp; {totalLektioner} lektioner &nbsp;·&nbsp; {totalLektioner} quizzer bestået
+          </div>
+
+          {/* Dato */}
+          <div style={{color:"#888",fontSize:"8pt",marginBottom:"6mm"}}>
+            Udstedt den {dato}
+          </div>
+
+          {/* Signaturlinjer */}
+          <div style={{display:"flex",gap:"20mm",alignItems:"flex-end",marginBottom:"2mm"}}>
+            <div style={{textAlign:"center"}}>
+              <div style={{width:"40mm",height:"1px",background:"#c4973e",marginBottom:"1.5mm"}}/>
+              <div style={{color:"#888",fontSize:"7pt"}}>MomsRevisor ApS</div>
+            </div>
+            <div style={{textAlign:"center"}}>
+              <div style={{width:"40mm",height:"1px",background:"#c4973e",marginBottom:"1.5mm"}}/>
+              <div style={{color:"#888",fontSize:"7pt"}}>Akademiet</div>
+            </div>
+          </div>
+
+          {/* Bevisnummer */}
+          <div style={{color:"#444",fontSize:"6pt",marginTop:"2mm"}}>
+            Bevisnr: {bevisNr}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Oversigt
   if (aktivtModul === null) return (
     <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <style>{printCSS}</style>
+      {visBevis && <BevisOverlay/>}
       <SectionHeader title="Akademiet — Moms & Skat"/>
       <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"1rem"}}>
         Lær moms og skat fra bunden med strukturerede moduler, praktiske eksempler og quizzer der tester din viden. Hvert modul bygger videre på det forrige.
       </p>
+
+      {/* Kursusbevis-info */}
+      <div style={{display:"flex",gap:"12px",alignItems:"flex-start",background:"rgba(196,151,62,0.06)",border:"0.5px solid rgba(196,151,62,0.25)",borderRadius:"10px",padding:"14px 18px",marginBottom:"1.5rem",maxWidth:"680px"}}>
+        <div style={{fontSize:"24px",flexShrink:0}}>🏆</div>
+        <div>
+          <div style={{fontWeight:700,fontSize:"14px",color:C.navy,marginBottom:"3px"}}>Få et kursusbevis ved gennemførelse</div>
+          <div style={{fontSize:"13px",color:C.textSub,lineHeight:1.65}}>
+            Gennemfør alle {MODULER.length} moduler og bestå quizzerne — så kan du downloade et personligt kursusbevis som PDF. Beviset dokumenterer din faglige viden inden for moms og skat og kan bruges i din CV eller over for kunder og samarbejdspartnere.
+          </div>
+        </div>
+      </div>
 
       {/* Fremgang */}
       <div style={{background:"rgba(196,151,62,0.08)",border:"0.5px solid rgba(196,151,62,0.3)",borderRadius:"10px",padding:"14px 18px",marginBottom:"1.5rem",display:"flex",alignItems:"center",gap:"16px",flexWrap:"wrap"}}>
