@@ -240,7 +240,55 @@ Momssats: 25%. Selskabsskat: 22% (SEL § 17). Topskat: 15% over ca. 615.000 kr. 
 
 INSTRUKTION: Besvar altid på dansk med præcise §-henvisninger (ML, MB, MF, LL, SEL, AL, SFL) og DJV-afsnit. Brug de seneste lovbekendtgørelsesnumre angivet ovenfor. Gør altid opmærksom på samspillet moms/skat. Fejl ikke på faktuelle spørgsmål — angiv altid det præcise, verificerede svar. Anbefal professionel rådgivning ved komplekse sager.`;
 
-const EXAMPLES = [
+// ── SIKKERHED: Rate limiting, timeout og input-sanitering ─────────────────────
+const _rateMap = {};
+function rateLimit(key, maxKald, periodeMs) {
+  const nu = Date.now();
+  if (!_rateMap[key]) _rateMap[key] = [];
+  _rateMap[key] = _rateMap[key].filter(t => nu - t < periodeMs);
+  if (_rateMap[key].length >= maxKald) return false;
+  _rateMap[key].push(nu);
+  return true;
+}
+
+async function sikkerFetch(url, options, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const tid = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(tid);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res;
+  } catch (e) {
+    clearTimeout(tid);
+    if (e.name === "AbortError") throw new Error("Anmodningen tog for lang tid. Prøv igen.");
+    throw e;
+  }
+}
+
+function saniterTekst(str, maxLen = 2000) {
+  if (typeof str !== "string") return "";
+  return str.replace(/[<>]/g, "").trim().slice(0, maxLen);
+}
+
+function validerCVR(cvr) {
+  const cleaned = String(cvr).replace(/\D/g, "");
+  return /^\d{8}$/.test(cleaned) ? cleaned : null;
+}
+
+const MAX_FIL_BYTES = 10 * 1024 * 1024; // 10 MB
+const TILLADTE_TYPER = ["application/pdf","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/vnd.ms-excel","text/csv"];
+const TILLADTE_EXT  = [".pdf",".xlsx",".xls",".csv"];
+
+function validerFil(fil) {
+  if (fil.size > MAX_FIL_BYTES) return `Filen "${fil.name}" er for stor (max 10 MB).`;
+  const ext = fil.name.toLowerCase().slice(fil.name.lastIndexOf("."));
+  if (!TILLADTE_EXT.includes(ext) && !TILLADTE_TYPER.includes(fil.type))
+    return `Filtype ikke tilladt: ${fil.name}. Kun PDF, Excel og CSV.`;
+  return null;
+}
+
+
   "Kan jeg fratrække moms på en personbil?",
   "Hvad er forskellen på moms og skat for repræsentation?",
   "Hvad er reglerne for fri bil i skat?",
@@ -468,7 +516,7 @@ function AIDemo({ navigate }) {
             AI-rådgiveren i aktion
           </h2>
           <p style={{color:"#666",fontSize:"15px",maxWidth:"520px",margin:"0 auto",lineHeight:1.6}}>
-            Stil spørgsmål om moms og skat og få øjeblikkelige svar baseret på dansk og EU-ret — præcis som en rigtig revisor, til en brøkdel af prisen.
+            Stil spørgsmål om moms og skat og få øjeblikkelige svar baseret på dansk og EU-ret — præcis som en rigtig revisor.
           </p>
         </div>
 
@@ -743,23 +791,28 @@ function Chat() {
   useEffect(()=>{ endRef.current?.scrollIntoView({behavior:"smooth"}); },[messages,loading]);
 
   const send = async (text) => {
-    const msg = text || input.trim();
+    const raa = text || input.trim();
+    const msg = saniterTekst(raa, 1000);
     if (!msg || loading) return;
+    if (!rateLimit("chat", 10, 60000)) {
+      setMessages(prev=>[...prev,{role:"assistant",content:"⚠️ Du har stillet mange spørgsmål på kort tid. Vent et øjeblik og prøv igen."}]);
+      return;
+    }
     setInput("");
     setLoading(true);
     const newMsgs = [...messages,{role:"user",content:msg}];
     setMessages(newMsgs);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
+      const res = await sikkerFetch("https://api.anthropic.com/v1/messages", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:AI_KNOWLEDGE,messages:newMsgs})
-      });
+      }, 30000);
       const data = await res.json();
-      const reply = data.content?.[0]?.text || "Beklager, teknisk fejl.";
+      const reply = data.content?.[0]?.text || "Beklager, teknisk fejl. Prøv igen.";
       setMessages([...newMsgs,{role:"assistant",content:reply}]);
     } catch(e) {
-      setMessages([...newMsgs,{role:"assistant",content:"Der opstod en teknisk fejl. Prøv igen."}]);
+      setMessages([...newMsgs,{role:"assistant",content:"⚠️ " + (e.message || "Teknisk fejl. Prøv igen.")}]);
     } finally { setLoading(false); }
   };
 
@@ -2158,42 +2211,6 @@ function MomsCompliance() {
   const filRef = useRef(null);
 
   // ── CVR opslag via Claude AI med web_search ──
-  const slaOpCVR = async () => {
-    const cleaned = cvr.replace(/\D/g,"");
-    if (!/^\d{8}$/.test(cleaned)) { setCvrFejl("CVR-nummer skal være præcis 8 cifre."); return; }
-    setCvrFejl(""); setCvrLoading(true); setCvrData(null); setAiAnalyse("");
-    try {
-      // Brug Claude med web_search til at hente CVR-data — omgår CORS
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          tools: [{"type":"web_search_20250305","name":"web_search"}],
-          messages: [{
-            role: "user",
-            content: "Slå CVR-nummer " + cleaned + " op på cvr.dk eller virk.dk og returner følgende oplysninger som JSON og KUN JSON uden forklaring eller markdown:\n{\"navn\":\"...\",\"cvr\":\"" + cleaned + "\",\"status\":\"AKTIV eller OPHØRT\",\"branche\":\"...\",\"brancheKode\":\"...\",\"adresse\":\"...\",\"ansatte\":\"...\",\"stiftet\":\"...\",\"ejerform\":\"...\"}"
-          }]
-        })
-      });
-      const data = await res.json();
-      // Find tekst-svaret fra Claude
-      const tekstBlokke = (data.content||[]).filter(b=>b.type==="text");
-      const raaJson = tekstBlokke.map(b=>b.text).join("");
-      // Udtræk JSON fra svaret
-      const jsonMatch = raaJson.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("Ingen JSON i svar");
-      const virk = JSON.parse(jsonMatch[0]);
-      virk.cvr = cleaned;
-      setCvrData(virk);
-      setFase("analyse");
-      hentAiAnalyse(virk);
-    } catch(e) {
-      setCvrFejl("Kunne ikke hente CVR-data. Prøv igen om et øjeblik.");
-    }
-    setCvrLoading(false);
-  };
 
   // ── AI compliance-analyse baseret på CVR-data ──
   const hentAiAnalyse = async (virk) => {
@@ -2238,21 +2255,25 @@ function MomsCompliance() {
 
   // ── Fil-upload og analyse ──
   const behandlFiler = (nyeFiler) => {
-    const tilladte = Array.from(nyeFiler).filter(f =>
-      f.type === "application/pdf" ||
-      f.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-      f.type === "application/vnd.ms-excel" ||
-      f.name.endsWith(".xlsx") || f.name.endsWith(".xls") || f.name.endsWith(".pdf") || f.name.endsWith(".csv")
-    );
-    if (tilladte.length === 0) return;
-    setFiler(prev => [...prev, ...tilladte.map(f => ({fil:f, navn:f.name, str: (f.size/1024).toFixed(0)+"KB", type: f.name.endsWith(".pdf")?"PDF":"Excel/CSV"}))]);
+    const fejl = [];
+    const gyldige = [];
+    Array.from(nyeFiler).forEach(f => {
+      const fejlBesked = validerFil(f);
+      if (fejlBesked) { fejl.push(fejlBesked); }
+      else { gyldige.push({fil:f, navn:f.name, str:(f.size/1024).toFixed(0)+"KB", type:f.name.toLowerCase().endsWith(".pdf")?"PDF":"Excel/CSV"}); }
+    });
+    if (fejl.length > 0) alert(fejl.join("\n"));
+    if (gyldige.length > 0) setFiler(prev => [...prev, ...gyldige]);
   };
 
   const analyserFiler = async () => {
     if (filer.length === 0) return;
+    if (!rateLimit("compliance-fil", 3, 120000)) {
+      setFilAnalyse("⚠️ For mange analyser på kort tid. Vent et øjeblik og prøv igen.");
+      return;
+    }
     setFilLoading(true); setFilAnalyse("");
 
-    // Læs filer som tekst/base64
     const filIndhold = await Promise.all(filer.map(async ({fil, navn, type}) => {
       if (type === "PDF") {
         const b64 = await new Promise(res => {
@@ -2271,34 +2292,29 @@ function MomsCompliance() {
       }
     }));
 
-    const virksomhedInfo = cvrData ? `Virksomhed: ${cvrData.navn} (CVR: ${cvrData.cvr}), Branche: ${cvrData.branche}` : "Ukendt virksomhed";
+    const virksomhedInfo = cvrData ? "Virksomhed: " + saniterTekst(cvrData.navn) + " (CVR: " + cvrData.cvr + "), Branche: " + saniterTekst(cvrData.branche) : "Ukendt virksomhed";
 
-    // Byg messages med filer
     const content = [];
     filIndhold.forEach(({navn, type, b64, tekst, erPdf}) => {
       if (erPdf && b64) {
-        content.push({ type:"document", source:{ type:"base64", media_type:"application/pdf", data:b64 }, title: navn });
+        content.push({ type:"document", source:{ type:"base64", media_type:"application/pdf", data:b64 }, title: saniterTekst(navn, 100) });
       } else if (tekst) {
-        content.push({ type:"text", text:`FILINDHOLD (${navn}):\n${tekst}` });
+        content.push({ type:"text", text:"FILINDHOLD (" + saniterTekst(navn, 100) + "):\n" + tekst });
       }
     });
     content.push({ type:"text", text: virksomhedInfo + "\n\nDu er en erfaren dansk moms- og skatterådgiver. Analyser ovenstående regnskabsmateriale og identificer konkrete fejl og risici inden for BÅDE moms og skat.\n\nStrukturér analysen:\n\nKRITISKE MOMSFEJL - Fejl der giver efterbetaling/bøde (angiv kontonummer/beløb hvis synligt)\n\nKRITISKE SKATTEFEJL - Fejl i skattemæssige fradrag, afskrivninger, personalegoder mv.\n\nASYMMETRI MOMS/SKAT - Poster der behandles forskelligt moms- og skattemæssigt (fx repræsentation, biler)\n\nANBEFALINGER - Konkrete handlinger prioriteret efter risiko\n\nLOVHENVISNINGER - Relevante ML §, MB §, LL §, SEL §, AL § for fundne fejl\n\nVær præcis og henvis til specifikke konti og beløb fra materialet." });
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await sikkerFetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{role:"user", content}]
-        })
-      });
+        body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, messages:[{role:"user",content}] })
+      }, 60000);
       const data = await res.json();
       setFilAnalyse(data.content?.[0]?.text || "Analyse ikke tilgængelig.");
       setFase("rapport");
     } catch(e) {
-      setFilAnalyse("Der opstod en fejl. Prøv igen.");
+      setFilAnalyse("⚠️ " + (e.message || "Teknisk fejl. Prøv igen."));
     }
     setFilLoading(false);
   };
