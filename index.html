@@ -270,9 +270,7 @@ function hentAktivSide() {
 function Nav({ active, navigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const links = [
-    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["regnskab","Regnskab & Bogføring"],["traening","Akademiet"],["hvad","Hvad er moms?"],
-    ["perioder","Perioder"],["beregner","Beregner"],["ydelser","Ydelser"],
-    ["om","Om os"],["kontakt","Kontakt"],
+    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["perioder","Perioder"],["traening","Akademiet"],["beregner","Beregner"],["ydelser","Ydelser"],["regnskab","Regnskab & Bogføring"],["hvad","Hvad er moms?"],["om","Om os"],["kontakt","Kontakt"],
   ];
   const navTo = (id) => { navigate(id); setMenuOpen(false); };
   return (
