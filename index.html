@@ -251,6 +251,7 @@ const RUTER = {
   "sporg":      "/sporg-ai",
   "compliance": "/moms-compliance",
   "traening":   "/akademiet",
+  "regnskab":   "/digitalt-regnskab",
   "hvad":       "/hvad-er-moms",
   "perioder":   "/momsperioder",
   "beregner":   "/momsberegner",
@@ -269,7 +270,7 @@ function hentAktivSide() {
 function Nav({ active, navigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const links = [
-    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["traening","Akademiet"],["hvad","Hvad er moms?"],
+    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["regnskab","Regnskab & Bogføring"],["traening","Akademiet"],["hvad","Hvad er moms?"],
     ["perioder","Perioder"],["beregner","Beregner"],["ydelser","Ydelser"],
     ["om","Om os"],["kontakt","Kontakt"],
   ];
@@ -2202,6 +2203,156 @@ function MomsCompliance() {
     </div>
   );
 }
+// ── DIGITALT REGNSKAB ──────────────────────────────────────────────────────────
+function Regnskab() {
+  const [aktivTab, setAktivTab] = useState("regnskab");
+
+  const SERVICES = {
+    regnskab: {
+      emoji: "📊",
+      farve: "#0c6b3e",
+      lys: "rgba(12,107,62,0.08)",
+      kant: "rgba(12,107,62,0.25)",
+      titel: "Digitalt Regnskab",
+      tagline: "Præcise og overskuelige regnskaber der giver dig det fulde overblik over din virksomheds økonomi.",
+      underemner: [
+        { ikon:"📑", titel:"Årsregnskab", tekst:"Udarbejdelse af årsregnskab i henhold til årsregnskabsloven (ÅRL). Vi sikrer korrekt klassificering, noter og ledelsespåtegning." },
+        { ikon:"📈", titel:"Perioderegnskab", tekst:"Månedlige eller kvartalsvise regnskaber der giver dig løbende indsigt i virksomhedens økonomi og likviditet." },
+        { ikon:"🔮", titel:"Budgettering og forecast", tekst:"Vi hjælper med at udarbejde realistiske budgetter og forecasts der understøtter strategiske beslutninger." },
+        { ikon:"⚖️", titel:"Konsoliderede regnskaber", tekst:"Sammenstilling af regnskaber fra flere selskaber i en koncern til ét samlet koncernregnskab." },
+        { ikon:"💡", titel:"Regnskabsanalyse", tekst:"Dybdegående analyse af nøgletal, likviditet, soliditet og rentabilitet — med konkrete anbefalinger." },
+        { ikon:"🏦", titel:"Likviditetsstyring", tekst:"Overblik over pengestrømme og rullende likviditetsprognoser så du undgår ubehagelige overraskelser." },
+      ]
+    },
+    raadgivning: {
+      emoji: "🤝",
+      farve: "#1a3f70",
+      lys: "rgba(26,63,112,0.08)",
+      kant: "rgba(26,63,112,0.25)",
+      titel: "Rådgivning",
+      tagline: "Kvalificeret sparring og strategisk rådgivning der hjælper dig med at træffe de rigtige beslutninger for din virksomhed.",
+      underemner: [
+        { ikon:"🏗️", titel:"Virksomhedsstruktur", tekst:"Rådgivning om optimal selskabsstruktur — enkeltmandsvirksomhed, ApS, holding eller K/S — med fokus på skat og ansvarsbegrænsning." },
+        { ikon:"💼", titel:"Generationsskifte", tekst:"Planlægning og gennemførelse af generationsskifte med skattemæssig optimering, succession og overdragelsesmodeller." },
+        { ikon:"📋", titel:"Due diligence", tekst:"Finansiel og skattemæssig gennemgang ved køb eller salg af virksomhed. Vi identificerer risici og vurderer prissætning." },
+        { ikon:"📊", titel:"Skatteoptimering", tekst:"Lovlig optimering af skattetilsvaret — virksomhedsordningen, selskabsskat, udbyttebeskatning og fradragsplanlægning." },
+        { ikon:"🌍", titel:"International rådgivning", tekst:"Rådgivning om transfer pricing, fast driftssted, dobbeltbeskatning og etablering i udlandet." },
+        { ikon:"🚀", titel:"Iværksætterrådgivning", tekst:"Hjælp til opstart — valg af selskabsform, registrering, momsregistrering, første regnskab og budgettering." },
+      ]
+    },
+    bogfoering: {
+      emoji: "🧾",
+      farve: "#7a3d00",
+      lys: "rgba(122,61,0,0.07)",
+      kant: "rgba(122,61,0,0.2)",
+      titel: "Bogføring",
+      tagline: "Løbende og korrekt bogføring der opfylder bogføringsloven og danner det solide grundlag for dit regnskab og din moms.",
+      underemner: [
+        { ikon:"📂", titel:"Løbende bogføring", tekst:"Vi bogfører løbende på baggrund af dine bilag — digitalt og effektivt via e-conomic, Dinero, Billy eller andet regnskabssystem." },
+        { ikon:"💳", titel:"Debitor- og kreditorbogholderi", tekst:"Håndtering af debitorer (tilgodehavender) og kreditorer (leverandørfakturaer) med automatisk afstemning." },
+        { ikon:"💰", titel:"Lønbogholderi", tekst:"Komplet lønhåndtering inkl. lønkørsel, A-skat, AM-bidrag, feriepenge og indberetning til eIndkomst." },
+        { ikon:"🔁", titel:"Bankafstemning", tekst:"Løbende afstemning af bankkonto, kassebeholdning og mellemregningskonti så regnskabet altid er opdateret." },
+        { ikon:"📊", titel:"Momsafstemning", tekst:"Korrekt momsbehandling og -afstemning i henhold til momsloven. Vi sørger for at momsangivelserne er korrekte og rettidige." },
+        { ikon:"📱", titel:"Digital bilagshåndtering", tekst:"Kvitteringer og fakturaer uploades direkte via app eller e-mail — ingen fysiske bilag, alt gemmes sikkert i skyen." },
+      ]
+    }
+  };
+
+  const aktiv = SERVICES[aktivTab];
+
+  return (
+    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Digitalt Regnskab, Rådgivning & Bogføring"/>
+      <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.75,fontSize:"14px",marginBottom:"2.5rem"}}>
+        Vi tilbyder en komplet digital løsning til din virksomheds økonomi — fra daglig bogføring og løbende regnskab til strategisk rådgivning og skatteoptimering. Alt foregår digitalt og effektivt.
+      </p>
+
+      {/* 3 store service-kort øverst */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:"1.25rem",marginBottom:"2.5rem"}}>
+        {Object.entries(SERVICES).map(([key, s]) => (
+          <div key={key} onClick={()=>setAktivTab(key)} style={{
+            background: aktivTab===key ? s.lys : C.bgCard,
+            border: `${aktivTab===key?"1.5px":"0.5px"} solid ${aktivTab===key?s.farve:C.border}`,
+            borderRadius:"14px", padding:"1.5rem", cursor:"pointer",
+            transition:"all 0.2s", position:"relative", overflow:"hidden",
+          }}>
+            {aktivTab===key && <div style={{position:"absolute",top:0,left:0,right:0,height:"3px",background:s.farve}}/>}
+            <div style={{fontSize:"32px",marginBottom:"0.75rem"}}>{s.emoji}</div>
+            <div style={{fontWeight:700,fontSize:"17px",color:aktivTab===key?s.farve:C.navy,marginBottom:"6px"}}>{s.titel}</div>
+            <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:"0 0 1rem"}}>{s.tagline}</p>
+            <div style={{fontSize:"12px",fontWeight:600,color:aktivTab===key?s.farve:C.textSub,display:"flex",alignItems:"center",gap:"4px"}}>
+              {aktivTab===key ? "▼ Valgt" : "Se ydelser →"}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Detaljeret underemner-grid */}
+      <div style={{background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,borderRadius:"16px",padding:"2rem",marginBottom:"2rem"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"1.75rem"}}>
+          <div style={{fontSize:"28px"}}>{aktiv.emoji}</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:"18px",color:aktiv.farve}}>{aktiv.titel}</div>
+            <div style={{fontSize:"13px",color:C.textSub,marginTop:"2px"}}>{aktiv.underemner.length} ydelsesområder</div>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"1rem"}}>
+          {aktiv.underemner.map(u => (
+            <div key={u.titel} style={{background:C.bgCard,border:`0.5px solid ${aktiv.kant}`,borderRadius:"10px",padding:"1.25rem",display:"flex",gap:"1rem",alignItems:"flex-start"}}>
+              <div style={{width:"40px",height:"40px",borderRadius:"10px",background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0}}>{u.ikon}</div>
+              <div>
+                <div style={{fontWeight:700,fontSize:"14px",color:C.navy,marginBottom:"5px"}}>{u.titel}</div>
+                <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:0}}>{u.tekst}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA boks */}
+      <div style={{background:C.navy,borderRadius:"14px",padding:"2rem",display:"grid",gridTemplateColumns:"1fr auto",gap:"2rem",alignItems:"center",flexWrap:"wrap"}}>
+        <div>
+          <div style={{color:C.gold,fontSize:"12px",fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Kom i gang</div>
+          <div style={{color:C.white,fontWeight:700,fontSize:"20px",marginBottom:"8px"}}>Interesseret i {aktiv.titel.toLowerCase()}?</div>
+          <p style={{color:"rgba(255,255,255,0.6)",fontSize:"13px",lineHeight:1.6,margin:0}}>
+            Vi tilpasser løsningen til din virksomheds behov og størrelse. Book en uforpligtende samtale og hør mere om mulighederne.
+          </p>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:"10px",flexShrink:0}}>
+          <button onClick={()=>window.dispatchEvent(new CustomEvent("navigate",{detail:"kontakt"}))} style={{background:C.gold,color:C.navy,border:"none",padding:"12px 28px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
+            Kontakt os →
+          </button>
+          <button onClick={()=>window.dispatchEvent(new CustomEvent("navigate",{detail:"sporg"}))} style={{background:"transparent",color:"rgba(255,255,255,0.7)",border:"0.5px solid rgba(255,255,255,0.3)",padding:"10px 28px",borderRadius:"8px",fontSize:"13px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
+            Spørg AI-rådgiveren
+          </button>
+        </div>
+      </div>
+
+      {/* Hvad inkluderer digitalt? */}
+      <div style={{marginTop:"2rem"}}>
+        <h3 style={{fontSize:"1.1rem",fontWeight:700,color:C.navy,marginBottom:"0.4rem"}}>Hvorfor digital løsning?</h3>
+        <div style={{width:"32px",height:"2px",background:C.gold,borderRadius:"2px",marginBottom:"1.25rem"}}/>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1rem"}}>
+          {[
+            ["☁️","Alt i skyen","Adgang til dit regnskab fra alle enheder — altid opdateret og sikkert gemt."],
+            ["⚡","Automatisering","Integration med bank, betalingssystemer og e-fakturering reducerer manuel indtastning."],
+            ["🔒","Sikkerhed","GDPR-kompatibel dataopbevaring med krypteret overførsel og backup."],
+            ["📲","Nem kommunikation","Upload bilag via app, del dokumenter og kommuniker direkte med os online."],
+          ].map(([ic,ti,tx])=>(
+            <div key={ti} style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"10px",padding:"1rem",display:"flex",gap:"10px",alignItems:"flex-start"}}>
+              <div style={{fontSize:"22px",flexShrink:0}}>{ic}</div>
+              <div>
+                <div style={{fontWeight:700,fontSize:"13px",color:C.navy,marginBottom:"4px"}}>{ti}</div>
+                <p style={{fontSize:"12px",color:C.textSub,lineHeight:1.5,margin:0}}>{tx}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [active, setActive] = useState(hentAktivSide);
 
@@ -2216,8 +2367,10 @@ function App() {
   // Håndter browser tilbage/frem-knapper
   useEffect(() => {
     const handlePop = () => setActive(hentAktivSide());
+    const handleNav = (e) => navigate(e.detail);
     window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
+    window.addEventListener("navigate", handleNav);
+    return () => { window.removeEventListener("popstate", handlePop); window.removeEventListener("navigate", handleNav); };
   }, []);
 
   return (
@@ -2226,6 +2379,7 @@ function App() {
       <main style={{flex:1}}>
         {active==="home" && <Home navigate={navigate}/>}
         {active==="compliance" && <MomsCompliance/>}
+        {active==="regnskab" && <Regnskab/>}
         {active==="sporg" && <Chat/>}
         {active==="hvad" && <HvadErMoms/>}
         {active==="perioder" && <Perioder/>}
