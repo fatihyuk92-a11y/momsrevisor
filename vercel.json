@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/sporg-ai", "destination": "/index.html" },
+    { "source": "/moms-compliance", "destination": "/index.html" },
+    { "source": "/momstraening", "destination": "/index.html" },
+    { "source": "/hvad-er-moms", "destination": "/index.html" },
+    { "source": "/momsperioder", "destination": "/index.html" },
+    { "source": "/momsberegner", "destination": "/index.html" },
+    { "source": "/ydelser", "destination": "/index.html" },
+    { "source": "/om-os", "destination": "/index.html" },
+    { "source": "/kontakt", "destination": "/index.html" }
+  ]
+}
