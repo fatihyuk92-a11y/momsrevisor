@@ -216,7 +216,7 @@ AKTUELLE SATSER 2026:
 INSTRUKTION: Besvar altid på dansk. Angiv præcist hvilke love der er relevante for det konkrete spørgsmål — BÅDE moms og skat hvis begge er berørt. Henvis til §-numre og lovbekendtgørelsesnumre. Gør altid eksplicit opmærksom på hvis en momsafgørelse har skattemæssige konsekvenser eller omvendt. Vær konkret og praktisk. Anbefal professionel rådgivning ved komplekse sager.`;
 
 const EXAMPLES = [
-  "Kan jeg fratrække moms på køb af en firmabil?",
+  "Kan jeg fratrække moms på en personbil?",
   "Hvad er forskellen på moms og skat for repræsentation?",
   "Hvad er reglerne for fri bil i skat?",
   "Kan jeg fradrage moms på restaurationsbesøg?",
@@ -352,16 +352,16 @@ function SectionHeader({title, sub}) {
 // ── AI DEMO ───────────────────────────────────────────────────────────────────
 const DEMO_SEKVENSER = [
   {
-    spm: "Kan jeg fratrække moms på køb af en firmabil?",
-    svar: "Nej — som udgangspunkt har virksomheder intet momsfradrag ved køb af personbiler (hvide plader), heller ikke selvom bilen bruges 100% erhvervsmæssigt.\n\nHjemmel: ML § 42, stk. 1, nr. 6.\n\nUndtagelser gælder kun for: bilforhandlere, køreskoler og udlejningsvirksomheder.\n\nSkattemæssigt er billedet anderledes — der er fuldt fradrag for erhvervsmæssige driftsomkostninger, men fri bil beskattes efter LL § 16, stk. 4.",
+    spm: "Kan jeg fratrække moms på en personbil?",
+    svar: "Nej — personbiler (hvide plader) giver intet momsfradrag ved køb, leasing eller drift. Dette gælder uanset hvor erhvervsmæssigt bilen bruges.\n\nHjemmel: ML § 42, stk. 1, nr. 6.\n\nUndtagelser: bilforhandlere, køreskoler og udlejningsvirksomheder.\n\nOBS — varebiler (gule plader) er anderledes: fuldt momsfradrag ved udelukkende erhvervsmæssig brug, og fuldt fradrag på drift selv ved blandet brug (ML § 42, stk. 4–5).",
   },
   {
-    spm: "Hvad er fristen for momsangivelse for en virksomhed med 8 mio. kr. i omsætning?",
-    svar: "En virksomhed med 8 mio. kr. i omsætning er kvartalsafregnende (5–50 mio. kr./år).\n\nFrist: Senest den 1. i den 3. måned efter kvartalets udløb.\n\nEksempel: 1. kvartal (jan–mar) skal angives og betales senest 1. juni 2026.\n\nHjemmel: ML § 57, stk. 3 og MB § 82.",
+    spm: "Hvad er fristen for kvartalsvise momsangivelser?",
+    svar: "For virksomheder med 5–50 mio. kr. i omsætning er afregningen kvartalsvis.\n\nFrist: Senest den 1. i den 3. måned efter kvartalets udløb.\n\nEksempel 2026:\n• 1. kvartal (jan–mar) → betales senest 1. juni\n• 2. kvartal (apr–jun) → betales senest 1. september\n• 3. kvartal (jul–sep) → betales senest 1. december\n\nHjemmel: ML § 57, stk. 3.",
   },
   {
     spm: "Hvad er forskellen på moms og skat for repræsentation?",
-    svar: "Her er der vigtig asymmetri:\n\nMOMS (ML § 42, stk. 1, nr. 2): Intet fradrag for repræsentation. Restaurant til forretningsforbindelser: kun 1/4 momsfradrag.\n\nSKAT (LL § 8, stk. 4): 25% skattefradrag af udgiften — dvs. 75% nægtes fradrag.\n\nKonklusion: En restaurantregning på 1.000 kr. giver 25% momsfradrag OG 25% skattefradrag — men gaver og teaterbesøg giver 0% i begge systemer.",
+    svar: "Her er der vigtig asymmetri mellem de to systemer:\n\nMOMS (ML § 42, stk. 1, nr. 2): Intet fradrag for repræsentation. Restaurant til forretningsforbindelser: kun 1/4 momsfradrag.\n\nSKAT (LL § 8, stk. 4): 25% skattefradrag — dvs. 75% af udgiften nægtes fradrag.\n\nKonklusion: En restaurantregning giver 25% momsfradrag OG 25% skattefradrag. Gaver og underholdning giver 0% i begge systemer.",
   },
 ];
 
