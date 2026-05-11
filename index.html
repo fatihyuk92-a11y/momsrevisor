@@ -193,39 +193,34 @@ function Home({navigate}) {
             <button onClick={()=>navigate("sporg")} style={{background:C.gold,color:C.navy,border:"none",padding:"13px 28px",borderRadius:"8px",fontSize:"15px",fontWeight:700,cursor:"pointer"}}>Stil et momsspørgsmål ↗</button>
             <button onClick={()=>navigate("ydelser")} style={{background:"transparent",color:C.white,border:`1.5px solid rgba(255,255,255,0.4)`,padding:"13px 28px",borderRadius:"8px",fontSize:"15px",cursor:"pointer"}}>Se vores ydelser</button>
           </div>
-      <div style={{background:C.navy,padding:"1.75rem 2rem"}}>
-        <div style={{maxWidth:"1100px",margin:"0 auto",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:"0"}}>
+      <div style={{background:"rgba(0,0,0,0.25)",borderTop:"0.5px solid rgba(255,255,255,0.08)",padding:"1.75rem 2rem",marginTop:"2rem"}}>
+        <div style={{maxWidth:"1100px",margin:"0 auto",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"0"}}>
           {[
             {
               ikon:<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
-              tal:"6", label:"Retskilder", tekst:"Vi baserer vores svar på 6 primære retskilder"
+              label:"Opdaterede retskilder", tekst:"Svar baseret på retskilder og retspraksis"
             },
             {
               ikon:<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-              tal:"100%", label:"Online", tekst:"Få rådgivning og værktøjer – når det passer dig"
+              label:"Digital rådgivning", tekst:"Få rådgivning og værktøjer online – når det passer dig"
             },
             {
-              ikon:<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>,
-              tal:"98%", label:"Succesrate", tekst:"Vores AI-rådgivning løser 98% af alle spørgsmål"
+              ikon:<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/><path d="M5 3L2 6m20-3l-3 3M2 18l3 3m14-3l3 3"/></svg>,
+              label:"AI-understøttet analyse", tekst:"Avanceret AI kombineret med juridisk ekspertise"
             },
             {
               ikon:<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-              tal:"24t", label:"Svartid", tekst:"Typisk svartid under 24 timer på hverdage"
+              label:"Hurtig respons", tekst:"Øjeblikkelig svar ved brug af AI og typisk svartid under 48 timer ved manuelle forespørgsler"
             },
-            {
-              ikon:<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
-              tal:"Løbende", label:"Opdateret", tekst:"Altid opdateret med seneste lovgivning og praksis"
-            },
-          ].map(({ikon,tal,label,tekst},i,arr)=>(
+          ].map(({ikon,label,tekst},i,arr)=>(
             <div key={label} style={{
               textAlign:"center",
-              padding:"0.75rem 1rem",
+              padding:"1rem 1.5rem",
               borderRight: i < arr.length-1 ? "0.5px solid rgba(255,255,255,0.1)" : "none",
             }}>
-              <div style={{display:"flex",justifyContent:"center",marginBottom:"0.5rem"}}>{ikon}</div>
-              <div style={{color:C.gold,fontSize:"22px",fontWeight:700,lineHeight:1.1}}>{tal}</div>
-              <div style={{color:C.white,fontSize:"13px",fontWeight:600,marginBottom:"4px"}}>{label}</div>
-              <div style={{color:"rgba(255,255,255,0.5)",fontSize:"11px",lineHeight:1.5}}>{tekst}</div>
+              <div style={{display:"flex",justifyContent:"center",marginBottom:"0.6rem"}}>{ikon}</div>
+              <div style={{color:C.gold,fontSize:"14px",fontWeight:700,marginBottom:"4px"}}>{label}</div>
+              <div style={{color:"rgba(255,255,255,0.5)",fontSize:"12px",lineHeight:1.5}}>{tekst}</div>
             </div>
           ))}
         </div>
