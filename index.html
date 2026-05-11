@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MomsRevisor A/S – Professionel momsrådgivning</title>
+<title>MomsRevisor ApS – Professionel momsrådgivning</title>
 <meta name="description" content="Professionel momsrådgivning med AI-rådgiver, momsberegner, CVR compliance-analyse og momstræning for danske virksomheder. Baseret på seneste momslov og EU-ret."/>
 <meta name="robots" content="index, follow"/>
 <link rel="canonical" href="https://momsrevisor.dk/"/>
 <!-- Open Graph -->
 <meta property="og:type" content="website"/>
-<meta property="og:site_name" content="MomsRevisor A/S"/>
-<meta property="og:title" content="MomsRevisor A/S – Professionel momsrådgivning"/>
+<meta property="og:site_name" content="MomsRevisor ApS"/>
+<meta property="og:title" content="MomsRevisor ApS – Professionel momsrådgivning"/>
 <meta property="og:description" content="AI-drevet momsrådgivning, CVR compliance-analyse, momsberegner og komplet momstræning A–Z for danske virksomheder."/>
 <meta property="og:url" content="https://momsrevisor.dk/"/>
 <!-- Schema.org strukturerede data -->
@@ -18,7 +18,7 @@
 {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
-  "name": "MomsRevisor A/S",
+  "name": "MomsRevisor ApS",
   "description": "Specialiseret momsrådgivning for danske virksomheder",
   "url": "https://momsrevisor.dk",
   "address": {
@@ -99,6 +99,7 @@ table{border-collapse:collapse}
   .desktop-nav { display: flex !important; }
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -288,7 +289,7 @@ function Nav({ active, navigate }) {
         <div style={{width:"34px",height:"34px",borderRadius:"8px",background:"linear-gradient(135deg,rgba(196,151,62,0.2),rgba(196,151,62,0.05))",border:"1px solid rgba(196,151,62,0.35)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"17px"}}>⚖</div>
         <div>
           <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:600,fontSize:"15px",lineHeight:1.1}}>MomsRevisor</div>
-          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.7)",letterSpacing:"0.12em",textTransform:"uppercase"}}>A/S · Professionel Rådgivning</div>
+          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.7)",letterSpacing:"0.12em",textTransform:"uppercase"}}>ApS · Professionel Rådgivning</div>
         </div>
       </div>
 
@@ -469,7 +470,7 @@ function Home({navigate}) {
             ["🏠","Fast ejendom","Frivillig momsregistrering for udlejning, køb og salg, byggeprojekter og reguleringsforpligtelser."],
             ["🚗","Biler og driftsmidler","Momsfradrag ved køb, leasing og drift af person- og varebiler samt reguleringsregler."],
             ["🧾","Faktura og bogføring","Korrekte fakturakrav, bogføring af momsposteringer og delvist momsfradrag (pro-rata)."],
-            ["🔄","Moms og skat — samspil og asymmetri","De kritiske forskelle og sammenhænge mellem moms og skat. Mange fejl opstår fordi virksomheder tror reglerne er ens — det er de ikke."],
+            ["🔄","Moms og skat — samspil og asymmetri","Forstå de kritiske forskelle og sammenhænge mellem moms og skat. Mange fejl opstår fordi virksomheder tror reglerne er ens — det er de ikke."],
           ].map(([ic,ti,tx])=>(
             <Card key={ti}>
               <div style={{
@@ -1152,7 +1153,7 @@ function OmOs() {
     <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
       <SectionHeader title="Om os"/>
       <p style={{color:C.textSub,maxWidth:"600px",lineHeight:1.75,fontSize:"14px",marginBottom:"2rem"}}>
-        MomsRevisor A/S er en specialiseret momsrådgivningsvirksomhed med kontorer i København og Aarhus. Vi hjælper virksomheder med at navigere sikkert i momsregler og sikre korrekte og effektive løsninger.
+        MomsRevisor ApS er en specialiseret momsrådgivningsvirksomhed med kontorer i København og Aarhus. Vi hjælper virksomheder med at navigere sikkert i momsregler og sikre korrekte og effektive løsninger.
       </p>
 
       {/* 3 kort — samme stil som Ydelser */}
@@ -1576,14 +1577,111 @@ function Momstraening() {
     return Math.round((done/total)*100);
   };
 
+  const totalLektioner = MODULER.reduce((s,m)=>s+m.lektioner.length,0);
+  const altFaerdig = fremgang() === 100;
+  const [bevisNavn, setBevisNavn] = useState("");
+
+  const genererBevis = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"landscape", unit:"mm", format:"a4" });
+    const W = 297, H = 210;
+
+    // Baggrund
+    doc.setFillColor(12, 31, 53);
+    doc.rect(0, 0, W, H, "F");
+
+    // Ydre guldramme
+    doc.setDrawColor(196, 151, 62);
+    doc.setLineWidth(1.2);
+    doc.rect(8, 8, W-16, H-16);
+    doc.setLineWidth(0.35);
+    doc.rect(12, 12, W-24, H-24);
+
+    // Hjørneornamenter
+    [[12,12,1,1],[W-12,12,-1,1],[12,H-12,1,-1],[W-12,H-12,-1,-1]].forEach(([x,y,dx,dy])=>{
+      doc.setDrawColor(196,151,62); doc.setLineWidth(0.7);
+      doc.line(x,y,x+dx*14,y); doc.line(x,y,x,y+dy*14);
+    });
+
+    // Øverst: logo-cirkel
+    doc.setDrawColor(196,151,62); doc.setLineWidth(0.6);
+    doc.setFillColor(20,45,75); doc.circle(W/2, 37, 13, "FD");
+    doc.setTextColor(196,151,62); doc.setFontSize(16); doc.setFont("helvetica","bold");
+    doc.text("\u2696", W/2, 41, {align:"center"});
+
+    // Firma
+    doc.setTextColor(196,151,62); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.setCharSpace(2);
+    doc.text("MOMSREVISOR ApS", W/2, 57, {align:"center"});
+    doc.setCharSpace(0);
+
+    // Titel
+    doc.setTextColor(255,255,255); doc.setFontSize(30); doc.setFont("helvetica","bold");
+    doc.text("KURSUSBEVIS", W/2, 73, {align:"center"});
+
+    // Guld linje
+    doc.setDrawColor(196,151,62); doc.setLineWidth(0.7);
+    doc.line(W/2-45, 77, W/2+45, 77);
+
+    // Attestering
+    doc.setTextColor(160,160,160); doc.setFontSize(10); doc.setFont("helvetica","normal");
+    doc.text("Dette attesterer at", W/2, 88, {align:"center"});
+
+    // Navn
+    const navn = bevisNavn.trim() || "Kursusdeltager";
+    doc.setTextColor(255,255,255); doc.setFontSize(24); doc.setFont("helvetica","bold");
+    doc.text(navn, W/2, 100, {align:"center"});
+    doc.setDrawColor(196,151,62); doc.setLineWidth(0.25);
+    const nw = doc.getTextWidth(navn);
+    doc.line(W/2-nw/2, 103, W/2+nw/2, 103);
+
+    // Beskrivelse
+    doc.setTextColor(160,160,160); doc.setFontSize(10); doc.setFont("helvetica","normal");
+    doc.text("har gennemfort og besta\u0308t alle moduler i", W/2, 112, {align:"center"});
+
+    // Kursustitel
+    doc.setTextColor(196,151,62); doc.setFontSize(15); doc.setFont("helvetica","bold");
+    doc.text("Akademiet \u2014 Moms & Skat", W/2, 122, {align:"center"});
+
+    // Modul-liste
+    doc.setTextColor(130,130,130); doc.setFontSize(7); doc.setFont("helvetica","normal");
+    const modulTekst = MODULER.map(m=>m.titel.replace(/Modul \d+: /,"")).join(" \u00B7 ");
+    doc.text(doc.splitTextToSize(modulTekst, 210), W/2, 131, {align:"center"});
+
+    // Stats
+    doc.setTextColor(196,151,62); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.text(MODULER.length + " moduler  \u00B7  " + totalLektioner + " lektioner  \u00B7  " + totalLektioner + " quizzer bestået", W/2, 143, {align:"center"});
+
+    // Dato
+    const dato = new Date().toLocaleDateString("da-DK",{day:"numeric",month:"long",year:"numeric"});
+    doc.setTextColor(150,150,150); doc.setFontSize(9); doc.setFont("helvetica","normal");
+    doc.text("Udstedt den " + dato, W/2, 152, {align:"center"});
+
+    // Signaturlinjer
+    doc.setDrawColor(196,151,62); doc.setLineWidth(0.3);
+    doc.line(W/2-65,170,W/2-15,170);
+    doc.line(W/2+15,170,W/2+65,170);
+    doc.setTextColor(140,140,140); doc.setFontSize(8);
+    doc.text("MomsRevisor ApS", W/2-40, 175, {align:"center"});
+    doc.text("Akademiet", W/2+40, 175, {align:"center"});
+
+    // Bevisnummer
+    doc.setFontSize(7); doc.setTextColor(80,80,80);
+    doc.text("Bevisnr: BEV-" + Date.now().toString(36).toUpperCase(), W/2, 185, {align:"center"});
+
+    doc.save("Kursusbevis_MomsRevisor_" + navn.replace(/\s+/g,"_") + ".pdf");
+  };
+
   // Oversigt
   if (aktivtModul === null) return (
     <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
-      <SectionHeader title="Akademiet — Moms & Skat A–Z"/>
+      <SectionHeader title="Akademiet — Moms & Skat"/>
       <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"1rem"}}>
         Lær moms og skat fra bunden med strukturerede moduler, praktiske eksempler og quizzer der tester din viden. Hvert modul bygger videre på det forrige.
       </p>
-      <div style={{background:`rgba(196,151,62,0.08)`,border:`0.5px solid rgba(196,151,62,0.3)`,borderRadius:"10px",padding:"14px 18px",marginBottom:"2rem",display:"flex",alignItems:"center",gap:"16px"}}>
+
+      {/* Fremgang */}
+      <div style={{background:"rgba(196,151,62,0.08)",border:"0.5px solid rgba(196,151,62,0.3)",borderRadius:"10px",padding:"14px 18px",marginBottom:"1.5rem",display:"flex",alignItems:"center",gap:"16px",flexWrap:"wrap"}}>
         <div style={{fontSize:"13px",color:C.textSub,flex:1}}>
           <strong style={{color:C.gold}}>Din fremgang</strong> — {fremgang()}% gennemført
         </div>
@@ -1592,6 +1690,39 @@ function Momstraening() {
         </div>
         <div style={{fontWeight:700,color:C.gold,fontSize:"15px"}}>{fremgang()}%</div>
       </div>
+
+      {/* Kursusbevis-banner */}
+      {altFaerdig && (
+        <div style={{background:"linear-gradient(135deg,#0c1f35 0%,#1a3558 100%)",border:`1.5px solid ${C.gold}`,borderRadius:"14px",padding:"2rem",marginBottom:"2rem",textAlign:"center",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:"3px",background:`linear-gradient(90deg,transparent,${C.gold},transparent)`}}/>
+          <div style={{fontSize:"52px",marginBottom:"0.5rem"}}>🏆</div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:700,color:C.white,marginBottom:"6px"}}>
+            Tillykke — du har gennemført Akademiet!
+          </div>
+          <p style={{color:"rgba(255,255,255,0.6)",fontSize:"13px",marginBottom:"1.5rem",lineHeight:1.7,maxWidth:"480px",margin:"0 auto 1.5rem"}}>
+            Du har gennemført alle {MODULER.length} moduler og {totalLektioner} lektioner inden for moms og skat. Indtast dit navn og download dit kursusbevis som PDF.
+          </p>
+          <div style={{display:"flex",gap:"10px",justifyContent:"center",flexWrap:"wrap",maxWidth:"460px",margin:"0 auto"}}>
+            <input
+              value={bevisNavn}
+              onChange={e=>setBevisNavn(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&bevisNavn.trim()&&genererBevis()}
+              placeholder="Indtast dit fulde navn..."
+              style={{flex:1,minWidth:"200px",padding:"10px 16px",borderRadius:"8px",border:"1px solid rgba(196,151,62,0.4)",background:"rgba(255,255,255,0.07)",color:C.white,fontSize:"14px",fontFamily:"Georgia,serif"}}
+            />
+            <button
+              onClick={genererBevis}
+              disabled={!bevisNavn.trim()}
+              style={{background:bevisNavn.trim()?C.gold:"rgba(196,151,62,0.25)",color:bevisNavn.trim()?C.navy:"rgba(255,255,255,0.3)",border:"none",padding:"10px 22px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:bevisNavn.trim()?"pointer":"default",fontFamily:"Georgia,serif",transition:"all 0.2s",whiteSpace:"nowrap"}}
+            >
+              📄 Download bevis
+            </button>
+          </div>
+          <div style={{position:"absolute",bottom:0,left:0,right:0,height:"3px",background:`linear-gradient(90deg,transparent,${C.gold},transparent)`}}/>
+        </div>
+      )}
+
+      {/* Modul-kort */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"1.5rem"}}>
         {MODULER.map((m,mi)=>{
           const lDone = m.lektioner.filter((_,li)=>gennemfoert[`${mi}-${li}`]!==undefined).length;
@@ -2109,7 +2240,7 @@ function App() {
           <div>
             <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"1rem"}}>
               <div style={{width:"30px",height:"30px",borderRadius:"7px",background:"rgba(196,151,62,0.12)",border:"1px solid rgba(196,151,62,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px"}}>⚖</div>
-              <div style={{fontFamily:"'Playfair Display',serif",color:"rgba(255,255,255,0.9)",fontWeight:600,fontSize:"15px"}}>MomsRevisor A/S</div>
+              <div style={{fontFamily:"'Playfair Display',serif",color:"rgba(255,255,255,0.9)",fontWeight:600,fontSize:"15px"}}>MomsRevisor ApS</div>
             </div>
             <p style={{fontSize:"13px",color:"rgba(255,255,255,0.35)",lineHeight:1.7,maxWidth:"380px",marginBottom:"1.25rem"}}>
               Specialiseret momsrådgivning for danske virksomheder. Vi kombinerer juridisk ekspertise med AI-teknologi.
@@ -2127,7 +2258,7 @@ function App() {
           </div>
         </div>
         <div style={{borderTop:"1px solid rgba(255,255,255,0.05)",padding:"1rem 2rem",textAlign:"center"}}>
-          <span style={{fontSize:"11px",color:"rgba(255,255,255,0.2)",letterSpacing:"0.05em"}}>© 2026 MOMSREVISOR A/S · CVR 12345678</span>
+          <span style={{fontSize:"11px",color:"rgba(255,255,255,0.2)",letterSpacing:"0.05em"}}>© 2026 MOMSREVISOR ApS · CVR 12345678</span>
         </div>
       </footer>
     </div>
