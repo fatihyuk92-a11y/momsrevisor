@@ -4,7 +4,36 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MomsRevisor A/S – Professionel momsrådgivning</title>
-<meta name="description" content="Professionel momsrådgivning med AI-rådgiver, momsberegner og periodeoversigt for danske virksomheder."/>
+<meta name="description" content="Professionel momsrådgivning med AI-rådgiver, momsberegner, CVR compliance-analyse og momstræning for danske virksomheder. Baseret på seneste momslov og EU-ret."/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://momsrevisor.dk/"/>
+<!-- Open Graph -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="MomsRevisor A/S"/>
+<meta property="og:title" content="MomsRevisor A/S – Professionel momsrådgivning"/>
+<meta property="og:description" content="AI-drevet momsrådgivning, CVR compliance-analyse, momsberegner og komplet momstræning A–Z for danske virksomheder."/>
+<meta property="og:url" content="https://momsrevisor.dk/"/>
+<!-- Schema.org strukturerede data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "MomsRevisor A/S",
+  "description": "Specialiseret momsrådgivning for danske virksomheder",
+  "url": "https://momsrevisor.dk",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Bredgade 20",
+    "postalCode": "1260",
+    "addressLocality": "København K",
+    "addressCountry": "DK"
+  },
+  "telephone": "+4533112233",
+  "priceRange": "$$",
+  "areaServed": "DK",
+  "serviceType": ["Momsrådgivning", "Skattemæssig rådgivning", "EU-moms", "Lønsumsafgift"]
+}
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -87,7 +116,28 @@ const C = {
   red: "#ef4444",
 };
 
-function Nav({ active, setActive }) {
+// URL routing — kortlægning mellem side-id og URL-sti
+const RUTER = {
+  "home":       "/",
+  "sporg":      "/sporg-ai",
+  "compliance": "/moms-compliance",
+  "traening":   "/momstraening",
+  "hvad":       "/hvad-er-moms",
+  "perioder":   "/momsperioder",
+  "beregner":   "/momsberegner",
+  "ydelser":    "/ydelser",
+  "om":         "/om-os",
+  "kontakt":    "/kontakt",
+};
+// Omvendt opslag: sti → id
+const STI_TIL_ID = Object.fromEntries(Object.entries(RUTER).map(([id,sti])=>[sti,id]));
+
+function hentAktivSide() {
+  const sti = window.location.pathname;
+  return STI_TIL_ID[sti] || "home";
+}
+
+function Nav({ active, navigate }) {
   const links = [
     ["home","Forside"],["sporg","Spørg AI"],["compliance","Moms Compliance"],["traening","Momstræning"],["hvad","Hvad er moms?"],
     ["perioder","Perioder"],["beregner","Beregner"],["ydelser","Ydelser"],
@@ -95,12 +145,12 @@ function Nav({ active, setActive }) {
   ];
   return (
     <nav style={{background:C.navy,padding:"0 1.5rem",display:"flex",alignItems:"center",justifyContent:"space-between",height:"60px",position:"sticky",top:0,zIndex:100,flexWrap:"wrap",gap:"0.5rem"}}>
-      <div onClick={()=>setActive("home")} style={{color:C.white,fontWeight:700,fontSize:"17px",cursor:"pointer",display:"flex",alignItems:"center",gap:"8px"}}>
+      <div onClick={()=>navigate("home")} style={{color:C.white,fontWeight:700,fontSize:"17px",cursor:"pointer",display:"flex",alignItems:"center",gap:"8px"}}>
         <span style={{color:C.gold,fontSize:"20px"}}>⚖</span> MomsRevisor <span style={{fontSize:"11px",color:"rgba(255,255,255,0.4)",fontWeight:400}}>A/S</span>
       </div>
       <div style={{display:"flex",flexWrap:"wrap",gap:"2px"}}>
         {links.map(([id,lbl])=>(
-          <button key={id} onClick={()=>setActive(id)} style={{
+          <button key={id} onClick={()=>navigate(id)} style={{
             background: active===id?"rgba(200,168,75,0.25)":"transparent",
             color: active===id?C.gold:"rgba(255,255,255,0.8)",
             border:"none",padding:"6px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"13px",transition:"all 0.15s"
@@ -125,7 +175,7 @@ function SectionHeader({title}) {
 }
 
 // ── HOME ──────────────────────────────────────────────────────────────────────
-function Home({setActive}) {
+function Home({navigate}) {
   return (
     <div>
       <div style={{background:"linear-gradient(135deg,#0f2740 0%,#1a3f60 50%,#0f2740 100%)",padding:"5rem 2rem",textAlign:"center"}}>
@@ -140,8 +190,8 @@ function Home({setActive}) {
             Vi hjælper danske virksomheder med at navigere i momslovens kompleksitet — fra daglig bogføring til komplekse EU-transaktioner.
           </p>
           <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap"}}>
-            <button onClick={()=>setActive("sporg")} style={{background:C.gold,color:C.navy,border:"none",padding:"13px 28px",borderRadius:"8px",fontSize:"15px",fontWeight:700,cursor:"pointer"}}>Stil et momsspørgsmål ↗</button>
-            <button onClick={()=>setActive("ydelser")} style={{background:"transparent",color:C.white,border:`1.5px solid rgba(255,255,255,0.4)`,padding:"13px 28px",borderRadius:"8px",fontSize:"15px",cursor:"pointer"}}>Se vores ydelser</button>
+            <button onClick={()=>navigate("sporg")} style={{background:C.gold,color:C.navy,border:"none",padding:"13px 28px",borderRadius:"8px",fontSize:"15px",fontWeight:700,cursor:"pointer"}}>Stil et momsspørgsmål ↗</button>
+            <button onClick={()=>navigate("ydelser")} style={{background:"transparent",color:C.white,border:`1.5px solid rgba(255,255,255,0.4)`,padding:"13px 28px",borderRadius:"8px",fontSize:"15px",cursor:"pointer"}}>Se vores ydelser</button>
           </div>
         </div>
       </div>
@@ -1636,12 +1686,28 @@ function MomsCompliance() {
   );
 }
 function App() {
-  const [active, setActive] = useState("home");
+  const [active, setActive] = useState(hentAktivSide);
+
+  // Opdater URL når siden skifter
+  const navigate = (id) => {
+    const sti = RUTER[id] || "/";
+    window.history.pushState({id}, "", sti);
+    setActive(id);
+    window.scrollTo(0,0);
+  };
+
+  // Håndter browser tilbage/frem-knapper
+  useEffect(() => {
+    const handlePop = () => setActive(hentAktivSide());
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
   return (
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",flexDirection:"column"}}>
-      <Nav active={active} setActive={setActive}/>
+      <Nav active={active} navigate={navigate}/>
       <main style={{flex:1}}>
-        {active==="home" && <Home setActive={setActive}/>}
+        {active==="home" && <Home navigate={navigate}/>}
         {active==="compliance" && <MomsCompliance/>}
         {active==="sporg" && <Chat/>}
         {active==="hvad" && <HvadErMoms/>}
