@@ -750,6 +750,128 @@ function Home({navigate}) {
       {/* AI Demo sektion */}
       <AIDemo navigate={navigate}/>
 
+      {/* ── Hurtig adgang: Perioder, Akademiet, Beregner ── */}
+      <div style={{background:C.bg,padding:"3rem 2rem 0"}}>
+        <div style={{maxWidth:"1100px",margin:"0 auto"}}>
+          <div style={{textAlign:"center",marginBottom:"2rem"}}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.3rem,2.5vw,1.8rem)",fontWeight:700,color:C.navy,marginBottom:"6px"}}>
+              Dine vigtigste værktøjer
+            </div>
+            <p style={{color:C.textSub,fontSize:"14px",margin:0}}>Hurtigt overblik over de mest brugte funktioner</p>
+          </div>
+
+          {/* Perioder — stor fremhævet kort */}
+          <div onClick={()=>navigate("perioder")} style={{
+            background:`linear-gradient(135deg,#0c1f35 0%,#1a3558 60%,#0f2d50 100%)`,
+            borderRadius:"16px",padding:"2rem 2.5rem",cursor:"pointer",marginBottom:"1rem",
+            border:"0.5px solid rgba(196,151,62,0.3)",
+            boxShadow:"0 8px 32px rgba(12,31,53,0.2)",
+            position:"relative",overflow:"hidden",
+            transition:"transform 0.15s,box-shadow 0.15s",
+          }}>
+            {/* Baggrundsdekoration */}
+            <div style={{position:"absolute",right:"-20px",top:"-20px",width:"180px",height:"180px",borderRadius:"50%",background:"rgba(196,151,62,0.06)",pointerEvents:"none"}}/>
+            <div style={{position:"absolute",right:"60px",bottom:"-40px",width:"120px",height:"120px",borderRadius:"50%",background:"rgba(196,151,62,0.04)",pointerEvents:"none"}}/>
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:"2rem",alignItems:"center",flexWrap:"wrap"}}>
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}}>
+                  <div style={{width:"44px",height:"44px",borderRadius:"12px",background:"rgba(196,151,62,0.15)",border:"1px solid rgba(196,151,62,0.4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px"}}>📅</div>
+                  <div>
+                    <div style={{color:"rgba(196,151,62,0.8)",fontSize:"10px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase"}}>Mest brugte</div>
+                    <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:700,fontSize:"20px",lineHeight:1.1}}>Afgifter & Frister {new Date().getFullYear()}</div>
+                  </div>
+                </div>
+                <p style={{color:"rgba(255,255,255,0.6)",fontSize:"13px",lineHeight:1.65,margin:"0 0 1.25rem",maxWidth:"500px"}}>
+                  Se alle indberetningsfrister for moms, A-skat, B-skat, acontoskat, lønsumsafgift og punktafgifter. Altid opdateret med næste frist fremhævet.
+                </p>
+                {/* Mini frist-preview */}
+                <div style={{display:"flex",gap:"8px",flexWrap:"wrap"}}>
+                  {[
+                    ["🧾","Moms","Kvartalsvis"],
+                    ["💼","A-skat","Månedlig"],
+                    ["📊","B-skat","10 rater/år"],
+                    ["⚡","Punktafgifter","Månedlig/kvartalsvis"],
+                  ].map(([ic,ti,fr])=>(
+                    <div key={ti} style={{background:"rgba(255,255,255,0.07)",border:"0.5px solid rgba(255,255,255,0.12)",borderRadius:"8px",padding:"6px 12px",display:"flex",alignItems:"center",gap:"6px"}}>
+                      <span style={{fontSize:"13px"}}>{ic}</span>
+                      <div>
+                        <div style={{color:C.white,fontSize:"11px",fontWeight:600}}>{ti}</div>
+                        <div style={{color:"rgba(255,255,255,0.4)",fontSize:"10px"}}>{fr}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"8px",flexShrink:0}}>
+                <div style={{background:C.gold,color:C.navy,padding:"12px 28px",borderRadius:"10px",fontWeight:700,fontSize:"14px",fontFamily:"Georgia,serif",whiteSpace:"nowrap",boxShadow:`0 4px 16px rgba(196,151,62,0.35)`}}>
+                  Se frister →
+                </div>
+                <div style={{color:"rgba(255,255,255,0.35)",fontSize:"11px"}}>Gratis · Altid opdateret</div>
+              </div>
+            </div>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:"2.5px",background:`linear-gradient(90deg,transparent,${C.gold},transparent)`}}/>
+          </div>
+
+          {/* Akademiet + Beregner — side om side */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1rem",marginBottom:"3rem"}}>
+            {/* Akademiet */}
+            <div onClick={()=>navigate("traening")} style={{
+              background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:"14px",
+              padding:"1.5rem",cursor:"pointer",position:"relative",overflow:"hidden",
+              transition:"transform 0.15s,box-shadow 0.15s",
+            }}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:"3px",background:`linear-gradient(90deg,${C.navy},#1a4d7a)`}}/>
+              <div style={{display:"flex",gap:"12px",alignItems:"flex-start",marginBottom:"0.75rem"}}>
+                <div style={{width:"44px",height:"44px",borderRadius:"12px",background:"rgba(12,31,53,0.08)",border:`1px solid rgba(12,31,53,0.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",flexShrink:0}}>🎓</div>
+                <div>
+                  <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"2px"}}>Akademiet</div>
+                  <div style={{fontSize:"12px",color:C.textSub}}>Moms & Skat A–Z</div>
+                </div>
+              </div>
+              <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:"0 0 1rem"}}>
+                8 moduler med lektioner og quizzer. Gennemfør alle moduler og få et personligt kursusbevis som PDF.
+              </p>
+              <div style={{display:"flex",gap:"8px",flexWrap:"wrap",marginBottom:"1rem"}}>
+                {["8 moduler","24 lektioner","Kursusbevis"].map(t=>(
+                  <span key={t} style={{background:"rgba(12,31,53,0.06)",border:`0.5px solid rgba(12,31,53,0.1)`,borderRadius:"20px",padding:"3px 10px",fontSize:"11px",color:C.navy,fontWeight:600}}>{t}</span>
+                ))}
+              </div>
+              <div style={{color:C.navy,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"4px"}}>
+                Start her →
+              </div>
+            </div>
+
+            {/* Beregner */}
+            <div onClick={()=>navigate("beregner")} style={{
+              background:C.bgCard,border:`1px solid ${C.border}`,borderRadius:"14px",
+              padding:"1.5rem",cursor:"pointer",position:"relative",overflow:"hidden",
+              transition:"transform 0.15s,box-shadow 0.15s",
+            }}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:"3px",background:`linear-gradient(90deg,${C.gold},rgba(196,151,62,0.3))`}}/>
+              <div style={{display:"flex",gap:"12px",alignItems:"flex-start",marginBottom:"0.75rem"}}>
+                <div style={{width:"44px",height:"44px",borderRadius:"12px",background:"rgba(196,151,62,0.1)",border:`1px solid rgba(196,151,62,0.2)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",flexShrink:0}}>🧮</div>
+                <div>
+                  <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"2px"}}>Momsberegner</div>
+                  <div style={{fontSize:"12px",color:C.textSub}}>Hurtig og præcis</div>
+                </div>
+              </div>
+              <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:"0 0 1rem"}}>
+                Beregn moms på sekunder — læg til eller træk fra. Se ekskl., momsbeløb og inkl. pris med det samme.
+              </p>
+              {/* Mini beregner preview */}
+              <div style={{background:C.bgSecondary,borderRadius:"8px",padding:"10px 12px",marginBottom:"1rem",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{fontSize:"12px",color:C.textSub}}>10.000 kr. ekskl. moms</div>
+                <div style={{fontSize:"14px",fontWeight:700,color:C.navy}}>= 12.500 kr.</div>
+              </div>
+              <div style={{color:C.gold,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"4px"}}>
+                Beregn nu →
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Expertise grid */}
       <div style={{maxWidth:"1100px",margin:"0 auto",padding:"5rem 2rem 3rem"}}>
         <SectionHeader title="Vores ekspertise" sub="Specialiseret rådgivning inden for alle aspekter af dansk og international moms."/>
