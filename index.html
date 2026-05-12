@@ -1041,6 +1041,138 @@ function Home({navigate}) {
     </div>
   );
 }
+// ── PRO ADGANGSPORT ───────────────────────────────────────────────────────────
+// Adgangskoder — ændr disse og distribuer til betalende kunder
+// Format: "KODE": "kundenavn" (til logning)
+const PRO_KODER = {
+  "MR-2026-DEMO": "Demo",
+  // Tilføj nye kunder her: "MR-XXXX-YYYY": "Kundenavn",
+};
+
+const PRO_STORAGE_KEY = "mr_pro_adgang";
+
+function erProAktiv() {
+  try {
+    const data = JSON.parse(localStorage.getItem(PRO_STORAGE_KEY)||"{}");
+    return data.kode && PRO_KODER[data.kode] && data.udloeber > Date.now();
+  } catch { return false; }
+}
+
+function aktiverProAdgang(kode) {
+  if (!PRO_KODER[kode]) return false;
+  localStorage.setItem(PRO_STORAGE_KEY, JSON.stringify({
+    kode,
+    navn: PRO_KODER[kode],
+    udloeber: Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 dage
+  }));
+  return true;
+}
+
+function hentProNavn() {
+  try {
+    const data = JSON.parse(localStorage.getItem(PRO_STORAGE_KEY)||"{}");
+    return PRO_KODER[data.kode] || "";
+  } catch { return ""; }
+}
+
+function ProGate({ side, children }) {
+  const [adgang, setAdgang] = useState(erProAktiv);
+  const [kode, setKode] = useState("");
+  const [fejl, setFejl] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const forsøgAdgang = () => {
+    const renset = kode.trim().toUpperCase();
+    if (!renset) { setFejl("Indtast din adgangskode."); return; }
+    setLoading(true);
+    setTimeout(() => {
+      if (aktiverProAdgang(renset)) {
+        setAdgang(true);
+        setFejl("");
+      } else {
+        setFejl("Ugyldig adgangskode. Kontakt os på kontakt@momsrevisor.dk for adgang.");
+      }
+      setLoading(false);
+    }, 600);
+  };
+
+  if (adgang) return (
+    <div>
+      <div style={{background:"rgba(12,31,53,0.97)",borderBottom:`0.5px solid rgba(196,151,62,0.2)`,padding:"6px 2rem",display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"12px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+          <span style={{background:"rgba(196,151,62,0.15)",color:C.gold,border:`0.5px solid rgba(196,151,62,0.4)`,borderRadius:"12px",padding:"2px 10px",fontSize:"10px",fontWeight:700,letterSpacing:"0.5px"}}>PRO</span>
+          <span style={{color:"rgba(255,255,255,0.5)",fontSize:"11px"}}>{hentProNavn()}</span>
+        </div>
+        <button onClick={()=>{localStorage.removeItem(PRO_STORAGE_KEY);setAdgang(false);setKode("");}} style={{background:"none",border:"none",color:"rgba(255,255,255,0.3)",fontSize:"11px",cursor:"pointer",padding:"2px 6px"}}>Log ud</button>
+      </div>
+      {children}
+    </div>
+  );
+
+  return (
+    <div style={{maxWidth:"520px",margin:"0 auto",padding:"5rem 2rem",textAlign:"center"}}>
+      {/* PRO-ikon */}
+      <div style={{width:"72px",height:"72px",borderRadius:"50%",background:"linear-gradient(135deg,rgba(196,151,62,0.2),rgba(196,151,62,0.05))",border:`1.5px solid rgba(196,151,62,0.4)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"32px",margin:"0 auto 1.5rem"}}>
+        🔐
+      </div>
+
+      <div style={{display:"inline-block",background:"rgba(196,151,62,0.12)",color:C.gold,border:`0.5px solid rgba(196,151,62,0.35)`,borderRadius:"20px",padding:"3px 14px",fontSize:"11px",fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",marginBottom:"1rem"}}>
+        PRO · Kun for abonnenter
+      </div>
+
+      <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:"1.8rem",fontWeight:700,color:C.navy,marginBottom:"0.75rem",lineHeight:1.2}}>
+        {side === "chat" ? "Moms & Skat AI-rådgiver" : "Moms & Skat Compliance"}
+      </h2>
+
+      <p style={{color:C.textSub,fontSize:"14px",lineHeight:1.7,marginBottom:"2rem",maxWidth:"380px",margin:"0 auto 2rem"}}>
+        {side === "chat"
+          ? "AI-rådgiveren er forbeholdt betalende kunder. Få ubegrænset adgang til kvalificeret moms- og skatterådgivning baseret på seneste lovgivning."
+          : "Compliance-analysen er forbeholdt betalende kunder. Slå din virksomhed op på CVR og spot konkrete moms- og skattefejl automatisk."}
+      </p>
+
+      {/* Hvad er inkluderet */}
+      <div style={{background:C.bgSecondary,border:`0.5px solid ${C.border}`,borderRadius:"12px",padding:"1.25rem",marginBottom:"2rem",textAlign:"left"}}>
+        <div style={{fontSize:"12px",fontWeight:700,color:C.navy,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"0.5px"}}>PRO inkluderer</div>
+        {(side==="chat"
+          ? ["Ubegrænset AI-rådgivning om moms og skat","Svar baseret på 17+ retskilder inkl. seneste lovgivning","Konkrete lovhenvisninger (ML §, LL §, SEL §)","Moms/skat-asymmetri og samspilsanalyser"]
+          : ["CVR-opslag og automatisk virksomhedsanalyse","AI compliance-analyse for moms og skat","Upload saldobalance og spot fejl konkret","Print-klar rapport med anbefalinger"]
+        ).map(t=>(
+          <div key={t} style={{display:"flex",gap:"8px",alignItems:"center",padding:"4px 0"}}>
+            <span style={{color:C.green,fontSize:"14px",flexShrink:0}}>✓</span>
+            <span style={{fontSize:"13px",color:C.textSub}}>{t}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Adgangskode-felt */}
+      <div style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"12px",padding:"1.5rem",marginBottom:"1.5rem"}}>
+        <div style={{fontSize:"13px",fontWeight:600,color:C.navy,marginBottom:"10px"}}>Har du allerede adgang?</div>
+        <div style={{display:"flex",gap:"8px",marginBottom:"8px"}}>
+          <input
+            value={kode}
+            onChange={e=>{ setKode(e.target.value.toUpperCase()); setFejl(""); }}
+            onKeyDown={e=>e.key==="Enter"&&forsøgAdgang()}
+            placeholder="Indtast din adgangskode..."
+            style={{flex:1,padding:"10px 14px",borderRadius:"8px",border:`1.5px solid ${fejl?C.red:C.borderMid}`,background:C.bgSecondary,color:C.text,fontSize:"14px",fontFamily:"monospace",letterSpacing:"1px"}}
+          />
+          <button onClick={forsøgAdgang} disabled={loading} style={{background:loading?"#aaa":C.navy,color:C.white,border:"none",padding:"10px 20px",borderRadius:"8px",fontWeight:700,fontSize:"13px",cursor:"pointer",whiteSpace:"nowrap",transition:"all 0.15s"}}>
+            {loading?"⏳":"Åbn →"}
+          </button>
+        </div>
+        {fejl && <div style={{fontSize:"12px",color:C.red,display:"flex",gap:"6px",alignItems:"center"}}>⚠️ {fejl}</div>}
+      </div>
+
+      {/* Kontakt / Køb */}
+      <div style={{fontSize:"13px",color:C.textSub,lineHeight:1.6}}>
+        Ikke abonnent endnu?{" "}
+        <button onClick={()=>window.dispatchEvent(new CustomEvent("navigate",{detail:"kontakt"}))} style={{background:"none",border:"none",color:C.gold,fontWeight:700,cursor:"pointer",fontSize:"13px",textDecoration:"underline",padding:0}}>
+          Kontakt os for adgang
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -3493,9 +3625,9 @@ function App() {
       <Nav active={active} navigate={navigate}/>
       <main style={{flex:1}}>
         {active==="home" && <Home navigate={navigate}/>}
-        {active==="compliance" && <MomsCompliance/>}
+        {active==="compliance" && <ProGate side="compliance"><MomsCompliance/></ProGate>}
         {active==="regnskab" && <Regnskab/>}
-        {active==="sporg" && <Chat/>}
+        {active==="sporg" && <ProGate side="chat"><Chat/></ProGate>}
         {active==="hvad" && <HvadErMoms/>}
         {active==="perioder" && <Perioder/>}
         {active==="beregner" && <Beregner/>}
