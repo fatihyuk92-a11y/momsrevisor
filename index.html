@@ -4113,44 +4113,41 @@ function Regnskab() {
 
       <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
 
-        {/* Tab-navigation — store klikkbare kort */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem",marginBottom:"2.5rem"}}>
-          {Object.entries(SERVICES).map(([key, s]) => {
-            const akt = aktivTab===key;
-            const ti = TAB_IKONER[key];
-            return (
-              <div key={key} onClick={()=>setAktivTab(key)} style={{
-                background: akt ? ti.grad : C.bgCard,
-                border: `${akt?"1.5px":"0.5px"} solid ${akt?s.farve:C.border}`,
-                borderRadius:"16px",padding:"1.5rem",cursor:"pointer",
-                transition:"all 0.2s",position:"relative",overflow:"hidden",
-                boxShadow: akt ? `0 8px 32px ${s.lys.replace("0.08","0.3")}` : "none",
-              }}>
-                {akt && <div style={{position:"absolute",top:0,left:0,right:0,height:"2px",background:"rgba(255,255,255,0.3)"}}/>}
-                <div style={{fontSize:"2rem",marginBottom:"0.75rem"}}>{s.emoji}</div>
-                <div style={{fontWeight:700,fontSize:"17px",color:akt?C.white:C.navy,marginBottom:"5px"}}>{s.titel}</div>
-                <p style={{fontSize:"12px",color:akt?"rgba(255,255,255,0.7)":C.textSub,lineHeight:1.55,margin:"0 0 1rem"}}>{s.tagline}</p>
-                <div style={{display:"inline-flex",alignItems:"center",gap:"5px",fontSize:"11px",fontWeight:700,
-                  background:akt?"rgba(255,255,255,0.12)":ti.lys,
-                  color:akt?C.white:s.farve,
-                  padding:"4px 12px",borderRadius:"20px",
-                }}>
-                  {akt ? "✓ Valgt" : "Se ydelser →"}
-                </div>
-              </div>
-            );
-          })}
+        {/* Tab navigation — samme stil som Beregner & Frister */}
+        <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"1.25rem",borderBottom:`1px solid ${C.border}`}}>
+          {Object.entries(SERVICES).map(([key, s]) => (
+            <button key={key} onClick={()=>setAktivTab(key)} style={{
+              padding:"10px 16px",
+              borderRadius:"10px 10px 0 0",
+              border:"none",
+              borderBottom:`2px solid ${aktivTab===key?C.gold:"transparent"}`,
+              marginBottom:"-1px",
+              background:aktivTab===key?C.bgSecondary:"transparent",
+              color:aktivTab===key?C.navy:C.textSub,
+              cursor:"pointer",
+              fontSize:"14px",
+              fontWeight:aktivTab===key?700:500,
+              display:"flex",
+              alignItems:"center",
+              gap:"6px",
+              transition:"all 0.15s",
+              whiteSpace:"nowrap",
+            }}>
+              <span>{s.emoji}</span>{s.titel}
+            </button>
+          ))}
         </div>
 
-        {/* Aktiv sektion — overskrift + grid */}
+        {/* Aktiv sektion — overskrift + tagline + grid */}
         <div style={{marginBottom:"2.5rem"}}>
-          <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"1.75rem",padding:"1.25rem 1.5rem",background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,borderRadius:"12px"}}>
+          <div style={{display:"flex",alignItems:"flex-start",gap:"14px",marginBottom:"1.75rem",padding:"1.25rem 1.5rem",background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,borderRadius:"12px"}}>
             <div style={{width:"48px",height:"48px",borderRadius:"12px",background:TAB_IKONER[aktivTab].grad,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",flexShrink:0}}>
               {aktiv.emoji}
             </div>
-            <div>
-              <div style={{fontWeight:700,fontSize:"18px",color:aktiv.farve}}>{aktiv.titel}</div>
-              <div style={{fontSize:"12px",color:C.textSub,marginTop:"2px"}}>{aktiv.underemner.length} ydelsesområder — klik for at lære mere</div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:"18px",color:aktiv.farve,marginBottom:"4px"}}>{aktiv.titel}</div>
+              <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.65,margin:"0 0 6px"}}>{aktiv.tagline}</p>
+              <div style={{fontSize:"11px",color:C.textSub,opacity:0.7}}>{aktiv.underemner.length} ydelsesområder</div>
             </div>
           </div>
 
