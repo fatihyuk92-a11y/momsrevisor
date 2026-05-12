@@ -371,29 +371,29 @@ function Nav({ active, navigate }) {
       minHeight:"60px",position:"sticky",top:0,zIndex:100,flexWrap:"wrap",
     }}>
       {/* Logo */}
-      <div onClick={()=>navTo("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",flexShrink:0,padding:"8px 0"}}>
-        <svg width="220" height="64" viewBox="0 0 480 140" role="img">
+      <div onClick={()=>navTo("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",flexShrink:0,padding:"4px 0"}}>
+        <svg width="340" height="88" viewBox="0 0 680 180" role="img">
           <title>accai logo</title>
-          <text x="0" y="72"
+          <text x="0" y="90"
             fontFamily="'Playfair Display', Georgia, serif"
             fontWeight="400"
-            fontSize="72"
+            fontSize="90"
             letterSpacing="-2">
-            <tspan fill="#ffffff">acc</tspan><tspan fill="#c4973e">.</tspan><tspan fill="#c4973e">ai</tspan>
+            <tspan fill="#ffffff">acc</tspan><tspan fill="#c4973e">ai</tspan>
           </text>
-          <line x1="0" y1="84" x2="340" y2="84" stroke="#c4973e" strokeWidth="0.7" opacity="0.45"/>
-          <text x="1" y="104"
+          <line x1="0" y1="106" x2="420" y2="106" stroke="#c4973e" strokeWidth="0.8" opacity="0.45"/>
+          <text x="2" y="130"
+            fontFamily="'DM Sans', sans-serif"
+            fontWeight="400"
+            fontSize="16"
+            letterSpacing="3.5"
+            fill="rgba(255,255,255,0.8)">ACCOUNTING INTELLIGENCE</text>
+          <text x="2" y="154"
             fontFamily="'DM Sans', sans-serif"
             fontWeight="300"
             fontSize="14"
-            letterSpacing="2.5"
-            fill="rgba(255,255,255,0.65)">ACCOUNTING INTELLIGENCE</text>
-          <text x="1" y="124"
-            fontFamily="'DM Sans', sans-serif"
-            fontWeight="300"
-            fontSize="12"
             letterSpacing="0.8"
-            fill="rgba(255,255,255,0.4)">Smart rådgivning · Præcise svar</text>
+            fill="rgba(196,151,62,0.75)">Smart rådgivning · Præcise svar</text>
         </svg>
       </div>
 
@@ -3677,9 +3677,30 @@ function App() {
       <footer style={{background:"#07131f",borderTop:"1px solid rgba(196,151,62,0.12)"}}>
         <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem 2rem",display:"grid",gridTemplateColumns:"1fr auto",gap:"3rem",alignItems:"start"}}>
           <div>
-            <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"1rem"}}>
-              <div style={{width:"30px",height:"30px",borderRadius:"7px",background:"rgba(196,151,62,0.12)",border:"1px solid rgba(196,151,62,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px"}}>⚖</div>
-              <div style={{fontFamily:"'Playfair Display',serif",color:"rgba(255,255,255,0.9)",fontWeight:600,fontSize:"15px"}}>accai ApS</div>
+            <div style={{marginBottom:"1rem"}}>
+              <svg width="280" height="72" viewBox="0 0 680 180" role="img">
+                <title>accai logo</title>
+                <text x="0" y="90"
+                  fontFamily="'Playfair Display', Georgia, serif"
+                  fontWeight="400"
+                  fontSize="90"
+                  letterSpacing="-2">
+                  <tspan fill="#ffffff">acc</tspan><tspan fill="#c4973e">ai</tspan>
+                </text>
+                <line x1="0" y1="106" x2="420" y2="106" stroke="#c4973e" strokeWidth="0.8" opacity="0.4"/>
+                <text x="2" y="130"
+                  fontFamily="'DM Sans', sans-serif"
+                  fontWeight="400"
+                  fontSize="16"
+                  letterSpacing="3.5"
+                  fill="rgba(255,255,255,0.6)">ACCOUNTING INTELLIGENCE</text>
+                <text x="2" y="154"
+                  fontFamily="'DM Sans', sans-serif"
+                  fontWeight="300"
+                  fontSize="14"
+                  letterSpacing="0.8"
+                  fill="rgba(196,151,62,0.6)">Smart rådgivning · Præcise svar</text>
+              </svg>
             </div>
             <p style={{fontSize:"13px",color:"rgba(255,255,255,0.35)",lineHeight:1.7,maxWidth:"380px",marginBottom:"1.25rem"}}>
               Specialiseret momsrådgivning for danske virksomheder. Vi kombinerer juridisk ekspertise med AI-teknologi.
