@@ -3554,9 +3554,23 @@ function Regnskab() {
   return (
     <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
       <SectionHeader title="Digitalt Regnskab, Rådgivning & Bogføring"/>
-      <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.75,fontSize:"14px",marginBottom:"2.5rem"}}>
+      <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.75,fontSize:"14px",marginBottom:"1.5rem"}}>
         Vi tilbyder en komplet digital løsning til din virksomheds økonomi — fra daglig bogføring og løbende regnskab til strategisk rådgivning og skatteoptimering. Alt foregår digitalt og effektivt.
       </p>
+
+      {/* Partner-notice */}
+      <div style={{display:"flex",gap:"14px",alignItems:"flex-start",background:"rgba(196,151,62,0.05)",border:"0.5px solid rgba(196,151,62,0.25)",borderLeft:`3px solid ${C.gold}`,borderRadius:"0 10px 10px 0",padding:"14px 18px",marginBottom:"2.5rem",maxWidth:"780px"}}>
+        <div style={{fontSize:"20px",flexShrink:0,marginTop:"1px"}}>🤝</div>
+        <div>
+          <div style={{fontWeight:700,fontSize:"13px",color:C.navy,marginBottom:"4px"}}>Leveret via partneraftale</div>
+          <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.7,margin:"0 0 4px"}}>
+            Ydelsen leveres af en ekstern samarbejdspartner. Vi har indgået en partneraftale, som giver vores kunder adgang til særlige priser og fordele.
+          </p>
+          <div style={{fontSize:"12px",color:C.textSub,opacity:0.7}}>
+            accai yder ikke selv traditionelle revisions- eller regnskabsopgaver — vi koordinerer og formidler kontakten til den rette partner baseret på din opgaves omfang og behov.
+          </div>
+        </div>
+      </div>
 
       {/* 3 store service-kort øverst */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:"1.25rem",marginBottom:"2.5rem"}}>
