@@ -2196,6 +2196,319 @@ function Momstraening() {
 
 
 // ── MOMS COMPLIANCE ────────────────────────────────────────────────────────────
+// ── COMPLIANCE DEMO ───────────────────────────────────────────────────────────
+const COMPLIANCE_FASER = [
+  {
+    id: "cvr",
+    label: "CVR-opslag",
+    nr: "1",
+    varighed: 2800,
+    render: (pct) => (
+      <div style={{padding:"20px 24px"}}>
+        <div style={{fontSize:"12px",color:"#888",marginBottom:"8px",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Søg på CVR-nummer</div>
+        <div style={{display:"flex",gap:"8px",marginBottom:"16px"}}>
+          <div style={{flex:1,background:"#f5f4f1",border:"1.5px solid #c4973e",borderRadius:"8px",padding:"10px 14px",fontSize:"15px",color:"#0c1f35",fontWeight:600,letterSpacing:"2px"}}>
+            {"24256790".slice(0, Math.floor(pct/100*8))}
+            {pct < 100 && <span style={{borderRight:"2px solid #c4973e",marginLeft:"1px",animation:"blink 0.7s infinite"}}/>}
+          </div>
+          <div style={{background: pct >= 100 ? "#c4973e" : "#ddd",color: pct >= 100 ? "#fff" : "#aaa",border:"none",padding:"10px 18px",borderRadius:"8px",fontWeight:700,fontSize:"13px",transition:"all 0.3s"}}>
+            {pct >= 100 ? "⏳ Søger..." : "Analysér →"}
+          </div>
+        </div>
+        {pct >= 100 && (
+          <div style={{background:"rgba(196,151,62,0.08)",border:"0.5px solid rgba(196,151,62,0.3)",borderRadius:"8px",padding:"10px 14px",fontSize:"12px",color:"#666",display:"flex",alignItems:"center",gap:"8px"}}>
+            <div style={{width:"16px",height:"16px",border:"2px solid #c4973e",borderTop:"2px solid transparent",borderRadius:"50%",animation:"spin 0.8s linear infinite",flexShrink:0}}/>
+            Henter data fra CVR-registeret via AI...
+          </div>
+        )}
+      </div>
+    )
+  },
+  {
+    id: "data",
+    label: "CVR-data",
+    nr: "1",
+    varighed: 2200,
+    render: (pct) => (
+      <div style={{padding:"20px 24px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+          <div style={{fontSize:"13px",fontWeight:700,color:"#0c1f35"}}>📋 Virksomhedsoplysninger</div>
+          <div style={{background:"rgba(34,197,94,0.12)",color:"#16a34a",border:"0.5px solid #16a34a",borderRadius:"20px",padding:"2px 10px",fontSize:"11px",fontWeight:700}}>AKTIV</div>
+        </div>
+        {[
+          ["Navn","Novo Nordisk A/S"],
+          ["CVR","24256790"],
+          ["Branche","Fremstilling af lægemidler"],
+          ["Adresse","Novo Allé, 2880 Bagsværd"],
+          ["Ansatte","63.000+"],
+          ["Ejerform","Aktieselskab"],
+        ].map(([l,v], i) => (
+          <div key={l} style={{
+            display:"flex",gap:"8px",padding:"5px 0",
+            borderBottom:"0.5px solid #f0ede8",
+            opacity: pct >= (i/6)*100 ? 1 : 0,
+            transform: pct >= (i/6)*100 ? "translateY(0)" : "translateY(4px)",
+            transition:"all 0.3s"
+          }}>
+            <span style={{fontSize:"12px",color:"#999",minWidth:"80px"}}>{l}</span>
+            <span style={{fontSize:"12px",fontWeight:600,color:"#0c1f35"}}>{v}</span>
+          </div>
+        ))}
+      </div>
+    )
+  },
+  {
+    id: "analyse",
+    label: "AI-analyse",
+    nr: "2",
+    varighed: 3500,
+    render: (pct) => {
+      const linjer = [
+        {label:"MOMSSTATUS", tekst:"Blandet momspligtig — farmaceutisk produktion fuldt momspligtig. Visse forskningsaktiviteter kan være momsfritagne (ML § 13, stk. 1, nr. 7).", farve:"#0c1f35"},
+        {label:"SKATTEMÆSSIG STATUS", tekst:"Aktieselskab — selskabsskat 22% (SEL § 17). Koncernstruktur kræver transfer pricing-dokumentation (LL § 2).", farve:"#0c1f35"},
+        {label:"MOMSRISICI", tekst:"Særlig opmærksomhed på pro-rata ved blandet moms, EU-varesalg til datterselskaber og reverse charge ved tjenesteydelser.", farve:"#b45309"},
+        {label:"SKATTERISICI", tekst:"Transfer pricing ved intercompany-transaktioner. Kontrollerede transaktioner skal ske på armslængdevilkår.", farve:"#b45309"},
+        {label:"TOP ANBEFALING", tekst:"Udarbejd opdateret transfer pricing-dokumentation og kontroller pro-rata-opgørelse for 2025/2026.", farve:"#16a34a"},
+      ];
+      const synlige = Math.floor(pct/100 * linjer.length);
+      return (
+        <div style={{padding:"16px 24px",maxHeight:"200px",overflowY:"auto"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}}>
+            <div style={{width:"8px",height:"8px",borderRadius:"50%",background:"#16a34a",animation: pct < 100 ? "blink 1s infinite" : "none"}}/>
+            <div style={{fontSize:"12px",fontWeight:700,color:"#0c1f35"}}>🤖 AI Compliance-analyse</div>
+          </div>
+          {linjer.slice(0, synlige).map(({label,tekst,farve}) => (
+            <div key={label} style={{marginBottom:"8px"}}>
+              <div style={{fontSize:"11px",fontWeight:700,color:farve,marginBottom:"2px"}}>{label}</div>
+              <div style={{fontSize:"11px",color:"#555",lineHeight:1.5}}>{tekst}</div>
+            </div>
+          ))}
+          {pct < 100 && synlige < linjer.length && (
+            <div style={{display:"flex",gap:"4px",alignItems:"center",padding:"4px 0"}}>
+              {[0,1,2].map(d=><div key={d} style={{width:"5px",height:"5px",borderRadius:"50%",background:"#c4973e",animation:`bounce 1.2s ${d*0.2}s infinite`}}/>)}
+            </div>
+          )}
+        </div>
+      );
+    }
+  },
+  {
+    id: "upload",
+    label: "Upload filer",
+    nr: "3",
+    varighed: 2500,
+    render: (pct) => (
+      <div style={{padding:"20px 24px"}}>
+        <div style={{fontSize:"12px",color:"#888",marginBottom:"10px",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.5px"}}>Upload regnskabsmateriale</div>
+        <div style={{border:"2px dashed",borderColor: pct > 30 ? "#c4973e" : "#ddd",borderRadius:"10px",padding:"16px",textAlign:"center",background: pct > 30 ? "rgba(196,151,62,0.04)" : "#faf9f7",transition:"all 0.4s",marginBottom:"12px"}}>
+          <div style={{fontSize:"24px",marginBottom:"4px"}}>{pct > 50 ? "📊" : "📂"}</div>
+          <div style={{fontSize:"12px",color: pct > 30 ? "#c4973e" : "#aaa",fontWeight:600}}>
+            {pct < 30 ? "Træk filer hertil..." : pct < 60 ? "Saldobalance_2025.xlsx" : "Fil klar til analyse ✓"}
+          </div>
+        </div>
+        {pct >= 60 && (
+          <div style={{background:"#f5f4f1",border:"0.5px solid #e0dbd4",borderRadius:"8px",padding:"8px 12px",display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}}>
+            <span style={{fontSize:"18px"}}>📊</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:"12px",fontWeight:600,color:"#0c1f35"}}>Saldobalance_2025.xlsx</div>
+              <div style={{fontSize:"11px",color:"#999"}}>Excel · 284KB</div>
+            </div>
+            <span style={{color:"#16a34a",fontSize:"14px"}}>✓</span>
+          </div>
+        )}
+        {pct >= 85 && (
+          <div style={{background:"#c4973e",color:"#fff",border:"none",padding:"8px 16px",borderRadius:"8px",fontWeight:700,fontSize:"12px",textAlign:"center"}}>
+            🔍 Analyserer fil...
+          </div>
+        )}
+      </div>
+    )
+  },
+  {
+    id: "rapport",
+    label: "Rapport",
+    nr: "4",
+    varighed: 3000,
+    render: (pct) => (
+      <div style={{padding:"16px 24px",maxHeight:"200px",overflowY:"auto"}}>
+        {pct > 5 && (
+          <div style={{background:"#0c1f35",borderRadius:"8px",padding:"10px 14px",marginBottom:"10px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"8px"}}>
+            <div>
+              <div style={{color:"rgba(255,255,255,0.5)",fontSize:"9px",letterSpacing:"1px"}}>COMPLIANCE RAPPORT</div>
+              <div style={{color:"#fff",fontWeight:700,fontSize:"13px"}}>Novo Nordisk A/S</div>
+              <div style={{color:"rgba(255,255,255,0.5)",fontSize:"10px"}}>CVR 24256790 · Lægemidler</div>
+            </div>
+            <div style={{display:"flex",gap:"6px"}}>
+              <div style={{background:"rgba(255,255,255,0.1)",color:"rgba(255,255,255,0.8)",border:"0.5px solid rgba(255,255,255,0.2)",padding:"4px 10px",borderRadius:"6px",fontSize:"10px"}}>🖨 Print</div>
+              <div style={{background:"#c4973e",color:"#0c1f35",padding:"4px 10px",borderRadius:"6px",fontSize:"10px",fontWeight:700}}>Ny analyse</div>
+            </div>
+          </div>
+        )}
+        {[
+          {emoji:"📋",titel:"AI Compliance-analyse",tekst:"Branchebaseret moms- og skatteanalyse med 5 afsnit og lovhenvisninger"},
+          {emoji:"📊",titel:"Regnskabsanalyse",tekst:"Fundne momsfejl og mangler i saldobalancen identificeret"},
+          {emoji:"⚠️",titel:"Ansvarsfraskrivelse",tekst:"AI-analyse er vejledende og erstatter ikke professionel rådgivning"},
+        ].map(({emoji,titel,tekst},i) => (
+          <div key={titel} style={{
+            background:"#fff",border:"0.5px solid #e8e3db",borderRadius:"8px",padding:"8px 12px",marginBottom:"6px",display:"flex",gap:"8px",
+            opacity: pct >= 20 + i*25 ? 1 : 0,
+            transform: pct >= 20 + i*25 ? "translateY(0)" : "translateY(6px)",
+            transition:"all 0.4s"
+          }}>
+            <span style={{fontSize:"16px"}}>{emoji}</span>
+            <div>
+              <div style={{fontSize:"11px",fontWeight:700,color:"#0c1f35"}}>{titel}</div>
+              <div style={{fontSize:"10px",color:"#999",lineHeight:1.4}}>{tekst}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  },
+];
+
+function ComplianceDemo({ navigate }) {
+  const [faseIdx, setFaseIdx] = useState(0);
+  const [pct, setPct] = useState(0);
+  const [korer, setKorer] = useState(true);
+  const faseRef = useRef(0);
+  const pctRef = useRef(0);
+
+  useEffect(() => {
+    if (!korer) return;
+    const fase = COMPLIANCE_FASER[faseIdx];
+    const interval = 30;
+    const steps = fase.varighed / interval;
+    const step = 100 / steps;
+
+    const timer = setInterval(() => {
+      pctRef.current = Math.min(100, pctRef.current + step);
+      setPct(Math.min(100, pctRef.current));
+      if (pctRef.current >= 100) {
+        clearInterval(timer);
+        setTimeout(() => {
+          const next = (faseRef.current + 1) % COMPLIANCE_FASER.length;
+          faseRef.current = next;
+          pctRef.current = 0;
+          setFaseIdx(next);
+          setPct(0);
+        }, 600);
+      }
+    }, interval);
+    return () => clearInterval(timer);
+  }, [faseIdx, korer]);
+
+  const aktuelFase = COMPLIANCE_FASER[faseIdx];
+  const trinNumre = ["1","2","3","4"];
+  const trinLabels = ["CVR-opslag","AI-analyse","Upload filer","Rapport"];
+  // Map fase index to step: 0,1 = step 0; 2 = step 1; 3 = step 2; 4 = step 3
+  const aktivtTrin = faseIdx <= 1 ? 0 : faseIdx === 2 ? 1 : faseIdx === 3 ? 2 : 3;
+
+  return (
+    <div style={{background:"linear-gradient(180deg,#f0ede8 0%,#e8e3db 100%)",padding:"4rem 2rem"}}>
+      <div style={{maxWidth:"1100px",margin:"0 auto"}}>
+
+        {/* Header */}
+        <div style={{textAlign:"center",marginBottom:"3rem"}}>
+          <div style={{display:"inline-block",background:"rgba(196,151,62,0.12)",color:"#c4973e",border:"0.5px solid rgba(196,151,62,0.35)",borderRadius:"20px",padding:"4px 16px",fontSize:"12px",fontWeight:600,letterSpacing:"0.5px",marginBottom:"1rem",textTransform:"uppercase"}}>
+            Se hvordan det virker
+          </div>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.6rem,3.5vw,2.4rem)",fontWeight:700,color:"#0c1f35",marginBottom:"0.75rem",lineHeight:1.2}}>
+            Compliance-analysen i aktion
+          </h2>
+          <p style={{color:"#666",fontSize:"15px",maxWidth:"520px",margin:"0 auto",lineHeight:1.6}}>
+            Fra CVR-nummer til komplet moms- og skatterapport på få minutter — helt automatisk.
+          </p>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3rem",alignItems:"center"}}>
+
+          {/* Venstre: forklaring */}
+          <div>
+            <div style={{display:"flex",flexDirection:"column",gap:"1.5rem",marginBottom:"2rem"}}>
+              {[
+                ["🔍","CVR-opslag","Indtast et CVR-nummer og AI'en henter automatisk virksomhedsdata fra det officielle register — navn, branche, adresse og ejerform."],
+                ["🤖","AI-analyse på sekunder","Baseret på CVR-data genereres en struktureret compliance-analyse for BÅDE moms og skat med lovhenvisninger."],
+                ["📊","Upload regnskabsmateriale","Upload saldobalance, kontokort eller kassekladdeposter — AI'en scanner og spotter konkrete fejl."],
+                ["📋","Komplet rapport","Modtag en samlet rapport med kritiske fejl, anbefalinger og lovhenvisninger klar til print."],
+              ].map(([ic,ti,tx])=>(
+                <div key={ti} style={{display:"flex",gap:"14px",alignItems:"flex-start"}}>
+                  <div style={{width:"40px",height:"40px",borderRadius:"10px",background:"rgba(196,151,62,0.12)",border:"0.5px solid rgba(196,151,62,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0}}>{ic}</div>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:"14px",color:"#0c1f35",marginBottom:"3px"}}>{ti}</div>
+                    <div style={{fontSize:"13px",color:"#666",lineHeight:1.55}}>{tx}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={()=>navigate("compliance")} style={{background:"#0c1f35",color:"#fff",border:"none",padding:"13px 28px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",display:"flex",alignItems:"center",gap:"8px"}}>
+              Prøv compliance-analysen <span style={{fontSize:"18px"}}>→</span>
+            </button>
+          </div>
+
+          {/* Højre: animeret vindue */}
+          <div style={{position:"relative"}}>
+            {/* Browser chrome */}
+            <div style={{background:"#e2ddd8",borderRadius:"14px 14px 0 0",padding:"10px 14px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid rgba(0,0,0,0.08)",borderBottom:"none"}}>
+              <div style={{display:"flex",gap:"5px"}}>
+                {["#ff5f57","#febc2e","#28c840"].map(c=><div key={c} style={{width:"11px",height:"11px",borderRadius:"50%",background:c}}/>)}
+              </div>
+              <div style={{flex:1,background:"rgba(255,255,255,0.6)",borderRadius:"6px",padding:"3px 12px",fontSize:"11px",color:"#888",textAlign:"center"}}>
+                momsrevisor.dk/moms-compliance
+              </div>
+            </div>
+
+            {/* Vindue */}
+            <div style={{background:"#faf9f7",border:"1px solid rgba(0,0,0,0.08)",borderTop:"none",borderRadius:"0 0 14px 14px",boxShadow:"0 12px 40px rgba(0,0,0,0.12)",overflow:"hidden"}}>
+
+              {/* Trin-indikator */}
+              <div style={{background:"#fff",borderBottom:"0.5px solid #e8e3db",padding:"12px 20px",display:"flex",gap:"0",alignItems:"center"}}>
+                {trinNumre.map((nr,i)=>(
+                  <React.Fragment key={nr}>
+                    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"3px"}}>
+                      <div style={{
+                        width:"26px",height:"26px",borderRadius:"50%",
+                        background: i < aktivtTrin ? "#16a34a" : i === aktivtTrin ? "#0c1f35" : "#e8e3db",
+                        border:`2px solid ${i < aktivtTrin ? "#16a34a" : i === aktivtTrin ? "#0c1f35" : "#ddd"}`,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        fontSize:"11px",fontWeight:700,
+                        color: i <= aktivtTrin ? "#fff" : "#aaa",
+                        transition:"all 0.4s"
+                      }}>
+                        {i < aktivtTrin ? "✓" : nr}
+                      </div>
+                      <div style={{fontSize:"9px",color: i === aktivtTrin ? "#0c1f35" : "#aaa",fontWeight: i === aktivtTrin ? 700 : 400,whiteSpace:"nowrap"}}>{trinLabels[i]}</div>
+                    </div>
+                    {i < trinNumre.length-1 && (
+                      <div style={{height:"2px",flex:1,background: i < aktivtTrin ? "#16a34a" : "#e8e3db",margin:"0 4px 16px",transition:"background 0.4s"}}/>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              {/* Fase-indhold */}
+              <div style={{minHeight:"220px",background:"#faf9f7"}}>
+                {aktuelFase.render(pct)}
+              </div>
+
+              {/* Progress bar */}
+              <div style={{height:"3px",background:"#e8e3db"}}>
+                <div style={{height:"100%",background:"#c4973e",width:`${pct}%`,transition:"width 0.05s linear"}}/>
+              </div>
+            </div>
+
+            {/* Pause/play */}
+            <button onClick={()=>setKorer(k=>!k)} style={{position:"absolute",bottom:"18px",right:"12px",background:"rgba(255,255,255,0.9)",border:"0.5px solid rgba(0,0,0,0.1)",borderRadius:"20px",padding:"4px 12px",fontSize:"11px",cursor:"pointer",color:"#666",display:"flex",alignItems:"center",gap:"5px"}}>
+              {korer ? "⏸ Pause" : "▶ Afspil"}
+            </button>
+          </div>
+        </div>
+      </div>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes blink{0%,100%{opacity:1}50%{opacity:0}} @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}`}</style>
+    </div>
+  );
+}
+
 function MomsCompliance() {
   const [fase, setFase] = useState("start"); // start | cvr | analyse | upload | rapport
   const [cvr, setCvr] = useState("");
@@ -2365,7 +2678,9 @@ function MomsCompliance() {
   };
 
   return (
-    <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
+    <div>
+      <ComplianceDemo navigate={id => { const sti = RUTER[id]||"/"; window.history.pushState({id},"",sti); window.dispatchEvent(new CustomEvent("navigate",{detail:id})); }}/>
+      <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
       <SectionHeader title="Moms & Skat Compliance"/>
       <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"2rem"}}>
         Slå din virksomhed op på CVR og få en øjeblikkelig AI-drevet compliance-analyse for BÅDE moms og skat. Upload saldobalance eller kontokort for at spotte konkrete fejl og skattemæssige risici.
@@ -2547,6 +2862,7 @@ function MomsCompliance() {
           </Card>
         </div>
       )}
+      </div>
     </div>
   );
 }
