@@ -371,12 +371,30 @@ function Nav({ active, navigate }) {
       minHeight:"60px",position:"sticky",top:0,zIndex:100,flexWrap:"wrap",
     }}>
       {/* Logo */}
-      <div onClick={()=>navTo("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:"10px",flexShrink:0,padding:"10px 0"}}>
-        <div style={{width:"34px",height:"34px",borderRadius:"8px",background:"linear-gradient(135deg,rgba(196,151,62,0.2),rgba(196,151,62,0.05))",border:"1px solid rgba(196,151,62,0.35)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"17px"}}>⚖</div>
-        <div>
-          <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:600,fontSize:"15px",lineHeight:1.1}}>accai</div>
-          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.7)",letterSpacing:"0.12em",textTransform:"uppercase"}}>ApS · Professionel Rådgivning</div>
-        </div>
+      <div onClick={()=>navTo("home")} style={{cursor:"pointer",display:"flex",alignItems:"center",flexShrink:0,padding:"8px 0"}}>
+        <svg width="220" height="64" viewBox="0 0 480 140" role="img">
+          <title>accai logo</title>
+          <text x="0" y="72"
+            fontFamily="'Playfair Display', Georgia, serif"
+            fontWeight="400"
+            fontSize="72"
+            letterSpacing="-2">
+            <tspan fill="#ffffff">acc</tspan><tspan fill="#c4973e">.</tspan><tspan fill="#c4973e">ai</tspan>
+          </text>
+          <line x1="0" y1="84" x2="340" y2="84" stroke="#c4973e" strokeWidth="0.7" opacity="0.45"/>
+          <text x="1" y="104"
+            fontFamily="'DM Sans', sans-serif"
+            fontWeight="300"
+            fontSize="14"
+            letterSpacing="2.5"
+            fill="rgba(255,255,255,0.65)">ACCOUNTING INTELLIGENCE</text>
+          <text x="1" y="124"
+            fontFamily="'DM Sans', sans-serif"
+            fontWeight="300"
+            fontSize="12"
+            letterSpacing="0.8"
+            fill="rgba(255,255,255,0.4)">Smart rådgivning · Præcise svar</text>
+        </svg>
       </div>
 
       {/* Desktop links */}
