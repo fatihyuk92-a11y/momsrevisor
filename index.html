@@ -2558,16 +2558,23 @@ function Momstraening() {
           ))}
 
           {/* Logo */}
-          <div style={{
-            width:"22mm",height:"22mm",borderRadius:"50%",
-            background:"rgba(196,151,62,0.15)",border:"1.5px solid #c4973e",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            fontSize:"14mm",marginBottom:"4mm",color:"#c4973e",
-          }}>⚖</div>
-
-          {/* Firma */}
-          <div style={{color:"#c4973e",fontSize:"8pt",fontWeight:700,letterSpacing:"3px",marginBottom:"3mm",textTransform:"uppercase"}}>
-            accai ApS
+          <div style={{marginBottom:"5mm",textAlign:"center"}}>
+            <svg width="120mm" height="30mm" viewBox="0 0 680 180" style={{display:"block",margin:"0 auto"}}>
+              <text x="0" y="90"
+                fontFamily="'Playfair Display', Georgia, serif"
+                fontWeight="400"
+                fontSize="90"
+                letterSpacing="-2">
+                <tspan fill="#ffffff">acc</tspan><tspan fill="#c4973e">ai</tspan>
+              </text>
+              <line x1="0" y1="106" x2="420" y2="106" stroke="#c4973e" strokeWidth="0.8" opacity="0.45"/>
+              <text x="2" y="130"
+                fontFamily="'DM Sans', sans-serif"
+                fontWeight="400"
+                fontSize="16"
+                letterSpacing="3.5"
+                fill="rgba(255,255,255,0.75)">ACCOUNTING INTELLIGENCE</text>
+            </svg>
           </div>
 
           {/* Titel */}
