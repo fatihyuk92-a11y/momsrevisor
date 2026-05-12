@@ -346,8 +346,8 @@ function Nav({ active, navigate }) {
   // [id, label, type]  type: "free" | "paid" | "info"
   const links = [
     ["home",      "Forside",             "free"],
-    ["sporg",     "Spørg AI",            "free"],
-    ["compliance","Compliance",          "free"],
+    ["sporg",     "Spørg AI",            "pro"],
+    ["compliance","Compliance",          "pro"],
     ["perioder",  "Frister & Afgifter",  "free"],
     ["traening",  "Akademiet",           "free"],
     ["beregner",  "Beregner",            "free"],
@@ -383,8 +383,8 @@ function Nav({ active, navigate }) {
       <div style={{display:"flex",flexWrap:"wrap",gap:"1px",alignItems:"center"}} className="desktop-nav">
         {links.map(([id,lbl,type],i)=>{
           const isPaid = type==="paid";
+          const isPro  = type==="pro";
           const isActive = active===id;
-          // Separator before first paid item
           const showSep = isPaid && links[i-1]?.[2]!=="paid";
           return (
             <React.Fragment key={id}>
@@ -392,7 +392,7 @@ function Nav({ active, navigate }) {
                 <div style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.12)",margin:"0 4px"}}/>
               )}
               <button onClick={()=>navTo(id)} style={{
-                background: isActive ? (isPaid?"rgba(196,151,62,0.2)":"rgba(196,151,62,0.15)") : "transparent",
+                background: isActive ? (isPaid||isPro?"rgba(196,151,62,0.2)":"rgba(196,151,62,0.15)") : "transparent",
                 color: isActive ? C.gold : isPaid ? "rgba(196,151,62,0.85)" : "rgba(255,255,255,0.75)",
                 border: isPaid ? `0.5px solid ${isActive?"rgba(196,151,62,0.5)":"rgba(196,151,62,0.2)"}` : "none",
                 padding: isPaid ? "5px 10px" : "6px 10px",
@@ -401,8 +401,9 @@ function Nav({ active, navigate }) {
                 transition:"all 0.15s",whiteSpace:"nowrap",
                 display:"flex",alignItems:"center",gap:"4px",
               }}>
-                {isPaid && <span style={{fontSize:"9px",opacity:0.7}}>💼</span>}
                 {lbl}
+                {isPro && <span style={{fontSize:"8px",fontWeight:800,background:"rgba(196,151,62,0.25)",color:C.gold,borderRadius:"4px",padding:"1px 4px",letterSpacing:"0.5px",lineHeight:1.4}}>PRO</span>}
+                {isPaid && <span style={{fontSize:"9px",opacity:0.7}}>💼</span>}
               </button>
             </React.Fragment>
           );
@@ -429,18 +430,22 @@ function Nav({ active, navigate }) {
               }}>{lbl}</button>
             ))}
           </div>
-          {/* Betalt */}
+          {/* PRO */}
           <div style={{height:"1px",background:"rgba(196,151,62,0.15)",margin:"0 8px 8px"}}/>
-          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.6)",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",padding:"0 8px 6px"}}>💼 Professionelle ydelser</div>
+          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.6)",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",padding:"0 8px 6px"}}>⭐ PRO</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"10px"}}>
-            {links.filter(([,,t])=>t==="paid").map(([id,lbl])=>(
+            {links.filter(([,,t])=>t==="pro").map(([id,lbl])=>(
               <button key={id} onClick={()=>navTo(id)} style={{
                 background:active===id?"rgba(196,151,62,0.2)":"rgba(196,151,62,0.06)",
-                color:active===id?C.gold:"rgba(196,151,62,0.85)",
+                color:active===id?C.gold:"rgba(196,151,62,0.9)",
                 border:`0.5px solid rgba(196,151,62,0.25)`,
                 padding:"8px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"13px",
                 fontFamily:"Georgia,serif",fontWeight:active===id?700:400,
-              }}>{lbl}</button>
+                display:"flex",alignItems:"center",gap:"6px",
+              }}>
+                {lbl}
+                <span style={{fontSize:"8px",fontWeight:800,background:"rgba(196,151,62,0.2)",color:C.gold,borderRadius:"4px",padding:"1px 4px"}}>PRO</span>
+              </button>
             ))}
           </div>
           {/* Info */}
@@ -942,7 +947,7 @@ function Home({navigate}) {
           <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"1.5rem"}}>
             <div style={{height:"1px",flex:1,background:"rgba(196,151,62,0.2)"}}/>
             <div style={{background:"rgba(196,151,62,0.12)",border:"0.5px solid rgba(196,151,62,0.4)",borderRadius:"20px",padding:"4px 16px",fontSize:"11px",fontWeight:700,color:C.gold,letterSpacing:"1.5px",textTransform:"uppercase",whiteSpace:"nowrap"}}>
-              Professionel service · Betalt ydelse
+              Professionel service · PRO
             </div>
             <div style={{height:"1px",flex:1,background:"rgba(196,151,62,0.2)"}}/>
           </div>
