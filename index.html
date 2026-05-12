@@ -343,7 +343,7 @@ function hentAktivSide() {
 function Nav({ active, navigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const links = [
-    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["perioder","Perioder"],["traening","Akademiet"],["beregner","Beregner"],["ydelser","Ydelser"],["regnskab","Regnskab & Bogføring"],["hvad","Hvad er moms?"],["om","Om os"],["kontakt","Kontakt"],
+    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["perioder","Frister & Afgifter"],["traening","Akademiet"],["beregner","Beregner"],["ydelser","Ydelser"],["regnskab","Regnskab & Bogføring"],["hvad","Hvad er moms?"],["om","Om os"],["kontakt","Kontakt"],
   ];
   const navTo = (id) => { navigate(id); setMenuOpen(false); };
   return (
@@ -1252,112 +1252,299 @@ const searchCVR = async () => {
 }
 
 function Perioder() {
-  const [tab, setTab] = useState("kvartal");
-  const now = new Date(2026,4,9);
+  const [aktivTab, setAktivTab] = useState("moms");
   const y = 2026;
+  const fmt = d => d.toLocaleDateString("da-DK",{day:"numeric",month:"short",year:"numeric"});
+  const today = new Date(); today.setHours(0,0,0,0);
 
-  const halvaar = [
-    {p:`1. halvår ${y}`,fra:new Date(y,0,1),til:new Date(y,5,30),frist:new Date(y,8,1)},
-    {p:`2. halvår ${y}`,fra:new Date(y,6,1),til:new Date(y,11,31),frist:new Date(y+1,2,1)},
-  ];
-  const kvartaler = [
-    {p:`1. kvartal ${y}`,fra:new Date(y,0,1),til:new Date(y,2,31),frist:new Date(y,5,1)},
-    {p:`2. kvartal ${y}`,fra:new Date(y,3,1),til:new Date(y,5,30),frist:new Date(y,8,1)},
-    {p:`3. kvartal ${y}`,fra:new Date(y,6,1),til:new Date(y,8,30),frist:new Date(y,11,1)},
-    {p:`4. kvartal ${y}`,fra:new Date(y,9,1),til:new Date(y,11,31),frist:new Date(y+1,2,1)},
-  ];
-  const maaneder = Array.from({length:12},(_,i)=>({
-    p:new Date(y,i,1).toLocaleString("da-DK",{month:"long",year:"numeric"}),
-    fra:new Date(y,i,1),til:new Date(y,i+1,0),
-    frist:i===5?new Date(y,7,17):new Date(y,i+1,25),
-  }));
-
-  const rows = tab==="halvaar"?halvaar:tab==="kvartal"?kvartaler:maaneder;
-  const fmt = d=>d.toLocaleDateString("da-DK",{day:"numeric",month:"short",year:"numeric"});
   const status = frist => {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const due = new Date(frist);
-  due.setHours(0,0,0,0);
-
-  const d = Math.floor((due - today) / 86400000);
-
-  if(d < 0) return {
-    lbl:"Udløbet",
-    c:C.red,
-    bg:"rgba(239,68,68,0.1)"
+    const due = new Date(frist); due.setHours(0,0,0,0);
+    const d = Math.floor((due - today) / 86400000);
+    if (d < 0)  return {lbl:"Udløbet",     c:C.red,    bg:"rgba(239,68,68,0.1)"};
+    if (d <= 14) return {lbl:`${d} dage`,  c:C.yellow, bg:"rgba(245,158,11,0.1)"};
+    return           {lbl:`${d} dage`,     c:C.green,  bg:"rgba(34,197,94,0.1)"};
   };
 
-  if(d <= 14) return {
-    lbl:`${d} dage`,
-    c:C.yellow,
-    bg:"rgba(245,158,11,0.1)"
+  // ── MOMS ──
+  const momsData = {
+    halvaar: [
+      {p:`1. halvår ${y}`, fra:new Date(y,0,1), til:new Date(y,5,30), frist:new Date(y,8,1)},
+      {p:`2. halvår ${y}`, fra:new Date(y,6,1), til:new Date(y,11,31),frist:new Date(y+1,2,1)},
+    ],
+    kvartal: [
+      {p:`1. kvartal ${y}`, fra:new Date(y,0,1), til:new Date(y,2,31), frist:new Date(y,5,1)},
+      {p:`2. kvartal ${y}`, fra:new Date(y,3,1), til:new Date(y,5,30), frist:new Date(y,8,1)},
+      {p:`3. kvartal ${y}`, fra:new Date(y,6,1), til:new Date(y,8,30), frist:new Date(y,11,1)},
+      {p:`4. kvartal ${y}`, fra:new Date(y,9,1), til:new Date(y,11,31),frist:new Date(y+1,2,1)},
+    ],
+    maaned: Array.from({length:12},(_,i)=>({
+      p: new Date(y,i,1).toLocaleString("da-DK",{month:"long",year:"numeric"}),
+      fra: new Date(y,i,1), til: new Date(y,i+1,0),
+      frist: i===5 ? new Date(y,7,17) : new Date(y,i+1,25),
+    })),
   };
 
-  return {
-    lbl:`${d} dage`,
-    c:C.green,
-    bg:"rgba(34,197,94,0.1)"
-  };
-};
+  // ── A-SKAT & AM-BIDRAG ──
+  const maanedNavne = ["Jan","Feb","Mar","Apr","Maj","Jun","Jul","Aug","Sep","Okt","Nov","Dec"];
+  const aSkatSma = Array.from({length:12},(_,i)=>({
+    p: `${maanedNavne[i]} ${y}`,
+    fra: new Date(y,i,1), til: new Date(y,i+1,0),
+    frist: new Date(y, i===11?y+1:y, i===11?10:undefined, ...(i===11?[]:[i+1,10])),
+    note: "Små virksomheder (< 1 mio. kr. A-skat/år)"
+  }));
+  // Fix: build correctly
+  const aSkatSmaRows = Array.from({length:12},(_,i)=>{
+    const fristMdr = i+1; const fristAar = i===11?y+1:y;
+    const fristDag = 10;
+    return {
+      p: `${new Date(y,i,1).toLocaleString("da-DK",{month:"long"})} ${y}`,
+      fra: new Date(y,i,1), til: new Date(y,i+1,0),
+      frist: new Date(fristAar, fristMdr>11?0:fristMdr, fristDag),
+      note: "< 1 mio. kr./år"
+    };
+  });
+  const aSkatStoreRows = Array.from({length:12},(_,i)=>{
+    const fristMdr = i; const fristDag = 1;
+    return {
+      p: `${new Date(y,i,1).toLocaleString("da-DK",{month:"long"})} ${y}`,
+      fra: new Date(y,i,1), til: new Date(y,i+1,0),
+      frist: new Date(y, i, fristDag),
+      note: "> 1 mio. kr./år"
+    };
+  });
+
+  // ── B-SKAT (ACONTOSKAT FOR SELVSTÆNDIGE) ──
+  const bSkatRater = [
+    {p:"Rate 1", frist:new Date(y,0,20), note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 2", frist:new Date(y,2,20), note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 3", frist:new Date(y,4,20), note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 4", frist:new Date(y,6,20), note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 5", frist:new Date(y,7,20), note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 6", frist:new Date(y,8,20), note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 7", frist:new Date(y,9,20), note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 8", frist:new Date(y,10,20),note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 9", frist:new Date(y,11,20),note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 10",frist:new Date(y+1,0,20),note:"Sidste rate — 1/10 af årets samlede B-skat"},
+  ];
+
+  // ── ACONTOSKAT SELSKABER ──
+  const acontoSkat = [
+    {p:`1. acontorat ${y}`, frist:new Date(y,2,20), note:"Halvdelen af årets forventede selskabsskat (22%)"},
+    {p:`2. acontorat ${y}`, frist:new Date(y,10,20),note:"Halvdelen af årets forventede selskabsskat (22%)"},
+    {p:`Restskat ${y-1}`,   frist:new Date(y,10,20),note:"Frivillig betaling — undgå restskattetillæg"},
+  ];
+
+  // ── LØNSUMSAFGIFT ──
+  const loensums = [
+    {p:"Metode 1 — månedlig aconto", frist:new Date(y,1,15),  note:"Finansielle virksomheder. Foreløbig betaling januar"},
+    {p:"Metode 1 — endelig årsopgørelse", frist:new Date(y,7,15), note:"Senest 15. august for foregående år"},
+    {p:"Metode 2 — 1. kvartal",      frist:new Date(y,5,1),   note:"Blandet moms/momsfri — koordinér med pro-rata"},
+    {p:"Metode 2 — 2. kvartal",      frist:new Date(y,8,1),   note:"Blandet moms/momsfri — koordinér med pro-rata"},
+    {p:"Metode 2 — 3. kvartal",      frist:new Date(y,11,1),  note:"Blandet moms/momsfri — koordinér med pro-rata"},
+    {p:"Metode 2 — 4. kvartal",      frist:new Date(y+1,2,1), note:"Blandet moms/momsfri — koordinér med pro-rata"},
+    {p:"Metode 3 — 1. halvår",       frist:new Date(y,8,1),   note:"Dagblade og aviser"},
+    {p:"Metode 3 — 2. halvår",       frist:new Date(y+1,2,1), note:"Dagblade og aviser"},
+    {p:"Metode 4 — månedlig aconto", frist:new Date(y,1,15),  note:"Læger, tandlæger, skoler mv. Foreløbig"},
+    {p:"Metode 4 — endelig årsopgørelse", frist:new Date(y,7,15), note:"Senest 15. august for foregående år"},
+  ];
+
+  // ── PUNKTAFGIFTER ──
+  const punktafgifter = [
+    {p:"Energiafgifter (el, gas, olie)", frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter. Registreringspligt ved køb til erhvervsbrug"},
+    {p:"CO₂-afgift",        frist:new Date(y,1,15), note:"Månedlig — følger energiafgifterne"},
+    {p:"Emballageafgift",   frist:new Date(y,1,25), note:"Kvartalsvis — 25. i måneden efter kvartalet"},
+    {p:"Chokoladeafgift",   frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter"},
+    {p:"Tobaksafgift",      frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter. Kun for registrerede oplagshavere"},
+    {p:"Spiritusafgift/øl/vin", frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter. Registreret oplagshaver"},
+    {p:"Spildevandsafgift", frist:new Date(y,3,1),  note:"Kvartalsvis — 1. i 2. måned efter kvartalet"},
+    {p:"Råstofafgift",      frist:new Date(y,3,1),  note:"Kvartalsvis"},
+    {p:"Vejbenyttelsesafgift (lastbiler)", frist:new Date(y,0,31), note:"Årsvis — 31. januar for indeværende år"},
+  ];
+
+  // ── TABS CONFIG ──
+  const TABS = [
+    {id:"moms",   lbl:"🧾 Moms",                farve:C.navy},
+    {id:"askat",  lbl:"💼 A-skat & AM-bidrag",  farve:"#1a4d7a"},
+    {id:"bskat",  lbl:"📊 B-skat",              farve:"#0c5c3a"},
+    {id:"selskab",lbl:"🏢 Acontoskat (ApS/A/S)",farve:"#5c2d0c"},
+    {id:"loensum",lbl:"⚖️ Lønsumsafgift",       farve:"#4a0c5c"},
+    {id:"punkt",  lbl:"⚡ Punktafgifter",       farve:"#7a3d00"},
+  ];
+
+  const [momsTab, setMomsTab] = useState("kvartal");
+  const [aSkatTab, setASkatTab] = useState("sma");
+
+  const InfoBoks = ({items}) => (
+    <div style={{marginTop:"1.5rem",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:"1rem"}}>
+      {items.map(([ic,ti,tx])=>(
+        <Card key={ti} style={{display:"flex",gap:"12px",alignItems:"flex-start"}}>
+          <div style={{fontSize:"20px",flexShrink:0}}>{ic}</div>
+          <div><div style={{fontWeight:700,fontSize:"13px",marginBottom:"3px"}}>{ti}</div>
+          <p style={{margin:0,fontSize:"12px",color:C.textSub,lineHeight:1.6}}>{tx}</p></div>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const Tabel = ({rows, kolonner=["Periode","Frist","Status","Note"], visNote=true}) => (
+    <div style={{overflowX:"auto",borderRadius:"10px",boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
+      <table style={{width:"100%",fontSize:"13px",borderCollapse:"collapse"}}>
+        <thead>
+          <tr style={{background:`linear-gradient(135deg,#0c1f35,#1a3558)`,color:C.white}}>
+            {kolonner.map(h=><th key={h} style={{padding:"10px 14px",textAlign:"left",fontWeight:600,fontSize:"12px",whiteSpace:"nowrap"}}>{h}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r,i)=>{
+            const s = status(r.frist);
+            const erAktuel = r.fra && today>=r.fra && today<=r.til;
+            return (
+              <tr key={i} style={{background:erAktuel?"rgba(196,151,62,0.07)":i%2===0?C.bgCard:C.bgSecondary,borderBottom:`0.5px solid ${C.border}`}}>
+                <td style={{padding:"9px 14px",fontWeight:erAktuel?700:400,whiteSpace:"nowrap"}}>
+                  {r.p}{erAktuel&&<span style={{fontSize:"10px",background:C.gold,color:C.navy,borderRadius:"10px",padding:"2px 7px",marginLeft:"6px",fontWeight:700}}>Nu</span>}
+                </td>
+                {r.fra && <td style={{padding:"9px 14px",color:C.textSub,whiteSpace:"nowrap"}}>{fmt(r.fra)}</td>}
+                {r.til && <td style={{padding:"9px 14px",color:C.textSub,whiteSpace:"nowrap"}}>{fmt(r.til)}</td>}
+                <td style={{padding:"9px 14px",fontWeight:600,whiteSpace:"nowrap"}}>{fmt(r.frist)}</td>
+                <td style={{padding:"9px 14px"}}><span style={{background:s.bg,color:s.c,borderRadius:"12px",padding:"3px 10px",fontSize:"11px",fontWeight:600,whiteSpace:"nowrap"}}>{s.lbl}</span></td>
+                {visNote&&r.note&&<td style={{padding:"9px 14px",color:C.textSub,fontSize:"12px"}}>{r.note}</td>}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
-    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
-      <SectionHeader title={`Momsindberetningsperioder ${y}`}/>
-      <CVROpslag />
-      <div style={{background:"rgba(196,151,62,0.06)",border:"1px solid rgba(196,151,62,0.2)",borderRadius:"12px",padding:"12px 18px",fontSize:"13px",color:C.textSub,marginBottom:"1.5rem",lineHeight:1.6}}>
-        <strong style={{color:C.gold}}>Hvem gælder hvad?</strong> · <strong>Halvårlig:</strong> under 5 mio. kr./år · <strong>Kvartalsvis:</strong> 5–50 mio. kr./år · <strong>Månedlig:</strong> over 50 mio. kr./år
-      </div>
-      <div style={{display:"flex",gap:"8px",marginBottom:"1.5rem",flexWrap:"wrap"}}>
-        {[["halvaar","Halvårlig"],["kvartal","Kvartalsvis"],["maaned","Månedlig"]].map(([id,lbl])=>(
-          <button key={id} onClick={()=>setTab(id)} style={{padding:"8px 20px",borderRadius:"8px",border:`1px solid ${tab===id?"transparent":C.border}`,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontSize:"13.5px",fontWeight:tab===id?600:400,background:tab===id?C.navy:C.bgCard,color:tab===id?C.white:C.textSub,transition:"all 0.18s",boxShadow:tab===id?"0 2px 8px rgba(12,31,53,0.18)":"none"}}>{lbl}</button>
+    <div style={{maxWidth:"1200px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title={`Afgifter & frister ${y}`}/>
+      <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"2rem",fontSize:"14px"}}>
+        Overblik over alle relevante indberetnings- og betalingsfrister for danske erhvervsdrivende — moms, A-skat, B-skat, lønsumsafgift og punktafgifter samlet ét sted.
+      </p>
+
+      {/* Tab navigation */}
+      <div style={{display:"flex",gap:"6px",marginBottom:"2rem",flexWrap:"wrap"}}>
+        {TABS.map(({id,lbl,farve})=>(
+          <button key={id} onClick={()=>setAktivTab(id)} style={{
+            padding:"9px 16px",borderRadius:"8px",border:`1.5px solid ${aktivTab===id?farve:C.border}`,
+            cursor:"pointer",fontSize:"13px",fontWeight:aktivTab===id?700:400,
+            background:aktivTab===id?farve:C.bgCard,
+            color:aktivTab===id?C.white:C.textSub,transition:"all 0.15s",
+            boxShadow:aktivTab===id?`0 2px 10px rgba(0,0,0,0.15)`:"none",
+          }}>{lbl}</button>
         ))}
       </div>
-      <div style={{overflowX:"auto",borderRadius:"10px",boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-        <table style={{width:"100%",fontSize:"14px"}}>
-          <thead>
-            <tr style={{background:"linear-gradient(135deg,#0c1f35,#1a3558)",color:C.white}}>
-              {["Periode","Fra","Til","Angivelsesfrist","Status"].map(h=>(
-                <th key={h} style={{padding:"10px 14px",textAlign:"left",fontWeight:600,fontSize:"13px"}}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r,i)=>{
-              const s=status(r.frist);
-              const isAct=now>=r.fra&&now<=r.til;
-              return (
-                <tr key={i} style={{background:isAct?"rgba(196,151,62,0.07)":i%2===0?C.bgCard:C.bgSecondary,borderBottom:`0.5px solid ${C.border}`}}>
-                  <td style={{padding:"10px 14px",fontWeight:isAct?700:400}}>
-                    {r.p} {isAct&&<span style={{fontSize:"11px",background:C.gold,color:C.navy,borderRadius:"10px",padding:"2px 8px",marginLeft:"6px",fontWeight:700}}>Aktuel</span>}
-                  </td>
-                  <td style={{padding:"10px 14px",color:C.textSub}}>{fmt(r.fra)}</td>
-                  <td style={{padding:"10px 14px",color:C.textSub}}>{fmt(r.til)}</td>
-                  <td style={{padding:"10px 14px",fontWeight:600}}>{fmt(r.frist)}</td>
-                  <td style={{padding:"10px 14px"}}><span style={{background:s.bg,color:s.c,borderRadius:"12px",padding:"3px 10px",fontSize:"12px",fontWeight:600}}>{s.lbl}</span></td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div style={{marginTop:"2rem",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:"1rem"}}>
-        {[
-          ["📅","Halvårlig – frister","1. halvår angives senest 1. september. 2. halvår senest 1. marts det følgende år."],
-          ["⚠️","Juni-undtagelse (månedlig)","Momsen for juni angives og betales først den 17. august — ikke den 25. juli."],
-          ["🏦","Bankdagsreglen","Falder fristen på weekend eller helligdag, udskydes den til næste bankdag."],
-          ["🆕","Nyregistrerede","Angiver kvartalsvis. Hvis forventet omsætning overstiger 55 mio. kr., er perioden månedlig."],
-        ].map(([ic,ti,tx])=>(
-          <Card key={ti} style={{display:"flex",gap:"12px",alignItems:"flex-start"}}>
-            <div style={{fontSize:"22px",flexShrink:0}}>{ic}</div>
-            <div><div style={{fontWeight:700,fontSize:"14px",marginBottom:"4px"}}>{ti}</div><p style={{margin:0,fontSize:"13px",color:C.textSub,lineHeight:1.6}}>{tx}</p></div>
-          </Card>
-        ))}
-      </div>
+
+      {/* ── MOMS ── */}
+      {aktivTab==="moms" && (
+        <div>
+          <div style={{background:"rgba(196,151,62,0.06)",border:"0.5px solid rgba(196,151,62,0.2)",borderRadius:"10px",padding:"12px 18px",fontSize:"13px",color:C.textSub,marginBottom:"1.25rem",lineHeight:1.6}}>
+            <strong style={{color:C.gold}}>Hvem gælder hvad?</strong> · <strong>Halvårlig:</strong> under 5 mio. kr./år · <strong>Kvartalsvis:</strong> 5–50 mio. kr./år · <strong>Månedlig:</strong> over 50 mio. kr./år
+          </div>
+          <div style={{display:"flex",gap:"8px",marginBottom:"1.25rem",flexWrap:"wrap"}}>
+            {[["halvaar","Halvårlig"],["kvartal","Kvartalsvis"],["maaned","Månedlig"]].map(([id,lbl])=>(
+              <button key={id} onClick={()=>setMomsTab(id)} style={{padding:"7px 18px",borderRadius:"8px",border:`1px solid ${momsTab===id?"transparent":C.border}`,cursor:"pointer",fontSize:"13px",fontWeight:momsTab===id?600:400,background:momsTab===id?C.navy:C.bgCard,color:momsTab===id?C.white:C.textSub,transition:"all 0.15s"}}>{lbl}</button>
+            ))}
+          </div>
+          <Tabel rows={momsData[momsTab]} kolonner={["Periode","Fra","Til","Angivelsesfrist","Status"]} visNote={false}/>
+          <InfoBoks items={[
+            ["📅","Halvårlig — frister","1. halvår angives senest 1. september. 2. halvår senest 1. marts det følgende år."],
+            ["⚠️","Juni-undtagelse (månedlig)","Momsen for juni angives og betales den 17. august — ikke den 25. juli."],
+            ["🏦","Bankdagsreglen","Falder fristen på weekend/helligdag, udskydes til næste bankdag."],
+            ["🆕","Nyregistrerede","Angiver kvartalsvis. Forventes omsætningen over 55 mio. kr., er perioden månedlig."],
+          ]}/>
+        </div>
+      )}
+
+      {/* ── A-SKAT & AM-BIDRAG ── */}
+      {aktivTab==="askat" && (
+        <div>
+          <div style={{background:"rgba(26,77,122,0.06)",border:"0.5px solid rgba(26,77,122,0.2)",borderRadius:"10px",padding:"12px 18px",fontSize:"13px",color:C.textSub,marginBottom:"1.25rem",lineHeight:1.6}}>
+            <strong style={{color:"#1a4d7a"}}>A-skat og AM-bidrag</strong> — indeholdes i lønnen og indbetales af arbejdsgiver til Skattestyrelsen. Fristen afhænger af virksomhedens størrelse. <strong>AM-bidrag: 8%</strong> af bruttolønnen.
+          </div>
+          <div style={{display:"flex",gap:"8px",marginBottom:"1.25rem"}}>
+            {[["sma","Små (< 1 mio. kr./år)"],["store","Store (> 1 mio. kr./år)"]].map(([id,lbl])=>(
+              <button key={id} onClick={()=>setASkatTab(id)} style={{padding:"7px 18px",borderRadius:"8px",border:`1px solid ${aSkatTab===id?"transparent":C.border}`,cursor:"pointer",fontSize:"13px",fontWeight:aSkatTab===id?600:400,background:aSkatTab===id?"#1a4d7a":C.bgCard,color:aSkatTab===id?C.white:C.textSub,transition:"all 0.15s"}}>{lbl}</button>
+            ))}
+          </div>
+          <Tabel rows={aSkatTab==="sma"?aSkatSmaRows:aSkatStoreRows} kolonner={["Måned","Fra","Til","Betalingsfrist","Status","Størrelse"]}/>
+          <InfoBoks items={[
+            ["💼","Hvem skal indberette?","Alle arbejdsgivere med ansatte skal indeholde A-skat og AM-bidrag af løn og indberette via eIndkomst."],
+            ["📅","Forfaldsdato","Små virksomheder: 10. i måneden efter lønudbetaling. Store virksomheder: 1. bankdag i måneden."],
+            ["⚠️","For sen betaling","Renter beregnes fra forfaldsdato. Dagbøder ved manglende indberetning til eIndkomst (KSL § 74)."],
+            ["📋","eIndkomst","Lønindberetning skal ske månedligt via eIndkomst — senest den 10. i måneden efter."],
+          ]}/>
+        </div>
+      )}
+
+      {/* ── B-SKAT ── */}
+      {aktivTab==="bskat" && (
+        <div>
+          <div style={{background:"rgba(12,92,58,0.06)",border:"0.5px solid rgba(12,92,58,0.2)",borderRadius:"10px",padding:"12px 18px",fontSize:"13px",color:C.textSub,marginBottom:"1.25rem",lineHeight:1.6}}>
+            <strong style={{color:"#0c5c3a"}}>B-skat (forskudsskat for selvstændige)</strong> — betales i <strong>10 rater</strong> over året. Beregnes af Skattestyrelsen på baggrund af forskudsopgørelsen. Kan ændres via TastSelv. Hjemmel: KSL § 42.
+          </div>
+          <Tabel rows={bSkatRater} kolonner={["Rate","Betalingsfrist","Status","Bemærkning"]}/>
+          <InfoBoks items={[
+            ["🔢","10 rater","B-skat opkræves i 10 rater — ingen rate i februar, april og juni."],
+            ["📝","Ændr din forskudsopgørelse","Hvis din indkomst ændrer sig, tilpas forskudsopgørelsen i TastSelv for at undgå restskat eller stor overskydende skat."],
+            ["⚠️","Restskat","Restskat over ca. 24.000 kr. tillægges et procenttillæg. Betales senest d. 1. juli det følgende år."],
+            ["✅","Frivillig indbetaling","Du kan indbetale frivillig ekstra B-skat senest 1. marts for at undgå restskattetillæg."],
+          ]}/>
+        </div>
+      )}
+
+      {/* ── ACONTOSKAT SELSKABER ── */}
+      {aktivTab==="selskab" && (
+        <div>
+          <div style={{background:"rgba(92,45,12,0.06)",border:"0.5px solid rgba(92,45,12,0.2)",borderRadius:"10px",padding:"12px 18px",fontSize:"13px",color:C.textSub,marginBottom:"1.25rem",lineHeight:1.6}}>
+            <strong style={{color:"#5c2d0c"}}>Acontoskat for selskaber</strong> — ApS og A/S betaler acontoskat i <strong>2 rater</strong> (20. marts og 20. november). Selskabsskat er <strong>22%</strong> af den skattepligtige indkomst (SEL § 17). Frivillig ekstra indbetaling kan ske senest 1. februar det følgende år.
+          </div>
+          <Tabel rows={acontoSkat} kolonner={["Acontorate","Betalingsfrist","Status","Bemærkning"]}/>
+          <InfoBoks items={[
+            ["🏢","Hvem?","Alle danske aktie- og anpartsselskaber (ApS/A/S) samt andre selskaber omfattet af SEL § 1."],
+            ["📊","Beregning","Acontoskatten beregnes som halvdelen af den forventede selskabsskat for indkomståret."],
+            ["💡","Frivillig ekstra indbetaling","Hvis der forventes restskat, kan ekstra acontoskat indbetales senest 1. februar — uden tillæg."],
+            ["📅","Årsopgørelse","Selvangivelse for selskaber indsendes via TastSelv Erhverv senest 6 måneder efter regnskabsårets afslutning."],
+          ]}/>
+        </div>
+      )}
+
+      {/* ── LØNSUMSAFGIFT ── */}
+      {aktivTab==="loensum" && (
+        <div>
+          <div style={{background:"rgba(74,12,92,0.06)",border:"0.5px solid rgba(74,12,92,0.2)",borderRadius:"10px",padding:"12px 18px",fontSize:"13px",color:C.textSub,marginBottom:"1.25rem",lineHeight:1.6}}>
+            <strong style={{color:"#4a0c5c"}}>Lønsumsafgift</strong> — betales af virksomheder med momsfritagne aktiviteter (LSAL). <strong>4 metoder:</strong> Metode 1 (finansielle: 15,3%) · Metode 2 (blandet: 6,37%) · Metode 3 (dagblade: 3,54%) · Metode 4 (øvrige: 6,37%).
+          </div>
+          <Tabel rows={loensums} kolonner={["Afgiftsperiode","Betalingsfrist","Status","Note"]}/>
+          <InfoBoks items={[
+            ["⚖️","Hvem betaler?","Virksomheder med momsfritagne aktiviteter: banker, forsikring, læger, tandlæger, skoler, forfattere mv. (ML § 13)."],
+            ["🔄","Metode 2 — samspil med moms","Den endelige opgørelse skal koordineres med momspro-rata. Angives i samme periode som pro-rata-korrektionen."],
+            ["📅","Metode 1 og 4 — årsopgørelse","Endelig opgørelse senest 15. august det følgende år. Foreløbige betalinger månedligt."],
+            ["📋","Registrering","Registrér via virk.dk inden lønsumsafgiftspligtige aktiviteter påbegyndes."],
+          ]}/>
+        </div>
+      )}
+
+      {/* ── PUNKTAFGIFTER ── */}
+      {aktivTab==="punkt" && (
+        <div>
+          <div style={{background:"rgba(122,61,0,0.06)",border:"0.5px solid rgba(122,61,0,0.2)",borderRadius:"10px",padding:"12px 18px",fontSize:"13px",color:C.textSub,marginBottom:"1.25rem",lineHeight:1.6}}>
+            <strong style={{color:"#7a3d00"}}>Punktafgifter</strong> — særafgifter på specifikke varer og aktiviteter. Kræver som regel registrering som <strong>oplagshaver</strong> hos Skattestyrelsen. Frister varierer — nedenstående er vejledende udgangspunkter.
+          </div>
+          <Tabel rows={punktafgifter} kolonner={["Afgiftstype","Næste frist (vejl.)","Status","Bemærkning"]}/>
+          <InfoBoks items={[
+            ["🏭","Registrering som oplagshaver","De fleste punktafgifter kræver registrering inden aktiviteten påbegyndes. Sker via virk.dk."],
+            ["⚡","Energiafgifter — godtgørelse","Momsregistrerede virksomheder kan få godtgjort en del af energiafgifterne. Angives på momsangivelsen."],
+            ["🍺","Alkohol- og tobaksafgifter","Gælder primært for producenter og importører. Detailhandel er fritaget for registrering."],
+            ["📋","Kontakt Skattestyrelsen","Punktafgifter er komplekse og branchespecifikke — kontakt Skattestyrelsen eller en rådgiver for din specifikke situation."],
+          ]}/>
+        </div>
+      )}
     </div>
   );
 }
+
 
 // ── BEREGNER ──────────────────────────────────────────────────────────────────
 function Beregner() {
