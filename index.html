@@ -342,10 +342,24 @@ function hentAktivSide() {
 
 function Nav({ active, navigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // [id, label, type]  type: "free" | "paid" | "info"
   const links = [
-    ["home","Forside"],["sporg","Spørg AI"],["compliance","Compliance"],["perioder","Frister & Afgifter"],["traening","Akademiet"],["beregner","Beregner"],["ydelser","Ydelser"],["regnskab","Regnskab & Bogføring"],["hvad","Hvad er moms?"],["om","Om os"],["kontakt","Kontakt"],
+    ["home",      "Forside",             "free"],
+    ["sporg",     "Spørg AI",            "free"],
+    ["compliance","Compliance",          "free"],
+    ["perioder",  "Frister & Afgifter",  "free"],
+    ["traening",  "Akademiet",           "free"],
+    ["beregner",  "Beregner",            "free"],
+    ["hvad",      "Hvad er moms?",       "info"],
+    ["om",        "Om os",               "info"],
+    ["kontakt",   "Kontakt",             "info"],
+    ["ydelser",   "Ydelser",             "paid"],
+    ["regnskab",  "Regnskab & Bogføring","paid"],
   ];
+
   const navTo = (id) => { navigate(id); setMenuOpen(false); };
+
   return (
     <nav style={{
       background:"rgba(12,31,53,0.97)",
@@ -366,15 +380,33 @@ function Nav({ active, navigate }) {
       </div>
 
       {/* Desktop links */}
-      <div style={{display:"flex",flexWrap:"wrap",gap:"2px",alignItems:"center"}} className="desktop-nav">
-        {links.map(([id,lbl])=>(
-          <button key={id} onClick={()=>navTo(id)} style={{
-            background:active===id?"rgba(196,151,62,0.15)":"transparent",
-            color:active===id?C.gold:"rgba(255,255,255,0.75)",
-            border:"none",padding:"6px 10px",borderRadius:"6px",cursor:"pointer",fontSize:"12px",
-            fontFamily:"Georgia,serif",fontWeight:active===id?700:400,transition:"all 0.15s",whiteSpace:"nowrap",
-          }}>{lbl}</button>
-        ))}
+      <div style={{display:"flex",flexWrap:"wrap",gap:"1px",alignItems:"center"}} className="desktop-nav">
+        {links.map(([id,lbl,type],i)=>{
+          const isPaid = type==="paid";
+          const isActive = active===id;
+          // Separator before first paid item
+          const showSep = isPaid && links[i-1]?.[2]!=="paid";
+          return (
+            <React.Fragment key={id}>
+              {showSep && (
+                <div style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.12)",margin:"0 4px"}}/>
+              )}
+              <button onClick={()=>navTo(id)} style={{
+                background: isActive ? (isPaid?"rgba(196,151,62,0.2)":"rgba(196,151,62,0.15)") : "transparent",
+                color: isActive ? C.gold : isPaid ? "rgba(196,151,62,0.85)" : "rgba(255,255,255,0.75)",
+                border: isPaid ? `0.5px solid ${isActive?"rgba(196,151,62,0.5)":"rgba(196,151,62,0.2)"}` : "none",
+                padding: isPaid ? "5px 10px" : "6px 10px",
+                borderRadius:"6px",cursor:"pointer",fontSize:"12px",
+                fontFamily:"Georgia,serif",fontWeight:isActive?700:400,
+                transition:"all 0.15s",whiteSpace:"nowrap",
+                display:"flex",alignItems:"center",gap:"4px",
+              }}>
+                {isPaid && <span style={{fontSize:"9px",opacity:0.7}}>💼</span>}
+                {lbl}
+              </button>
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {/* Mobile hamburger */}
@@ -384,15 +416,45 @@ function Nav({ active, navigate }) {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div style={{width:"100%",borderTop:"1px solid rgba(196,151,62,0.15)",padding:"0.5rem 0",display:"flex",flexWrap:"wrap",gap:"4px"}}>
-          {links.map(([id,lbl])=>(
-            <button key={id} onClick={()=>navTo(id)} style={{
-              background:active===id?"rgba(196,151,62,0.15)":"transparent",
-              color:active===id?C.gold:"rgba(255,255,255,0.8)",
-              border:"none",padding:"8px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"13px",
-              fontFamily:"Georgia,serif",fontWeight:active===id?700:400,
-            }}>{lbl}</button>
-          ))}
+        <div style={{width:"100%",borderTop:"1px solid rgba(196,151,62,0.15)",padding:"0.75rem 0"}}>
+          {/* Gratis */}
+          <div style={{fontSize:"9px",color:"rgba(255,255,255,0.3)",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",padding:"0 8px 6px"}}>Gratis</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"10px"}}>
+            {links.filter(([,,t])=>t==="free").map(([id,lbl])=>(
+              <button key={id} onClick={()=>navTo(id)} style={{
+                background:active===id?"rgba(196,151,62,0.15)":"transparent",
+                color:active===id?C.gold:"rgba(255,255,255,0.8)",
+                border:"none",padding:"8px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"13px",
+                fontFamily:"Georgia,serif",fontWeight:active===id?700:400,
+              }}>{lbl}</button>
+            ))}
+          </div>
+          {/* Betalt */}
+          <div style={{height:"1px",background:"rgba(196,151,62,0.15)",margin:"0 8px 8px"}}/>
+          <div style={{fontSize:"9px",color:"rgba(196,151,62,0.6)",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",padding:"0 8px 6px"}}>💼 Professionelle ydelser</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"10px"}}>
+            {links.filter(([,,t])=>t==="paid").map(([id,lbl])=>(
+              <button key={id} onClick={()=>navTo(id)} style={{
+                background:active===id?"rgba(196,151,62,0.2)":"rgba(196,151,62,0.06)",
+                color:active===id?C.gold:"rgba(196,151,62,0.85)",
+                border:`0.5px solid rgba(196,151,62,0.25)`,
+                padding:"8px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"13px",
+                fontFamily:"Georgia,serif",fontWeight:active===id?700:400,
+              }}>{lbl}</button>
+            ))}
+          </div>
+          {/* Info */}
+          <div style={{height:"1px",background:"rgba(255,255,255,0.06)",margin:"0 8px 8px"}}/>
+          <div style={{display:"flex",flexWrap:"wrap",gap:"4px"}}>
+            {links.filter(([,,t])=>t==="info").map(([id,lbl])=>(
+              <button key={id} onClick={()=>navTo(id)} style={{
+                background:active===id?"rgba(196,151,62,0.15)":"transparent",
+                color:active===id?C.gold:"rgba(255,255,255,0.5)",
+                border:"none",padding:"8px 12px",borderRadius:"6px",cursor:"pointer",fontSize:"12px",
+                fontFamily:"Georgia,serif",
+              }}>{lbl}</button>
+            ))}
+          </div>
         </div>
       )}
     </nav>
