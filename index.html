@@ -3301,7 +3301,6 @@ function MomsCompliance() {
 
   return (
     <div>
-      <ComplianceDemo navigate={id => { const sti = RUTER[id]||"/"; window.history.pushState({id},"",sti); window.dispatchEvent(new CustomEvent("navigate",{detail:id})); }}/>
       <div style={{maxWidth:"1000px",margin:"0 auto",padding:"3rem 2rem"}}>
       <SectionHeader title="Moms & Skat Compliance"/>
       <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.7,marginBottom:"2rem"}}>
@@ -3663,7 +3662,12 @@ function App() {
       <Nav active={active} navigate={navigate}/>
       <main style={{flex:1}}>
         {active==="home" && <Home navigate={navigate}/>}
-        {active==="compliance" && <ProGate side="compliance"><MomsCompliance/></ProGate>}
+        {active==="compliance" && (
+          <div>
+            <ComplianceDemo navigate={navigate}/>
+            <ProGate side="compliance"><MomsCompliance/></ProGate>
+          </div>
+        )}
         {active==="regnskab" && <Regnskab/>}
         {active==="sporg" && <ProGate side="chat"><Chat/></ProGate>}
         {active==="hvad" && <HvadErMoms/>}
