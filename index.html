@@ -936,20 +936,20 @@ function Home({navigate}) {
               <div style={{display:"flex",gap:"12px",alignItems:"flex-start",marginBottom:"0.75rem"}}>
                 <div style={{width:"44px",height:"44px",borderRadius:"12px",background:"rgba(196,151,62,0.1)",border:`1px solid rgba(196,151,62,0.2)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",flexShrink:0}}>🧮</div>
                 <div>
-                  <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"2px"}}>Momsberegner</div>
-                  <div style={{fontSize:"12px",color:C.textSub}}>Hurtig og præcis</div>
+                  <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"2px"}}>Beregnere</div>
+                  <div style={{fontSize:"12px",color:C.textSub}}>Moms · Løn · Kørsel · Timepris · Morarenter</div>
                 </div>
               </div>
               <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:"0 0 1rem"}}>
-                Beregn moms på sekunder — læg til eller træk fra. Se ekskl., momsbeløb og inkl. pris med det samme.
+                Praktiske beregnere til den daglige drift — opdateret med 2026-satser. Beregn moms, brutto til netto, skattefri kørselsgodtgørelse, freelance-timepris og morarenter på sekunder.
               </p>
               {/* Mini beregner preview */}
               <div style={{background:C.bgSecondary,borderRadius:"8px",padding:"10px 12px",marginBottom:"1rem",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:"12px",color:C.textSub}}>10.000 kr. ekskl. moms</div>
-                <div style={{fontSize:"14px",fontWeight:700,color:C.navy}}>= 12.500 kr.</div>
+                <div style={{fontSize:"12px",color:C.textSub}}>5 beregnere · 2026-satser</div>
+                <div style={{fontSize:"14px",fontWeight:700,color:C.navy}}>Klar at bruge</div>
               </div>
               <div style={{color:C.gold,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"4px"}}>
-                Beregn nu →
+                Åbn beregnere →
               </div>
             </div>
           </div>
@@ -1950,32 +1950,61 @@ function Perioder() {
 
 
 // ── BEREGNER ──────────────────────────────────────────────────────────────────
-function Beregner() {
+// Fælles stilarter til beregnere
+const _inp = {padding:"11px 14px",borderRadius:"10px",border:`1px solid ${C.border}`,background:C.bgCard,color:C.text,fontSize:"15px",width:"100%",boxShadow:"0 1px 3px rgba(12,31,53,0.05)",outline:"none",transition:"border-color 0.15s",boxSizing:"border-box"};
+const _lbl = {display:"block",fontSize:"12px",fontWeight:700,color:C.textSub,marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"};
+const _fmt2 = n=>(isFinite(n)?n:0).toLocaleString("da-DK",{minimumFractionDigits:2,maximumFractionDigits:2});
+const _fmt0 = n=>(isFinite(n)?n:0).toLocaleString("da-DK",{maximumFractionDigits:0});
+const _parse = v=>parseFloat(String(v).replace(",","."))||0;
+
+function ResRow({label, value, suffix="kr.", strong=false}) {
+  return (
+    <div style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:`0.5px solid ${C.border}`}}>
+      <span style={{fontSize:"14px",color:strong?C.text:C.textSub,fontWeight:strong?600:400}}>{label}</span>
+      <span style={{fontWeight:strong?700:600}}>{value} {suffix}</span>
+    </div>
+  );
+}
+
+function CalcTip({children}) {
+  return (
+    <div style={{marginTop:"1rem",background:"rgba(196,151,62,0.06)",border:"1px solid rgba(196,151,62,0.2)",borderRadius:"10px",padding:"11px 16px",fontSize:"12px",color:C.textSub,lineHeight:1.6}}>
+      <strong style={{color:C.gold}}>Bemærk:</strong> {children}
+    </div>
+  );
+}
+
+function CalcEmpty({icon, text}) {
+  return (
+    <div style={{textAlign:"center",padding:"2rem 0",color:C.textSub}}>
+      <div style={{fontSize:"36px",marginBottom:"0.5rem"}}>{icon}</div>
+      {text}
+    </div>
+  );
+}
+
+// ── MOMS ──────────────────────────────────────────────────────────────────────
+function MomsKalk() {
   const [beloeb, setBeloeb] = useState("");
   const [retning, setRetning] = useState("tilfoej");
   const [sats, setSats] = useState("25");
 
-  const num = parseFloat(beloeb.replace(",",".")) || 0;
-  const pct = parseFloat(sats)/100;
+  const num = _parse(beloeb);
+  const pct = _parse(sats)/100;
   const momsBeloeb = retning==="tilfoej" ? num*pct : num-num/(1+pct);
   const ekskl = retning==="tilfoej" ? num : num/(1+pct);
   const inkl = retning==="tilfoej" ? num*(1+pct) : num;
-  const fmt2 = n=>n.toLocaleString("da-DK",{minimumFractionDigits:2,maximumFractionDigits:2});
-
-  const inp = {padding:"11px 14px",borderRadius:"10px",border:`1px solid ${C.border}`,background:C.bgCard,color:C.text,fontSize:"15px",width:"100%",boxShadow:"0 1px 3px rgba(12,31,53,0.05)",outline:"none",transition:"border-color 0.15s"};
 
   return (
-    <div style={{maxWidth:"900px",margin:"0 auto",padding:"3rem 2rem"}}>
-      <SectionHeader title="Momsberegner"/>
-      <p style={{color:C.textSub,marginBottom:"2rem",lineHeight:1.7}}>Beregn moms hurtigt og nemt — angiv beløbet, vælg retning og momssats.</p>
+    <>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"2rem"}}>
         <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
           <div>
-            <label style={{display:"block",fontSize:"12px",fontWeight:700,color:C.textSub,marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Beløb (kr.)</label>
-            <input type="number" placeholder="Fx 10000" value={beloeb} onChange={e=>setBeloeb(e.target.value)} style={inp}/>
+            <label style={_lbl}>Beløb (kr.)</label>
+            <input type="number" placeholder="Fx 10000" value={beloeb} onChange={e=>setBeloeb(e.target.value)} style={_inp}/>
           </div>
           <div>
-            <label style={{display:"block",fontSize:"12px",fontWeight:700,color:C.textSub,marginBottom:"8px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Beregningsretning</label>
+            <label style={_lbl}>Beregningsretning</label>
             <div style={{display:"flex",gap:"0.75rem",flexWrap:"wrap"}}>
               {[["tilfoej","➕ Læg moms til"],["fratræk","➖ Træk moms fra"]].map(([v,l])=>(
                 <button key={v} onClick={()=>setRetning(v)} style={{padding:"9px 16px",borderRadius:"8px",border:`1.5px solid ${retning===v?C.navy:C.borderMid}`,background:retning===v?C.navy:C.bgSecondary,color:retning===v?C.white:C.text,cursor:"pointer",fontSize:"14px",transition:"all 0.15s"}}>{l}</button>
@@ -1984,8 +2013,8 @@ function Beregner() {
             <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>{retning==="tilfoej"?"Du angiver ekskl. moms — beregner inkl. moms.":"Du angiver inkl. moms — beregner momsandelen."}</p>
           </div>
           <div>
-            <label style={{display:"block",fontSize:"12px",fontWeight:700,color:C.textSub,marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Momssats</label>
-            <select value={sats} onChange={e=>setSats(e.target.value)} style={inp}>
+            <label style={_lbl}>Momssats</label>
+            <select value={sats} onChange={e=>setSats(e.target.value)} style={_inp}>
               <option value="25">25% — Standard dansk moms</option>
               <option value="0">0% — Momsfrit / nulmoms</option>
             </select>
@@ -1995,26 +2024,15 @@ function Beregner() {
           <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"1rem"}}>Resultat</div>
           {num>0 ? (
             <>
-              {[["Beløb ekskl. moms",fmt2(ekskl)],["Moms ("+sats+"%)",fmt2(momsBeloeb)]].map(([l,v])=>(
-                <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:`0.5px solid ${C.border}`}}>
-                  <span style={{fontSize:"14px",color:C.textSub}}>{l}</span>
-                  <span style={{fontWeight:600}}>{v} kr.</span>
-                </div>
-              ))}
+              <ResRow label="Beløb ekskl. moms" value={_fmt2(ekskl)}/>
+              <ResRow label={"Moms ("+sats+"%)"} value={_fmt2(momsBeloeb)}/>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 4px"}}>
                 <span style={{fontWeight:700,fontSize:"15px"}}>Beløb inkl. moms</span>
-                <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{fmt2(inkl)} kr.</span>
+                <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{_fmt2(inkl)} kr.</span>
               </div>
-              <div style={{marginTop:"1rem",background:"rgba(196,151,62,0.06)",border:"1px solid rgba(196,151,62,0.2)",borderRadius:"10px",padding:"11px 16px",fontSize:"12px",color:C.textSub,lineHeight:1.6}}>
-                <strong style={{color:C.gold}}>Tip:</strong> {sats==="25"?"Moms udgør altid 20% af det samlede beløb inkl. moms.":"Ingen moms ved 0%-sats."}
-              </div>
+              <CalcTip>{sats==="25"?"Moms udgør altid 20% af det samlede beløb inkl. moms.":"Ingen moms ved 0%-sats."}</CalcTip>
             </>
-          ) : (
-            <div style={{textAlign:"center",padding:"2rem 0",color:C.textSub}}>
-              <div style={{fontSize:"36px",marginBottom:"0.5rem"}}>🧮</div>
-              Angiv et beløb for at se resultatet
-            </div>
-          )}
+          ) : <CalcEmpty icon="🧮" text="Angiv et beløb for at se resultatet"/>}
         </Card>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1rem"}}>
@@ -2031,6 +2049,374 @@ function Beregner() {
           </Card>
         ))}
       </div>
+    </>
+  );
+}
+
+// ── LØN: BRUTTO → NETTO ───────────────────────────────────────────────────────
+function LoenKalk() {
+  const [brutto, setBrutto] = useState("");
+  const [traek, setTraek] = useState("37");
+  const [fradrag, setFradrag] = useState("4508"); // 54.100 / 12
+
+  const b = _parse(brutto);
+  const tp = _parse(traek)/100;
+  const fd = _parse(fradrag);
+
+  const amBidrag = b * 0.08;
+  const skattegrundlag = Math.max(0, b - amBidrag - fd);
+  const aSkat = skattegrundlag * tp;
+  const netto = b - amBidrag - aSkat;
+  const effektiv = b>0 ? ((b-netto)/b)*100 : 0;
+
+  return (
+    <>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"2rem"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
+          <div>
+            <label style={_lbl}>Bruttoløn pr. måned (kr.)</label>
+            <input type="number" placeholder="Fx 40000" value={brutto} onChange={e=>setBrutto(e.target.value)} style={_inp}/>
+          </div>
+          <div>
+            <label style={_lbl}>Trækprocent (%)</label>
+            <input type="number" placeholder="37" value={traek} onChange={e=>setTraek(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Stå på din forskudsopgørelse / skattekort. Landsgennemsnit er ca. 37–38% inkl. kommune- og evt. kirkeskat.</p>
+          </div>
+          <div>
+            <label style={_lbl}>Månedligt fradrag (kr.)</label>
+            <input type="number" placeholder="4508" value={fradrag} onChange={e=>setFradrag(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Personfradrag 2026: 54.100 kr./år ≈ 4.508 kr./md. Læg ev. beskæftigelsesfradrag og andre fradrag til.</p>
+          </div>
+        </div>
+        <Card>
+          <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"1rem"}}>Resultat — pr. måned</div>
+          {b>0 ? (
+            <>
+              <ResRow label="Bruttoløn" value={_fmt2(b)}/>
+              <ResRow label="AM-bidrag (8%)" value={"− "+_fmt2(amBidrag)}/>
+              <ResRow label="Månedligt fradrag" value={"− "+_fmt2(fd)}/>
+              <ResRow label="Skattepligtig indkomst" value={_fmt2(skattegrundlag)}/>
+              <ResRow label={"A-skat ("+traek+"%)"} value={"− "+_fmt2(aSkat)}/>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 4px"}}>
+                <span style={{fontWeight:700,fontSize:"15px"}}>Udbetalt netto</span>
+                <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{_fmt2(netto)} kr.</span>
+              </div>
+              <div style={{fontSize:"12px",color:C.textSub,textAlign:"right",marginTop:"4px"}}>Effektiv skat: {effektiv.toFixed(1)}%</div>
+              <CalcTip>Forenklet beregning. Pension, ATP, fagforening, A-kasse og andre fradrag er ikke medregnet. Brug Skattestyrelsens forskudsopgørelse for præcis beregning.</CalcTip>
+            </>
+          ) : <CalcEmpty icon="💼" text="Angiv din bruttoløn for at se nettoudbetaling"/>}
+        </Card>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1rem"}}>
+        {[
+          ["AM-bidrag","8% af bruttoløn","Trækkes altid først"],
+          ["Personfradrag 2026","54.100 kr./år","Skattefri bundgrænse (over 18 år)"],
+          ["Topskat-grænse 2026","777.900 kr./år","Efter AM-bidrag — 15% over"],
+          ["Bundskat 2026","12,09%","Af skattepligtig indkomst"],
+        ].map(([ti,fo,ex])=>(
+          <Card key={ti}>
+            <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"6px"}}>{ti}</div>
+            <div style={{fontSize:"18px",fontWeight:700,color:C.navy,marginBottom:"4px"}}>{fo}</div>
+            <div style={{fontSize:"12px",color:C.textSub}}>{ex}</div>
+          </Card>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ── KØRSELSGODTGØRELSE (2026) ─────────────────────────────────────────────────
+function KoerselKalk() {
+  const [km, setKm] = useState("");
+  const [type, setType] = useState("bil");
+
+  const k = _parse(km);
+  let beloeb=0, fordelt=null;
+  if (type==="bil") {
+    const lav = Math.max(0, k-20000);
+    const hoj = k - lav;
+    beloeb = hoj*3.94 + lav*2.28;
+    fordelt = {hoj, lav, hojBel: hoj*3.94, lavBel: lav*2.28};
+  } else {
+    beloeb = k * 0.64;
+  }
+
+  return (
+    <>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"2rem"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
+          <div>
+            <label style={_lbl}>Antal kilometer pr. år</label>
+            <input type="number" placeholder="Fx 15000" value={km} onChange={e=>setKm(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Grænsen på 20.000 km gælder pr. arbejdsgiver.</p>
+          </div>
+          <div>
+            <label style={_lbl}>Transportmiddel</label>
+            <div style={{display:"flex",gap:"0.75rem",flexWrap:"wrap"}}>
+              {[["bil","🚗 Bil"],["cykel","🚲 Cykel / knallert / scooter"]].map(([v,l])=>(
+                <button key={v} onClick={()=>setType(v)} style={{padding:"9px 16px",borderRadius:"8px",border:`1.5px solid ${type===v?C.navy:C.borderMid}`,background:type===v?C.navy:C.bgSecondary,color:type===v?C.white:C.text,cursor:"pointer",fontSize:"14px",transition:"all 0.15s"}}>{l}</button>
+              ))}
+            </div>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>{type==="bil"?"Egen bil — ikke firmabil. Firmabil giver ikke ret til skattefri kørselsgodtgørelse.":"Egen cykel, knallert, 45-knallert, scooter eller el-løbehjul."}</p>
+          </div>
+        </div>
+        <Card>
+          <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"1rem"}}>Skattefri godtgørelse — 2026</div>
+          {k>0 ? (
+            <>
+              {type==="bil" ? (
+                <>
+                  <ResRow label={_fmt0(fordelt.hoj)+" km × 3,94 kr."} value={_fmt2(fordelt.hojBel)}/>
+                  {fordelt.lav>0 && <ResRow label={_fmt0(fordelt.lav)+" km × 2,28 kr."} value={_fmt2(fordelt.lavBel)}/>}
+                </>
+              ) : (
+                <ResRow label={_fmt0(k)+" km × 0,64 kr."} value={_fmt2(beloeb)}/>
+              )}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 4px"}}>
+                <span style={{fontWeight:700,fontSize:"15px"}}>Skattefri godtgørelse i alt</span>
+                <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{_fmt2(beloeb)} kr.</span>
+              </div>
+              <CalcTip>Krav til kørselsregnskab: formål, destination, dato, antal km. Uden korrekt dokumentation bliver hele beløbet skattepligtigt som A-indkomst.</CalcTip>
+            </>
+          ) : <CalcEmpty icon="🚗" text="Angiv antal kilometer for at se godtgørelsen"/>}
+        </Card>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1rem"}}>
+        {[
+          ["Bil 0–20.000 km","3,94 kr./km","Høj sats — første 20.000 km"],
+          ["Bil over 20.000 km","2,28 kr./km","Lav sats — over grænsen"],
+          ["Cykel/knallert/scooter","0,64 kr./km","Egen to-hjuler"],
+          ["Befordringsfradrag 25–120 km","2,28 kr./km","Hjem–arbejde (kun pendling)"],
+        ].map(([ti,fo,ex])=>(
+          <Card key={ti}>
+            <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"6px"}}>{ti}</div>
+            <div style={{fontSize:"20px",fontWeight:700,color:C.navy,fontFamily:"monospace",marginBottom:"4px"}}>{fo}</div>
+            <div style={{fontSize:"12px",color:C.textSub}}>{ex}</div>
+          </Card>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ── TIMEPRIS (FREELANCE / KONSULENT) ──────────────────────────────────────────
+function TimeprisKalk() {
+  const [aarsloen, setAarsloen] = useState("");
+  const [dage, setDage] = useState("220");
+  const [timer, setTimer] = useState("6");
+  const [omk, setOmk] = useState("50000");
+  const [margin, setMargin] = useState("15");
+
+  const al = _parse(aarsloen);
+  const d = _parse(dage);
+  const t = _parse(timer);
+  const o = _parse(omk);
+  const m = _parse(margin)/100;
+
+  const totalTimer = d * t;
+  const kraevetOms = (al + o) * (1 + m);
+  const timeEkskl = totalTimer>0 ? kraevetOms / totalTimer : 0;
+  const timeInkl = timeEkskl * 1.25;
+  const dagspris = timeEkskl * 8;
+
+  return (
+    <>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"2rem"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
+          <div>
+            <label style={_lbl}>Ønsket årsindkomst (kr.)</label>
+            <input type="number" placeholder="Fx 500000" value={aarsloen} onChange={e=>setAarsloen(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Hvad du selv vil "trække ud" på et år — før skat.</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1rem"}}>
+            <div>
+              <label style={_lbl}>Arbejdsdage / år</label>
+              <input type="number" value={dage} onChange={e=>setDage(e.target.value)} style={_inp}/>
+            </div>
+            <div>
+              <label style={_lbl}>Fakturerbare timer / dag</label>
+              <input type="number" value={timer} onChange={e=>setTimer(e.target.value)} style={_inp}/>
+            </div>
+          </div>
+          <div>
+            <label style={_lbl}>Driftsomkostninger pr. år (kr.)</label>
+            <input type="number" value={omk} onChange={e=>setOmk(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Software, telefon, forsikring, bogføring, kontor mv.</p>
+          </div>
+          <div>
+            <label style={_lbl}>Overskudsgrad / buffer (%)</label>
+            <input type="number" value={margin} onChange={e=>setMargin(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Til pension, opsparing, risiko og ferie.</p>
+          </div>
+        </div>
+        <Card>
+          <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"1rem"}}>Anbefalet timepris</div>
+          {al>0 && d>0 && t>0 ? (
+            <>
+              <ResRow label="Fakturerbare timer / år" value={_fmt0(totalTimer)} suffix="timer"/>
+              <ResRow label="Krævet omsætning / år" value={_fmt2(kraevetOms)}/>
+              <ResRow label="Dagspris (8 t)" value={_fmt2(dagspris)}/>
+              <ResRow label="Timepris inkl. moms" value={_fmt2(timeInkl)}/>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 4px"}}>
+                <span style={{fontWeight:700,fontSize:"15px"}}>Timepris ekskl. moms</span>
+                <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{_fmt2(timeEkskl)} kr.</span>
+              </div>
+              <CalcTip>Som tommelfingerregel er ~5–6 fakturerbare timer pr. dag realistisk for en fuldtidsfreelancer. Resten går til salg, administration, pauser og uforudsete ting.</CalcTip>
+            </>
+          ) : <CalcEmpty icon="⏱️" text="Udfyld årsindkomst, dage og timer for at se din timepris"/>}
+        </Card>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1rem"}}>
+        {[
+          ["Formel","(Løn + omk.) × (1+margin) ÷ timer","Krævet omsætning ÷ fakturerbare timer"],
+          ["Typisk fakturering","5–6 timer / dag","8-timers dag = ca. 70% fakturerbart"],
+          ["Standardår","ca. 220 dage","260 hverdage − 25 ferie − 15 syg/kursus"],
+          ["Husk moms","+25% til fakturaen","Tjek din momspligt — ML § 47"],
+        ].map(([ti,fo,ex])=>(
+          <Card key={ti}>
+            <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"6px"}}>{ti}</div>
+            <div style={{fontSize:"16px",fontWeight:700,color:C.navy,marginBottom:"4px"}}>{fo}</div>
+            <div style={{fontSize:"12px",color:C.textSub}}>{ex}</div>
+          </Card>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ── MORARENTER (RENTELOVEN § 5) ───────────────────────────────────────────────
+function MorarenteKalk() {
+  const [hovedstol, setHovedstol] = useState("");
+  const [dage, setDage] = useState("");
+  const [sats, setSats] = useState("9.75");
+
+  const h = _parse(hovedstol);
+  const d = _parse(dage);
+  const s = _parse(sats)/100;
+
+  const rente = h * s * (d/365);
+  const samlet = h + rente;
+  const renteDag = h * s / 365;
+
+  return (
+    <>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"2rem"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
+          <div>
+            <label style={_lbl}>Hovedstol — skyldigt beløb (kr.)</label>
+            <input type="number" placeholder="Fx 50000" value={hovedstol} onChange={e=>setHovedstol(e.target.value)} style={_inp}/>
+          </div>
+          <div>
+            <label style={_lbl}>Antal dage forsinket</label>
+            <input type="number" placeholder="Fx 60" value={dage} onChange={e=>setDage(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Fra forfaldsdato (eller 30 dage efter påkrav, hvis ingen aftalt frist).</p>
+          </div>
+          <div>
+            <label style={_lbl}>Rentesats p.a. (%)</label>
+            <input type="number" step="0.01" placeholder="9.75" value={sats} onChange={e=>setSats(e.target.value)} style={_inp}/>
+            <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"8px"}}>
+              {[
+                ["9.75","2026 H1"],
+                ["10.75","2025 H1"],
+                ["11.5","2024 H2"],
+                ["11.75","2024 H1"],
+              ].map(([v,l])=>(
+                <button key={v} onClick={()=>setSats(v)} style={{padding:"6px 10px",borderRadius:"6px",border:`1px solid ${sats===v?C.gold:C.borderMid}`,background:sats===v?"rgba(196,151,62,0.1)":C.bgSecondary,color:sats===v?C.navy:C.textSub,cursor:"pointer",fontSize:"12px",fontWeight:sats===v?700:500,transition:"all 0.15s"}}>{v.replace(".",",")}% · {l}</button>
+              ))}
+            </div>
+            <p style={{margin:"8px 0 0",fontSize:"12px",color:C.textSub}}>Morarente = Nationalbankens udlånsrente + 8 pct.point (renteloven § 5). Fastsættes halvårligt.</p>
+          </div>
+        </div>
+        <Card>
+          <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"1rem"}}>Morarente</div>
+          {h>0 && d>0 ? (
+            <>
+              <ResRow label="Hovedstol" value={_fmt2(h)}/>
+              <ResRow label="Antal dage" value={_fmt0(d)} suffix="dage"/>
+              <ResRow label="Rente pr. dag" value={_fmt2(renteDag)}/>
+              <ResRow label="Morarente i alt" value={_fmt2(rente)}/>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 4px"}}>
+                <span style={{fontWeight:700,fontSize:"15px"}}>Samlet krav</span>
+                <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{_fmt2(samlet)} kr.</span>
+              </div>
+              <CalcTip>Ingen rentes rente i Danmark. Beregningen bruger faktiske dage (365). Ved erhvervstransaktioner kan kreditor desuden kræve et fast kompensationsbeløb på 310 kr. pr. faktura (renteloven § 9a).</CalcTip>
+            </>
+          ) : <CalcEmpty icon="📅" text="Angiv hovedstol og antal dage forsinket"/>}
+        </Card>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1rem"}}>
+        {[
+          ["Gældende sats","9,75% p.a.","1.1.–30.6.2026 (reguleres halvårligt)"],
+          ["Formel","Hovedstol × sats × dage/365","Faktiske dage, ingen rentes rente"],
+          ["Påkravsgebyr","100 kr./rykker","Op til 3 rykkere — renteloven § 9b"],
+          ["Kompensation B2B","310 kr./faktura","Fast — ved erhverv (renteloven § 9a)"],
+        ].map(([ti,fo,ex])=>(
+          <Card key={ti}>
+            <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"6px"}}>{ti}</div>
+            <div style={{fontSize:"18px",fontWeight:700,color:C.navy,marginBottom:"4px"}}>{fo}</div>
+            <div style={{fontSize:"12px",color:C.textSub}}>{ex}</div>
+          </Card>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ── BEREGNER (router/tabs) ────────────────────────────────────────────────────
+function Beregner() {
+  const [tab, setTab] = useState("moms");
+
+  const tabs = [
+    ["moms",      "💰", "Moms"],
+    ["loen",      "💼", "Løn"],
+    ["koersel",   "🚗", "Kørselsgodtgørelse"],
+    ["timepris",  "⏱️", "Timepris"],
+    ["morarente", "📅", "Morarenter"],
+  ];
+
+  const subs = {
+    moms: "Beregn moms — læg til, træk fra, og se ekskl./inkl. priser.",
+    loen: "Beregn nettoløn ud fra bruttoløn, trækprocent og fradrag (2026-satser).",
+    koersel: "Skattefri kørselsgodtgørelse efter 2026-satserne — for medarbejdere og selvstændige.",
+    timepris: "Find din rette freelance-timepris ud fra ønsket indkomst, omkostninger og fakturerbare timer.",
+    morarente: "Beregn morarenter efter renteloven § 5 — gældende sats 9,75% p.a.",
+  };
+
+  return (
+    <div style={{maxWidth:"940px",margin:"0 auto",padding:"3rem 2rem"}}>
+      <SectionHeader title="Beregnere" sub="Praktiske beregnere til den daglige drift — opdateret med 2026-satser."/>
+
+      {/* Tab navigation */}
+      <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"1.25rem",borderBottom:`1px solid ${C.border}`}}>
+        {tabs.map(([id,ic,label])=>(
+          <button key={id} onClick={()=>setTab(id)} style={{
+            padding:"10px 16px",
+            borderRadius:"10px 10px 0 0",
+            border:"none",
+            borderBottom:`2px solid ${tab===id?C.gold:"transparent"}`,
+            marginBottom:"-1px",
+            background:tab===id?C.bgSecondary:"transparent",
+            color:tab===id?C.navy:C.textSub,
+            cursor:"pointer",
+            fontSize:"14px",
+            fontWeight:tab===id?700:500,
+            display:"flex",
+            alignItems:"center",
+            gap:"6px",
+            transition:"all 0.15s",
+          }}>
+            <span>{ic}</span>{label}
+          </button>
+        ))}
+      </div>
+
+      <p style={{color:C.textSub,marginBottom:"2rem",lineHeight:1.7,fontSize:"14px"}}>{subs[tab]}</p>
+
+      {tab==="moms"      && <MomsKalk/>}
+      {tab==="loen"      && <LoenKalk/>}
+      {tab==="koersel"   && <KoerselKalk/>}
+      {tab==="timepris"  && <TimeprisKalk/>}
+      {tab==="morarente" && <MorarenteKalk/>}
     </div>
   );
 }
