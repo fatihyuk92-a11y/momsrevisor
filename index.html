@@ -1764,14 +1764,14 @@ function Perioder() {
     {p:"NOx-afgift",                       frist:næsteMaanedFrist(15),    note:"Månedlig — 15. i måneden efter"},
   ];
 
-  // ── TABS CONFIG ──
+  // ── TABS CONFIG (samme stil som Beregner) ──
   const TABS = [
-    {id:"moms",   lbl:"🧾 Moms",                farve:C.navy},
-    {id:"askat",  lbl:"💼 A-skat & AM-bidrag",  farve:"#1a4d7a"},
-    {id:"bskat",  lbl:"📊 B-skat",              farve:"#0c5c3a"},
-    {id:"selskab",lbl:"🏢 Acontoskat (ApS/A/S)",farve:"#5c2d0c"},
-    {id:"loensum",lbl:"⚖️ Lønsumsafgift",       farve:"#4a0c5c"},
-    {id:"punkt",  lbl:"⚡ Punktafgifter",       farve:"#7a3d00"},
+    {id:"moms",    ic:"🧾", lbl:"Moms"},
+    {id:"askat",   ic:"💼", lbl:"A-skat & AM-bidrag"},
+    {id:"bskat",   ic:"📊", lbl:"B-skat"},
+    {id:"selskab", ic:"🏢", lbl:"Acontoskat (ApS/A/S)"},
+    {id:"loensum", ic:"⚖️", lbl:"Lønsumsafgift"},
+    {id:"punkt",   ic:"⚡", lbl:"Punktafgifter"},
   ];
 
   const [momsTab, setMomsTab] = useState("kvartal");
@@ -1826,16 +1826,28 @@ function Perioder() {
         Overblik over alle relevante indberetnings- og betalingsfrister for danske erhvervsdrivende — moms, A-skat, B-skat, lønsumsafgift og punktafgifter samlet ét sted.
       </p>
 
-      {/* Tab navigation */}
-      <div style={{display:"flex",gap:"6px",marginBottom:"2rem",flexWrap:"wrap"}}>
-        {TABS.map(({id,lbl,farve})=>(
+      {/* Tab navigation — samme stil som Beregner-siden */}
+      <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"2rem",borderBottom:`1px solid ${C.border}`}}>
+        {TABS.map(({id,ic,lbl})=>(
           <button key={id} onClick={()=>setAktivTab(id)} style={{
-            padding:"9px 16px",borderRadius:"8px",border:`1.5px solid ${aktivTab===id?farve:C.border}`,
-            cursor:"pointer",fontSize:"13px",fontWeight:aktivTab===id?700:400,
-            background:aktivTab===id?farve:C.bgCard,
-            color:aktivTab===id?C.white:C.textSub,transition:"all 0.15s",
-            boxShadow:aktivTab===id?`0 2px 10px rgba(0,0,0,0.15)`:"none",
-          }}>{lbl}</button>
+            padding:"10px 16px",
+            borderRadius:"10px 10px 0 0",
+            border:"none",
+            borderBottom:`2px solid ${aktivTab===id?C.gold:"transparent"}`,
+            marginBottom:"-1px",
+            background:aktivTab===id?C.bgSecondary:"transparent",
+            color:aktivTab===id?C.navy:C.textSub,
+            cursor:"pointer",
+            fontSize:"14px",
+            fontWeight:aktivTab===id?700:500,
+            display:"flex",
+            alignItems:"center",
+            gap:"6px",
+            transition:"all 0.15s",
+            whiteSpace:"nowrap",
+          }}>
+            <span>{ic}</span>{lbl}
+          </button>
         ))}
       </div>
 
