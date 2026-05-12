@@ -2211,6 +2211,38 @@ function MomsCompliance() {
   const filRef = useRef(null);
 
   // ── CVR opslag via Claude AI med web_search ──
+  const slaOpCVR = async () => {
+    const cleaned = validerCVR(cvr);
+    if (!cleaned) { setCvrFejl("CVR-nummer skal være præcis 8 cifre."); return; }
+    if (!rateLimit("cvr", 5, 120000)) { setCvrFejl("For mange opslag. Vent et øjeblik og prøv igen."); return; }
+    setCvrFejl(""); setCvrLoading(true); setCvrData(null); setAiAnalyse("");
+    try {
+      const res = await sikkerFetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          tools: [{"type":"web_search_20250305","name":"web_search"}],
+          messages: [{role:"user", content: "Slå CVR-nummer " + cleaned + " op på cvr.dk eller virk.dk og returner som JSON og KUN JSON uden forklaring:\n{\"navn\":\"...\",\"cvr\":\"" + cleaned + "\",\"status\":\"AKTIV eller OPHØRT\",\"branche\":\"...\",\"brancheKode\":\"...\",\"adresse\":\"...\",\"ansatte\":\"...\",\"stiftet\":\"...\",\"ejerform\":\"...\"}"}]
+        })
+      }, 30000);
+      const data = await res.json();
+      const tekstBlokke = (data.content||[]).filter(b=>b.type==="text");
+      const raaJson = tekstBlokke.map(b=>b.text).join("");
+      const jsonMatch = raaJson.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("Ingen data fundet");
+      const virk = JSON.parse(jsonMatch[0]);
+      Object.keys(virk).forEach(k => { virk[k] = saniterTekst(String(virk[k] || ""), 200); });
+      virk.cvr = cleaned;
+      setCvrData(virk);
+      setFase("analyse");
+      hentAiAnalyse(virk);
+    } catch(e) {
+      setCvrFejl("Kunne ikke hente CVR-data. Prøv igen om et øjeblik.");
+    }
+    setCvrLoading(false);
+  };
 
   // ── AI compliance-analyse baseret på CVR-data ──
   const hentAiAnalyse = async (virk) => {
