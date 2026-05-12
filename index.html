@@ -1294,21 +1294,21 @@ function Perioder() {
   }));
   // Fix: build correctly
   const aSkatSmaRows = Array.from({length:12},(_,i)=>{
-    const fristMdr = i+1; const fristAar = i===11?y+1:y;
-    const fristDag = 10;
+    const fristMdr = i+1 > 11 ? 0 : i+1;
+    const fristAar = i+1 > 11 ? y+1 : y;
     return {
       p: `${new Date(y,i,1).toLocaleString("da-DK",{month:"long"})} ${y}`,
       fra: new Date(y,i,1), til: new Date(y,i+1,0),
-      frist: new Date(fristAar, fristMdr>11?0:fristMdr, fristDag),
+      frist: new Date(fristAar, fristMdr, 10),
       note: "< 1 mio. kr./år"
     };
   });
   const aSkatStoreRows = Array.from({length:12},(_,i)=>{
-    const fristMdr = i; const fristDag = 1;
+    // Store: 1. bankdag i SAMME måned som lønnen
     return {
       p: `${new Date(y,i,1).toLocaleString("da-DK",{month:"long"})} ${y}`,
       fra: new Date(y,i,1), til: new Date(y,i+1,0),
-      frist: new Date(y, i, fristDag),
+      frist: new Date(y, i, 1),
       note: "> 1 mio. kr./år"
     };
   });
@@ -1334,31 +1334,50 @@ function Perioder() {
     {p:`Restskat ${y-1}`,   frist:new Date(y,10,20),note:"Frivillig betaling — undgå restskattetillæg"},
   ];
 
-  // ── LØNSUMSAFGIFT ──
+  // ── LØNSUMSAFGIFT — næste frister ──
+  const næsteKvartalMomsFrist = () => {
+    const frister = [new Date(y,5,1),new Date(y,8,1),new Date(y,11,1),new Date(y+1,2,1)];
+    return frister.find(f=>f>today) || frister[frister.length-1];
+  };
   const loensums = [
-    {p:"Metode 1 — månedlig aconto", frist:new Date(y,1,15),  note:"Finansielle virksomheder. Foreløbig betaling januar"},
-    {p:"Metode 1 — endelig årsopgørelse", frist:new Date(y,7,15), note:"Senest 15. august for foregående år"},
-    {p:"Metode 2 — 1. kvartal",      frist:new Date(y,5,1),   note:"Blandet moms/momsfri — koordinér med pro-rata"},
-    {p:"Metode 2 — 2. kvartal",      frist:new Date(y,8,1),   note:"Blandet moms/momsfri — koordinér med pro-rata"},
-    {p:"Metode 2 — 3. kvartal",      frist:new Date(y,11,1),  note:"Blandet moms/momsfri — koordinér med pro-rata"},
-    {p:"Metode 2 — 4. kvartal",      frist:new Date(y+1,2,1), note:"Blandet moms/momsfri — koordinér med pro-rata"},
-    {p:"Metode 3 — 1. halvår",       frist:new Date(y,8,1),   note:"Dagblade og aviser"},
-    {p:"Metode 3 — 2. halvår",       frist:new Date(y+1,2,1), note:"Dagblade og aviser"},
-    {p:"Metode 4 — månedlig aconto", frist:new Date(y,1,15),  note:"Læger, tandlæger, skoler mv. Foreløbig"},
-    {p:"Metode 4 — endelig årsopgørelse", frist:new Date(y,7,15), note:"Senest 15. august for foregående år"},
+    {p:"Metode 1 — månedlig aconto",         frist:næsteMaanedFrist(15),     note:"Finansielle virksomheder. Foreløbig betaling — 15. i måneden efter"},
+    {p:"Metode 1 — endelig årsopgørelse",    frist:new Date(y,7,15),         note:"Senest 15. august for foregående år"},
+    {p:"Metode 2 — næste kvartal",           frist:næsteKvartalMomsFrist(),  note:"Blandet moms/momsfri — koordinér med pro-rata"},
+    {p:"Metode 3 — 1. halvår",               frist:new Date(y,8,1)>today?new Date(y,8,1):new Date(y+1,2,1), note:"Dagblade og aviser"},
+    {p:"Metode 4 — månedlig aconto",         frist:næsteMaanedFrist(15),     note:"Læger, tandlæger, skoler mv. — 15. i måneden efter"},
+    {p:"Metode 4 — endelig årsopgørelse",    frist:new Date(y,7,15),         note:"Senest 15. august for foregående år"},
   ];
 
-  // ── PUNKTAFGIFTER ──
+  // ── PUNKTAFGIFTER — næste frist beregnes dynamisk ──
+  const næsteMaanedFrist = (dag) => {
+    // Find næste måned hvor dag-th ikke er passeret
+    const d = new Date(today);
+    d.setDate(dag);
+    if (d <= today) { d.setMonth(d.getMonth() + 1); d.setDate(dag); }
+    return d;
+  };
+  const næsteKvartalFrist = (dag, maanedEfterKvartal) => {
+    // maanedEfterKvartal: 1 = jan, 4 = apr, 7 = jul, 10 = okt
+    const kvartalSlut = [2,5,8,11]; // marts, jun, sep, dec
+    for (const mdr of kvartalSlut) {
+      const frist = new Date(y, mdr, dag);
+      if (frist > today) return frist;
+    }
+    return new Date(y+1, 2, dag);
+  };
+
   const punktafgifter = [
-    {p:"Energiafgifter (el, gas, olie)", frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter. Registreringspligt ved køb til erhvervsbrug"},
-    {p:"CO₂-afgift",        frist:new Date(y,1,15), note:"Månedlig — følger energiafgifterne"},
-    {p:"Emballageafgift",   frist:new Date(y,1,25), note:"Kvartalsvis — 25. i måneden efter kvartalet"},
-    {p:"Chokoladeafgift",   frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter"},
-    {p:"Tobaksafgift",      frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter. Kun for registrerede oplagshavere"},
-    {p:"Spiritusafgift/øl/vin", frist:new Date(y,1,15), note:"Månedlig — 15. i måneden efter. Registreret oplagshaver"},
-    {p:"Spildevandsafgift", frist:new Date(y,3,1),  note:"Kvartalsvis — 1. i 2. måned efter kvartalet"},
-    {p:"Råstofafgift",      frist:new Date(y,3,1),  note:"Kvartalsvis"},
-    {p:"Vejbenyttelsesafgift (lastbiler)", frist:new Date(y,0,31), note:"Årsvis — 31. januar for indeværende år"},
+    {p:"Energiafgifter (el, gas, olie)",        frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter forbrug. Tilbagesøgning mulig for momsregistrerede"},
+    {p:"CO₂-afgift",                            frist:næsteMaanedFrist(15),      note:"Månedlig — følger energiafgifterne (15. i måneden efter)"},
+    {p:"Emballageafgift",                       frist:næsteKvartalFrist(25,1),   note:"Kvartalsvis — 25. i måneden efter kvartalets udløb"},
+    {p:"Chokoladeafgift",                       frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter for registrerede"},
+    {p:"Tobaksafgift",                          frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter. Kun registrerede oplagshavere"},
+    {p:"Spiritusafgift / øl / vin",             frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter. Registreret oplagshaver"},
+    {p:"Spildevandsafgift",                     frist:næsteKvartalFrist(1,2),    note:"Kvartalsvis — 1. i 2. måned efter kvartalets udløb"},
+    {p:"Råstofafgift",                          frist:næsteKvartalFrist(1,2),    note:"Kvartalsvis — 1. i 2. måned efter kvartalets udløb"},
+    {p:"Vejbenyttelsesafgift (lastbiler)",      frist:new Date(y+1,0,31),        note:"Årsvis — 31. januar for indeværende år"},
+    {p:"NOx-afgift",                            frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter for registrerede"},
+    {p:"Kvælstofoxidafgift (brændstoffer)",     frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter"},
   ];
 
   // ── TABS CONFIG ──
