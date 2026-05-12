@@ -1387,6 +1387,26 @@ function Perioder() {
     return           {lbl:`${d} dage`,     c:C.green,  bg:"rgba(34,197,94,0.1)"};
   };
 
+  // ── HJÆLPEFUNKTIONER — skal defineres FØR de bruges ──
+  const næsteMaanedFrist = (dag) => {
+    const d = new Date(today);
+    d.setDate(dag);
+    if (d <= today) { d.setMonth(d.getMonth() + 1); d.setDate(dag); }
+    return d;
+  };
+  const næsteKvartalFrist = (dag) => {
+    const kvartalSlut = [2,5,8,11];
+    for (const mdr of kvartalSlut) {
+      const frist = new Date(y, mdr, dag);
+      if (frist > today) return frist;
+    }
+    return new Date(y+1, 2, dag);
+  };
+  const næsteKvartalMomsFrist = () => {
+    const frister = [new Date(y,5,1),new Date(y,8,1),new Date(y,11,1),new Date(y+1,2,1)];
+    return frister.find(f=>f>today) || frister[frister.length-1];
+  };
+
   // ── MOMS ──
   const momsData = {
     halvaar: [
@@ -1407,14 +1427,6 @@ function Perioder() {
   };
 
   // ── A-SKAT & AM-BIDRAG ──
-  const maanedNavne = ["Jan","Feb","Mar","Apr","Maj","Jun","Jul","Aug","Sep","Okt","Nov","Dec"];
-  const aSkatSma = Array.from({length:12},(_,i)=>({
-    p: `${maanedNavne[i]} ${y}`,
-    fra: new Date(y,i,1), til: new Date(y,i+1,0),
-    frist: new Date(y, i===11?y+1:y, i===11?10:undefined, ...(i===11?[]:[i+1,10])),
-    note: "Små virksomheder (< 1 mio. kr. A-skat/år)"
-  }));
-  // Fix: build correctly
   const aSkatSmaRows = Array.from({length:12},(_,i)=>{
     const fristMdr = i+1 > 11 ? 0 : i+1;
     const fristAar = i+1 > 11 ? y+1 : y;
@@ -1425,81 +1437,56 @@ function Perioder() {
       note: "< 1 mio. kr./år"
     };
   });
-  const aSkatStoreRows = Array.from({length:12},(_,i)=>{
-    // Store: 1. bankdag i SAMME måned som lønnen
-    return {
-      p: `${new Date(y,i,1).toLocaleString("da-DK",{month:"long"})} ${y}`,
-      fra: new Date(y,i,1), til: new Date(y,i+1,0),
-      frist: new Date(y, i, 1),
-      note: "> 1 mio. kr./år"
-    };
-  });
+  const aSkatStoreRows = Array.from({length:12},(_,i)=>({
+    p: `${new Date(y,i,1).toLocaleString("da-DK",{month:"long"})} ${y}`,
+    fra: new Date(y,i,1), til: new Date(y,i+1,0),
+    frist: new Date(y, i, 1),
+    note: "> 1 mio. kr./år"
+  }));
 
-  // ── B-SKAT (ACONTOSKAT FOR SELVSTÆNDIGE) ──
+  // ── B-SKAT ──
   const bSkatRater = [
-    {p:"Rate 1", frist:new Date(y,0,20), note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 2", frist:new Date(y,2,20), note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 3", frist:new Date(y,4,20), note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 4", frist:new Date(y,6,20), note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 5", frist:new Date(y,7,20), note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 6", frist:new Date(y,8,20), note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 7", frist:new Date(y,9,20), note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 8", frist:new Date(y,10,20),note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 9", frist:new Date(y,11,20),note:"1/10 af årets samlede B-skat"},
-    {p:"Rate 10",frist:new Date(y+1,0,20),note:"Sidste rate — 1/10 af årets samlede B-skat"},
+    {p:"Rate 1",  frist:new Date(y,0,20),   note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 2",  frist:new Date(y,2,20),   note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 3",  frist:new Date(y,4,20),   note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 4",  frist:new Date(y,6,20),   note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 5",  frist:new Date(y,7,20),   note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 6",  frist:new Date(y,8,20),   note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 7",  frist:new Date(y,9,20),   note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 8",  frist:new Date(y,10,20),  note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 9",  frist:new Date(y,11,20),  note:"1/10 af årets samlede B-skat"},
+    {p:"Rate 10", frist:new Date(y+1,0,20), note:"Sidste rate — 1/10 af årets samlede B-skat"},
   ];
 
   // ── ACONTOSKAT SELSKABER ──
   const acontoSkat = [
-    {p:`1. acontorat ${y}`, frist:new Date(y,2,20), note:"Halvdelen af årets forventede selskabsskat (22%)"},
-    {p:`2. acontorat ${y}`, frist:new Date(y,10,20),note:"Halvdelen af årets forventede selskabsskat (22%)"},
-    {p:`Restskat ${y-1}`,   frist:new Date(y,10,20),note:"Frivillig betaling — undgå restskattetillæg"},
+    {p:`1. acontorat ${y}`, frist:new Date(y,2,20),  note:"Halvdelen af årets forventede selskabsskat (22%)"},
+    {p:`2. acontorat ${y}`, frist:new Date(y,10,20), note:"Halvdelen af årets forventede selskabsskat (22%)"},
+    {p:`Restskat ${y-1}`,   frist:new Date(y,10,20), note:"Frivillig betaling — undgå restskattetillæg"},
   ];
 
-  // ── LØNSUMSAFGIFT — næste frister ──
-  const næsteKvartalMomsFrist = () => {
-    const frister = [new Date(y,5,1),new Date(y,8,1),new Date(y,11,1),new Date(y+1,2,1)];
-    return frister.find(f=>f>today) || frister[frister.length-1];
-  };
+  // ── LØNSUMSAFGIFT ──
   const loensums = [
-    {p:"Metode 1 — månedlig aconto",         frist:næsteMaanedFrist(15),     note:"Finansielle virksomheder. Foreløbig betaling — 15. i måneden efter"},
-    {p:"Metode 1 — endelig årsopgørelse",    frist:new Date(y,7,15),         note:"Senest 15. august for foregående år"},
-    {p:"Metode 2 — næste kvartal",           frist:næsteKvartalMomsFrist(),  note:"Blandet moms/momsfri — koordinér med pro-rata"},
-    {p:"Metode 3 — 1. halvår",               frist:new Date(y,8,1)>today?new Date(y,8,1):new Date(y+1,2,1), note:"Dagblade og aviser"},
-    {p:"Metode 4 — månedlig aconto",         frist:næsteMaanedFrist(15),     note:"Læger, tandlæger, skoler mv. — 15. i måneden efter"},
-    {p:"Metode 4 — endelig årsopgørelse",    frist:new Date(y,7,15),         note:"Senest 15. august for foregående år"},
+    {p:"Metode 1 — månedlig aconto",      frist:næsteMaanedFrist(15),                                              note:"Finansielle virksomheder — 15. i måneden efter"},
+    {p:"Metode 1 — endelig årsopgørelse", frist:new Date(y,7,15),                                                  note:"Senest 15. august for foregående år"},
+    {p:"Metode 2 — næste kvartal",        frist:næsteKvartalMomsFrist(),                                           note:"Blandet moms/momsfri — koordinér med pro-rata"},
+    {p:"Metode 3 — næste halvår",         frist:new Date(y,8,1)>today?new Date(y,8,1):new Date(y+1,2,1),          note:"Dagblade og aviser"},
+    {p:"Metode 4 — månedlig aconto",      frist:næsteMaanedFrist(15),                                              note:"Læger, tandlæger, skoler mv. — 15. i måneden efter"},
+    {p:"Metode 4 — endelig årsopgørelse", frist:new Date(y,7,15),                                                  note:"Senest 15. august for foregående år"},
   ];
 
-  // ── PUNKTAFGIFTER — næste frist beregnes dynamisk ──
-  const næsteMaanedFrist = (dag) => {
-    // Find næste måned hvor dag-th ikke er passeret
-    const d = new Date(today);
-    d.setDate(dag);
-    if (d <= today) { d.setMonth(d.getMonth() + 1); d.setDate(dag); }
-    return d;
-  };
-  const næsteKvartalFrist = (dag, maanedEfterKvartal) => {
-    // maanedEfterKvartal: 1 = jan, 4 = apr, 7 = jul, 10 = okt
-    const kvartalSlut = [2,5,8,11]; // marts, jun, sep, dec
-    for (const mdr of kvartalSlut) {
-      const frist = new Date(y, mdr, dag);
-      if (frist > today) return frist;
-    }
-    return new Date(y+1, 2, dag);
-  };
-
+  // ── PUNKTAFGIFTER ──
   const punktafgifter = [
-    {p:"Energiafgifter (el, gas, olie)",        frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter forbrug. Tilbagesøgning mulig for momsregistrerede"},
-    {p:"CO₂-afgift",                            frist:næsteMaanedFrist(15),      note:"Månedlig — følger energiafgifterne (15. i måneden efter)"},
-    {p:"Emballageafgift",                       frist:næsteKvartalFrist(25,1),   note:"Kvartalsvis — 25. i måneden efter kvartalets udløb"},
-    {p:"Chokoladeafgift",                       frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter for registrerede"},
-    {p:"Tobaksafgift",                          frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter. Kun registrerede oplagshavere"},
-    {p:"Spiritusafgift / øl / vin",             frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter. Registreret oplagshaver"},
-    {p:"Spildevandsafgift",                     frist:næsteKvartalFrist(1,2),    note:"Kvartalsvis — 1. i 2. måned efter kvartalets udløb"},
-    {p:"Råstofafgift",                          frist:næsteKvartalFrist(1,2),    note:"Kvartalsvis — 1. i 2. måned efter kvartalets udløb"},
-    {p:"Vejbenyttelsesafgift (lastbiler)",      frist:new Date(y+1,0,31),        note:"Årsvis — 31. januar for indeværende år"},
-    {p:"NOx-afgift",                            frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter for registrerede"},
-    {p:"Kvælstofoxidafgift (brændstoffer)",     frist:næsteMaanedFrist(15),      note:"Månedlig — 15. i måneden efter"},
+    {p:"Energiafgifter (el, gas, olie)",   frist:næsteMaanedFrist(15),    note:"Månedlig — 15. i måneden efter. Tilbagesøgning mulig for momsregistrerede"},
+    {p:"CO₂-afgift",                       frist:næsteMaanedFrist(15),    note:"Månedlig — følger energiafgifterne"},
+    {p:"Emballageafgift",                  frist:næsteKvartalFrist(25),   note:"Kvartalsvis — 25. i måneden efter kvartalet"},
+    {p:"Chokoladeafgift",                  frist:næsteMaanedFrist(15),    note:"Månedlig — 15. i måneden efter"},
+    {p:"Tobaksafgift",                     frist:næsteMaanedFrist(15),    note:"Månedlig — kun registrerede oplagshavere"},
+    {p:"Spiritusafgift / øl / vin",        frist:næsteMaanedFrist(15),    note:"Månedlig — registreret oplagshaver"},
+    {p:"Spildevandsafgift",                frist:næsteKvartalFrist(1),    note:"Kvartalsvis — 1. i 2. måned efter kvartalet"},
+    {p:"Råstofafgift",                     frist:næsteKvartalFrist(1),    note:"Kvartalsvis"},
+    {p:"Vejbenyttelsesafgift (lastbiler)", frist:new Date(y+1,0,31),      note:"Årsvis — 31. januar"},
+    {p:"NOx-afgift",                       frist:næsteMaanedFrist(15),    note:"Månedlig — 15. i måneden efter"},
   ];
 
   // ── TABS CONFIG ──
