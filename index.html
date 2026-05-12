@@ -937,7 +937,7 @@ function Home({navigate}) {
                 <div style={{width:"44px",height:"44px",borderRadius:"12px",background:"rgba(196,151,62,0.1)",border:`1px solid rgba(196,151,62,0.2)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",flexShrink:0}}>🧮</div>
                 <div>
                   <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"2px"}}>Beregnere</div>
-                  <div style={{fontSize:"12px",color:C.textSub}}>Moms · Løn · Kørsel · Timepris · Morarenter</div>
+                  <div style={{fontSize:"12px",color:C.textSub}}>Moms · Løn · Kørsel · Timepris · Morarenter · Aktier</div>
                 </div>
               </div>
               <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:"0 0 1rem"}}>
@@ -945,7 +945,7 @@ function Home({navigate}) {
               </p>
               {/* Mini beregner preview */}
               <div style={{background:C.bgSecondary,borderRadius:"8px",padding:"10px 12px",marginBottom:"1rem",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:"12px",color:C.textSub}}>5 beregnere · 2026-satser</div>
+                <div style={{fontSize:"12px",color:C.textSub}}>6 beregnere · 2026-satser</div>
                 <div style={{fontSize:"14px",fontWeight:700,color:C.navy}}>Klar at bruge</div>
               </div>
               <div style={{color:C.gold,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"4px"}}>
@@ -2362,6 +2362,129 @@ function MorarenteKalk() {
   );
 }
 
+// ── AKTIEGEVINST (ALM. AKTIEDEPOT, 2026) ──────────────────────────────────────
+function AktieKalk() {
+  const [salg, setSalg] = useState("");
+  const [kost, setKost] = useState("");
+  const [civil, setCivil] = useState("enlig");
+  const [anden, setAnden] = useState("");
+
+  const gevinst = _parse(salg) - _parse(kost);
+  const andenInd = _parse(anden);
+  const groense = civil==="gift" ? 158800 : 79400;
+
+  // Samlet aktieindkomst (gevinst kan være negativ — tab)
+  const total = gevinst + andenInd;
+
+  // Hvis tab: ingen skat — vis fremførselsmulighed
+  const erTab = total < 0;
+
+  // Hvor meget af den nye gevinst rammer hver sats?
+  // Tankegangen: "anden aktieindkomst" bruger først af grænsen.
+  const restAfGrose = Math.max(0, groense - Math.max(0, andenInd));
+  const gevinstPositiv = Math.max(0, gevinst);
+  const del27 = Math.min(gevinstPositiv, restAfGrose);
+  const del42 = Math.max(0, gevinstPositiv - restAfGrose);
+  const skat27 = del27 * 0.27;
+  const skat42 = del42 * 0.42;
+  const skatIalt = skat27 + skat42;
+  const netto = gevinst - skatIalt;
+  const effektiv = gevinstPositiv > 0 ? (skatIalt / gevinstPositiv) * 100 : 0;
+
+  return (
+    <>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2rem",marginBottom:"2rem"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"1.25rem"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1rem"}}>
+            <div>
+              <label style={_lbl}>Salgssum (kr.)</label>
+              <input type="number" placeholder="Fx 150000" value={salg} onChange={e=>setSalg(e.target.value)} style={_inp}/>
+            </div>
+            <div>
+              <label style={_lbl}>Anskaffelsessum (kr.)</label>
+              <input type="number" placeholder="Fx 80000" value={kost} onChange={e=>setKost(e.target.value)} style={_inp}/>
+            </div>
+          </div>
+          <div>
+            <label style={_lbl}>Civilstand</label>
+            <div style={{display:"flex",gap:"0.75rem",flexWrap:"wrap"}}>
+              {[["enlig","👤 Enlig — 79.400 kr."],["gift","👫 Gift — 158.800 kr."]].map(([v,l])=>(
+                <button key={v} onClick={()=>setCivil(v)} style={{padding:"9px 16px",borderRadius:"8px",border:`1.5px solid ${civil===v?C.navy:C.borderMid}`,background:civil===v?C.navy:C.bgSecondary,color:civil===v?C.white:C.text,cursor:"pointer",fontSize:"14px",transition:"all 0.15s"}}>{l}</button>
+              ))}
+            </div>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Ægtefæller deler progressionsgrænsen — uudnyttet bundfradrag overføres automatisk.</p>
+          </div>
+          <div>
+            <label style={_lbl}>Anden aktieindkomst i året (kr.)</label>
+            <input type="number" placeholder="0 — udbytter og andre gevinster" value={anden} onChange={e=>setAnden(e.target.value)} style={_inp}/>
+            <p style={{margin:"6px 0 0",fontSize:"12px",color:C.textSub}}>Fx udbytter eller andre realiserede gevinster. Bruges først af progressionsgrænsen.</p>
+          </div>
+        </div>
+        <Card>
+          <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"1rem"}}>Resultat — almindeligt aktiedepot</div>
+          {(_parse(salg)>0 || _parse(kost)>0) ? (
+            <>
+              <ResRow label="Salgssum" value={_fmt2(_parse(salg))}/>
+              <ResRow label="Anskaffelsessum" value={"− "+_fmt2(_parse(kost))}/>
+              <ResRow label={erTab?"Tab":"Gevinst"} value={_fmt2(Math.abs(gevinst))} strong/>
+              {erTab ? (
+                <>
+                  <div style={{marginTop:"1rem",padding:"12px 16px",background:"rgba(220,38,38,0.06)",border:"1px solid rgba(220,38,38,0.2)",borderRadius:"10px"}}>
+                    <div style={{fontWeight:700,color:C.red,fontSize:"14px",marginBottom:"4px"}}>Tab — ingen skat</div>
+                    <div style={{fontSize:"12px",color:C.textSub,lineHeight:1.6}}>Tab på børsnoterede aktier er kildeartsbegrænset: modregnes kun i anden aktieindkomst (gevinst/udbytte fra noterede aktier). Uudnyttet tab fremføres automatisk til senere år.</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {del27>0 && <ResRow label={"27% af "+_fmt2(del27)} value={_fmt2(skat27)}/>}
+                  {del42>0 && <ResRow label={"42% af "+_fmt2(del42)} value={_fmt2(skat42)}/>}
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0 4px"}}>
+                    <span style={{fontWeight:700,fontSize:"15px"}}>Netto efter skat</span>
+                    <span style={{fontSize:"26px",fontWeight:700,color:C.navy}}>{_fmt2(netto)} kr.</span>
+                  </div>
+                  <div style={{fontSize:"12px",color:C.textSub,textAlign:"right",marginTop:"4px"}}>Skat i alt: {_fmt2(skatIalt)} kr. · Effektiv: {effektiv.toFixed(1)}%</div>
+                  {del42>0 && (
+                    <CalcWarn>Du rammer 42%-satsen. Overvej at sælge løbende over flere år for at holde dig under {_fmt0(groense)} kr./år.</CalcWarn>
+                  )}
+                  {del42===0 && gevinstPositiv>0 && (
+                    <CalcTip>Hele gevinsten beskattes med 27% — du har plads til yderligere {_fmt2(restAfGrose - del27)} kr. aktieindkomst før 42%-satsen rammer.</CalcTip>
+                  )}
+                </>
+              )}
+            </>
+          ) : <CalcEmpty icon="📈" text="Angiv salgs- og anskaffelsessum for at beregne skatten"/>}
+        </Card>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1rem"}}>
+        {[
+          ["Lav sats","27% aktieindkomstskat","Op til 79.400 kr. (2026)"],
+          ["Høj sats","42% aktieindkomstskat","Over progressionsgrænsen"],
+          ["Ægtefæller","158.800 kr.","Dobbelt grænse — automatisk"],
+          ["Opgørelsesmetode","Gennemsnitsmetoden","ABL § 24 — for noterede aktier"],
+        ].map(([ti,fo,ex])=>(
+          <Card key={ti}>
+            <div style={{fontSize:"12px",fontWeight:700,color:C.textSub,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"6px"}}>{ti}</div>
+            <div style={{fontSize:"18px",fontWeight:700,color:C.navy,marginBottom:"4px"}}>{fo}</div>
+            <div style={{fontSize:"12px",color:C.textSub}}>{ex}</div>
+          </Card>
+        ))}
+      </div>
+      <div style={{marginTop:"1.5rem",padding:"1rem 1.25rem",background:C.bgSecondary,borderRadius:"12px",border:`1px solid ${C.border}`,fontSize:"13px",color:C.textSub,lineHeight:1.7}}>
+        <strong style={{color:C.navy}}>Bemærk:</strong> Beregningen gælder almindeligt aktiedepot med realisationsbeskatning. For <strong>aktiesparekonto</strong> (lagerbeskatning, 17% flad sats, indskudsgrænse 174.200 kr. i 2026) gælder andre regler. Anskaffelsessum opgøres efter <strong>gennemsnitsmetoden</strong> (ABL § 24) — den gennemsnitlige købspris for alle dine aktier i samme selskab. Aktier købt før 2006 kan i visse tilfælde være omfattet af overgangsregler.
+      </div>
+    </>
+  );
+}
+
+// Lille rød advarsels-boks (bruges kun i AktieKalk)
+function CalcWarn({children}) {
+  return (
+    <div style={{marginTop:"1rem",background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.25)",borderRadius:"10px",padding:"11px 16px",fontSize:"12px",color:C.textSub,lineHeight:1.6}}>
+      <strong style={{color:C.yellow}}>Tip:</strong> {children}
+    </div>
+  );
+}
+
 // ── BEREGNER (router/tabs) ────────────────────────────────────────────────────
 function Beregner() {
   const [tab, setTab] = useState("moms");
@@ -2372,6 +2495,7 @@ function Beregner() {
     ["koersel",   "🚗", "Kørselsgodtgørelse"],
     ["timepris",  "⏱️", "Timepris"],
     ["morarente", "📅", "Morarenter"],
+    ["aktie",     "📈", "Aktiegevinst"],
   ];
 
   const subs = {
@@ -2380,6 +2504,7 @@ function Beregner() {
     koersel: "Skattefri kørselsgodtgørelse efter 2026-satserne — for medarbejdere og selvstændige.",
     timepris: "Find din rette freelance-timepris ud fra ønsket indkomst, omkostninger og fakturerbare timer.",
     morarente: "Beregn morarenter efter renteloven § 5 — gældende sats 9,75% p.a.",
+    aktie: "Beregn skat af aktiegevinst på almindeligt aktiedepot — 27/42-modellen, progressionsgrænse 79.400 kr. (2026).",
   };
 
   return (
@@ -2417,6 +2542,7 @@ function Beregner() {
       {tab==="koersel"   && <KoerselKalk/>}
       {tab==="timepris"  && <TimeprisKalk/>}
       {tab==="morarente" && <MorarenteKalk/>}
+      {tab==="aktie"     && <AktieKalk/>}
     </div>
   );
 }
