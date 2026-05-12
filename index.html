@@ -3550,108 +3550,146 @@ function Regnskab() {
 
   const aktiv = SERVICES[aktivTab];
 
+  const TAB_IKONER = {
+    regnskab:  { grad:"linear-gradient(135deg,#0c6b3e,#0a8f52)", lys:"rgba(12,107,62,0.1)" },
+    raadgivning:{ grad:"linear-gradient(135deg,#1a3f70,#1e5299)", lys:"rgba(26,63,112,0.1)" },
+    bogfoering: { grad:"linear-gradient(135deg,#7a3d00,#a35200)", lys:"rgba(122,61,0,0.1)" },
+  };
+
   return (
-    <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
-      <SectionHeader title="Digitalt Regnskab, Rådgivning & Bogføring"/>
-      <p style={{color:C.textSub,maxWidth:"680px",lineHeight:1.75,fontSize:"14px",marginBottom:"1.5rem"}}>
-        Vi tilbyder en komplet digital løsning til din virksomheds økonomi — fra daglig bogføring og løbende regnskab til strategisk rådgivning og skatteoptimering. Alt foregår digitalt og effektivt.
-      </p>
+    <div style={{background:C.bg,minHeight:"100vh"}}>
 
-      {/* Partner-notice */}
-      <div style={{display:"flex",gap:"14px",alignItems:"flex-start",background:"rgba(196,151,62,0.05)",border:"0.5px solid rgba(196,151,62,0.25)",borderLeft:`3px solid ${C.gold}`,borderRadius:"0 10px 10px 0",padding:"14px 18px",marginBottom:"2.5rem",maxWidth:"780px"}}>
-        <div style={{fontSize:"20px",flexShrink:0,marginTop:"1px"}}>🤝</div>
-        <div>
-          <div style={{fontWeight:700,fontSize:"13px",color:C.navy,marginBottom:"4px"}}>Leveret via partneraftale</div>
-          <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.7,margin:"0 0 4px"}}>
-            Ydelsen leveres af en ekstern samarbejdspartner. Vi har indgået en partneraftale, som giver vores kunder adgang til særlige priser og fordele.
+      {/* Hero-sektion */}
+      <div style={{background:`linear-gradient(160deg,#07131f 0%,#0c1f35 60%,#0f2d50 100%)`,padding:"4rem 2rem 3rem",borderBottom:"1px solid rgba(196,151,62,0.12)"}}>
+        <div style={{maxWidth:"1100px",margin:"0 auto"}}>
+          <div style={{display:"inline-block",background:"rgba(196,151,62,0.1)",color:C.gold,border:"0.5px solid rgba(196,151,62,0.3)",borderRadius:"20px",padding:"4px 16px",fontSize:"11px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"1.25rem"}}>
+            Leveret via partneraftale
+          </div>
+          <h1 style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:700,fontSize:"clamp(1.8rem,4vw,3rem)",lineHeight:1.15,marginBottom:"1rem",maxWidth:"700px"}}>
+            Digitalt Regnskab,<br/><span style={{color:C.gold}}>Rådgivning & Bogføring</span>
+          </h1>
+          <p style={{color:"rgba(255,255,255,0.6)",fontSize:"15px",lineHeight:1.75,maxWidth:"580px",marginBottom:"2rem"}}>
+            Vi tilbyder en komplet digital løsning til din virksomheds økonomi — fra daglig bogføring og løbende regnskab til strategisk rådgivning og skatteoptimering.
           </p>
-          <div style={{fontSize:"12px",color:C.textSub,opacity:0.7}}>
-            accai yder ikke selv traditionelle revisions- eller regnskabsopgaver — vi koordinerer og formidler kontakten til den rette partner baseret på din opgaves omfang og behov.
-          </div>
-        </div>
-      </div>
-
-      {/* 3 store service-kort øverst */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:"1.25rem",marginBottom:"2.5rem"}}>
-        {Object.entries(SERVICES).map(([key, s]) => (
-          <div key={key} onClick={()=>setAktivTab(key)} style={{
-            background: aktivTab===key ? s.lys : C.bgCard,
-            border: `${aktivTab===key?"1.5px":"0.5px"} solid ${aktivTab===key?s.farve:C.border}`,
-            borderRadius:"14px", padding:"1.5rem", cursor:"pointer",
-            transition:"all 0.2s", position:"relative", overflow:"hidden",
-          }}>
-            {aktivTab===key && <div style={{position:"absolute",top:0,left:0,right:0,height:"3px",background:s.farve}}/>}
-            <div style={{fontSize:"32px",marginBottom:"0.75rem"}}>{s.emoji}</div>
-            <div style={{fontWeight:700,fontSize:"17px",color:aktivTab===key?s.farve:C.navy,marginBottom:"6px"}}>{s.titel}</div>
-            <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:"0 0 1rem"}}>{s.tagline}</p>
-            <div style={{fontSize:"12px",fontWeight:600,color:aktivTab===key?s.farve:C.textSub,display:"flex",alignItems:"center",gap:"4px"}}>
-              {aktivTab===key ? "▼ Valgt" : "Se ydelser →"}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Detaljeret underemner-grid */}
-      <div style={{background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,borderRadius:"16px",padding:"2rem",marginBottom:"2rem"}}>
-        <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"1.75rem"}}>
-          <div style={{fontSize:"28px"}}>{aktiv.emoji}</div>
-          <div>
-            <div style={{fontWeight:700,fontSize:"18px",color:aktiv.farve}}>{aktiv.titel}</div>
-            <div style={{fontSize:"13px",color:C.textSub,marginTop:"2px"}}>{aktiv.underemner.length} ydelsesområder</div>
-          </div>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"1rem"}}>
-          {aktiv.underemner.map(u => (
-            <div key={u.titel} style={{background:C.bgCard,border:`0.5px solid ${aktiv.kant}`,borderRadius:"10px",padding:"1.25rem",display:"flex",gap:"1rem",alignItems:"flex-start"}}>
-              <div style={{width:"40px",height:"40px",borderRadius:"10px",background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0}}>{u.ikon}</div>
-              <div>
-                <div style={{fontWeight:700,fontSize:"14px",color:C.navy,marginBottom:"5px"}}>{u.titel}</div>
-                <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:0}}>{u.tekst}</p>
+          {/* Partner-notice */}
+          <div style={{display:"flex",gap:"12px",alignItems:"flex-start",background:"rgba(196,151,62,0.07)",border:"0.5px solid rgba(196,151,62,0.2)",borderRadius:"10px",padding:"14px 18px",maxWidth:"680px"}}>
+            <div style={{fontSize:"18px",flexShrink:0}}>🤝</div>
+            <div>
+              <div style={{fontWeight:700,fontSize:"13px",color:C.gold,marginBottom:"3px"}}>Leveret via partneraftale</div>
+              <p style={{fontSize:"12px",color:"rgba(255,255,255,0.55)",lineHeight:1.65,margin:"0 0 3px"}}>
+                Ydelsen leveres af en ekstern samarbejdspartner. Vi har indgået en partneraftale, som giver vores kunder adgang til særlige priser og fordele.
+              </p>
+              <div style={{fontSize:"11px",color:"rgba(255,255,255,0.35)"}}>
+                accai koordinerer og formidler kontakten til den rette partner baseret på din opgaves omfang.
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
-      {/* CTA boks */}
-      <div style={{background:C.navy,borderRadius:"14px",padding:"2rem",display:"grid",gridTemplateColumns:"1fr auto",gap:"2rem",alignItems:"center",flexWrap:"wrap"}}>
-        <div>
-          <div style={{color:C.gold,fontSize:"12px",fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Kom i gang</div>
-          <div style={{color:C.white,fontWeight:700,fontSize:"20px",marginBottom:"8px"}}>Interesseret i {aktiv.titel.toLowerCase()}?</div>
-          <p style={{color:"rgba(255,255,255,0.6)",fontSize:"13px",lineHeight:1.6,margin:0}}>
-            Vi tilpasser løsningen til din virksomheds behov og størrelse. Book en uforpligtende samtale og hør mere om mulighederne.
-          </p>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:"10px",flexShrink:0}}>
-          <button onClick={()=>window.dispatchEvent(new CustomEvent("navigate",{detail:"kontakt"}))} style={{background:C.gold,color:C.navy,border:"none",padding:"12px 28px",borderRadius:"8px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
-            Kontakt os →
-          </button>
-          <button onClick={()=>window.dispatchEvent(new CustomEvent("navigate",{detail:"sporg"}))} style={{background:"transparent",color:"rgba(255,255,255,0.7)",border:"0.5px solid rgba(255,255,255,0.3)",padding:"10px 28px",borderRadius:"8px",fontSize:"13px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
-            Spørg AI-rådgiveren
-          </button>
-        </div>
-      </div>
+      <div style={{maxWidth:"1100px",margin:"0 auto",padding:"3rem 2rem"}}>
 
-      {/* Hvad inkluderer digitalt? */}
-      <div style={{marginTop:"2rem"}}>
-        <h3 style={{fontSize:"1.1rem",fontWeight:700,color:C.navy,marginBottom:"0.4rem"}}>Hvorfor digital løsning?</h3>
-        <div style={{width:"32px",height:"2px",background:C.gold,borderRadius:"2px",marginBottom:"1.25rem"}}/>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"1rem"}}>
+        {/* Tab-navigation — store klikkbare kort */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1rem",marginBottom:"2.5rem"}}>
+          {Object.entries(SERVICES).map(([key, s]) => {
+            const akt = aktivTab===key;
+            const ti = TAB_IKONER[key];
+            return (
+              <div key={key} onClick={()=>setAktivTab(key)} style={{
+                background: akt ? ti.grad : C.bgCard,
+                border: `${akt?"1.5px":"0.5px"} solid ${akt?s.farve:C.border}`,
+                borderRadius:"16px",padding:"1.5rem",cursor:"pointer",
+                transition:"all 0.2s",position:"relative",overflow:"hidden",
+                boxShadow: akt ? `0 8px 32px ${s.lys.replace("0.08","0.3")}` : "none",
+              }}>
+                {akt && <div style={{position:"absolute",top:0,left:0,right:0,height:"2px",background:"rgba(255,255,255,0.3)"}}/>}
+                <div style={{fontSize:"2rem",marginBottom:"0.75rem"}}>{s.emoji}</div>
+                <div style={{fontWeight:700,fontSize:"17px",color:akt?C.white:C.navy,marginBottom:"5px"}}>{s.titel}</div>
+                <p style={{fontSize:"12px",color:akt?"rgba(255,255,255,0.7)":C.textSub,lineHeight:1.55,margin:"0 0 1rem"}}>{s.tagline}</p>
+                <div style={{display:"inline-flex",alignItems:"center",gap:"5px",fontSize:"11px",fontWeight:700,
+                  background:akt?"rgba(255,255,255,0.12)":ti.lys,
+                  color:akt?C.white:s.farve,
+                  padding:"4px 12px",borderRadius:"20px",
+                }}>
+                  {akt ? "✓ Valgt" : "Se ydelser →"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Aktiv sektion — overskrift + grid */}
+        <div style={{marginBottom:"2.5rem"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"1.75rem",padding:"1.25rem 1.5rem",background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,borderRadius:"12px"}}>
+            <div style={{width:"48px",height:"48px",borderRadius:"12px",background:TAB_IKONER[aktivTab].grad,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",flexShrink:0}}>
+              {aktiv.emoji}
+            </div>
+            <div>
+              <div style={{fontWeight:700,fontSize:"18px",color:aktiv.farve}}>{aktiv.titel}</div>
+              <div style={{fontSize:"12px",color:C.textSub,marginTop:"2px"}}>{aktiv.underemner.length} ydelsesområder — klik for at lære mere</div>
+            </div>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))",gap:"1rem"}}>
+            {aktiv.underemner.map((u,i) => (
+              <div key={u.titel} style={{
+                background:C.bgCard,
+                border:`0.5px solid ${C.border}`,
+                borderRadius:"12px",padding:"1.25rem",
+                display:"flex",gap:"1rem",alignItems:"flex-start",
+                transition:"border-color 0.15s",
+                position:"relative",overflow:"hidden",
+              }}>
+                <div style={{position:"absolute",top:0,left:0,bottom:0,width:"3px",background:TAB_IKONER[aktivTab].grad,opacity:0.6}}/>
+                <div style={{width:"42px",height:"42px",borderRadius:"10px",background:aktiv.lys,border:`0.5px solid ${aktiv.kant}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px",flexShrink:0}}>{u.ikon}</div>
+                <div>
+                  <div style={{fontWeight:700,fontSize:"14px",color:C.navy,marginBottom:"5px"}}>{u.titel}</div>
+                  <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.65,margin:0}}>{u.tekst}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Hvorfor digitalt — horizontal strip */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"1rem",marginBottom:"2.5rem"}}>
           {[
-            ["☁️","Alt i skyen","Adgang til dit regnskab fra alle enheder — altid opdateret og sikkert gemt."],
-            ["⚡","Automatisering","Integration med bank, betalingssystemer og e-fakturering reducerer manuel indtastning."],
-            ["🔒","Sikkerhed","GDPR-kompatibel dataopbevaring med krypteret overførsel og backup."],
-            ["📲","Nem kommunikation","Upload bilag via app, del dokumenter og kommuniker direkte med os online."],
-          ].map(([ic,ti,tx])=>(
-            <div key={ti} style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"10px",padding:"1rem",display:"flex",gap:"10px",alignItems:"flex-start"}}>
-              <div style={{fontSize:"22px",flexShrink:0}}>{ic}</div>
-              <div>
-                <div style={{fontWeight:700,fontSize:"13px",color:C.navy,marginBottom:"4px"}}>{ti}</div>
-                <p style={{fontSize:"12px",color:C.textSub,lineHeight:1.5,margin:0}}>{tx}</p>
-              </div>
+            {ic:"☁️",ti:"Alt i skyen",tx:"Adgang fra alle enheder — altid opdateret og sikkert gemt."},
+            {ic:"⚡",ti:"Automatisering",tx:"Integration med bank, e-fakturering og betalingssystemer."},
+            {ic:"🔒",ti:"GDPR-sikkerhed",tx:"Krypteret dataopbevaring og automatisk backup."},
+            {ic:"📲",ti:"Nem kommunikation",tx:"Upload bilag via app — ingen fysiske bilag."},
+          ].map(({ic,ti,tx})=>(
+            <div key={ti} style={{background:C.bgCard,border:`0.5px solid ${C.border}`,borderRadius:"12px",padding:"1.25rem"}}>
+              <div style={{fontSize:"24px",marginBottom:"8px"}}>{ic}</div>
+              <div style={{fontWeight:700,fontSize:"13px",color:C.navy,marginBottom:"4px"}}>{ti}</div>
+              <p style={{fontSize:"12px",color:C.textSub,lineHeight:1.55,margin:0}}>{tx}</p>
             </div>
           ))}
         </div>
+
+        {/* CTA */}
+        <div style={{background:`linear-gradient(135deg,#0c1f35,#1a3558)`,borderRadius:"16px",padding:"2.5rem",display:"grid",gridTemplateColumns:"1fr auto",gap:"2rem",alignItems:"center",border:"0.5px solid rgba(196,151,62,0.2)",position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:"2px",background:`linear-gradient(90deg,transparent,${C.gold},transparent)`}}/>
+          <div>
+            <div style={{color:C.gold,fontSize:"11px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"8px"}}>Kom i gang i dag</div>
+            <div style={{fontFamily:"'Playfair Display',serif",color:C.white,fontWeight:700,fontSize:"22px",marginBottom:"8px"}}>
+              Interesseret i {aktiv.titel.toLowerCase()}?
+            </div>
+            <p style={{color:"rgba(255,255,255,0.55)",fontSize:"13px",lineHeight:1.65,margin:0,maxWidth:"440px"}}>
+              Vi matcher dig med den rette partner og sørger for at du får en løsning der passer til din virksomheds størrelse og behov. Uforpligtende samtale.
+            </p>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:"10px",flexShrink:0}}>
+            <button onClick={()=>window.dispatchEvent(new CustomEvent("navigate",{detail:"kontakt"}))} style={{background:C.gold,color:C.navy,border:"none",padding:"13px 30px",borderRadius:"10px",fontWeight:700,fontSize:"14px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap",boxShadow:`0 4px 16px rgba(196,151,62,0.35)`}}>
+              Book samtale →
+            </button>
+            <button onClick={()=>window.dispatchEvent(new CustomEvent("navigate",{detail:"sporg"}))} style={{background:"rgba(255,255,255,0.05)",color:"rgba(255,255,255,0.6)",border:"0.5px solid rgba(255,255,255,0.15)",padding:"11px 30px",borderRadius:"10px",fontSize:"13px",cursor:"pointer",fontFamily:"Georgia,serif",whiteSpace:"nowrap"}}>
+              Spørg AI-rådgiveren
+            </button>
+          </div>
+          <div style={{position:"absolute",bottom:0,left:0,right:0,height:"2px",background:`linear-gradient(90deg,transparent,${C.gold},transparent)`}}/>
+        </div>
+
       </div>
     </div>
   );
