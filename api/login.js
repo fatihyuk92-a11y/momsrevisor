@@ -1,4 +1,4 @@
-const { createToken, isEmailAllowed, methodGuard, readJson, sendJson } = require("./_utils");
+const { clientIp, createToken, enforceRateLimit, isEmailAllowed, methodGuard, readJson, sendJson } = require("./_utils");
 
 module.exports = async function handler(req, res) {
   if (!methodGuard(req, res)) return;
@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
     if (!isEmailAllowed(email)) {
       return sendJson(res, 403, {
         ok: false,
-        fejl: "Emailen har ikke PRO-adgang endnu. Tilføj den i PRO_EMAILS på Vercel."
+        fejl: "Emailen har ikke PRO-adgang. Kontakt os, hvis du mener det er en fejl."
       });
     }
 

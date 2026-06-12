@@ -106,140 +106,7 @@ table{border-collapse:collapse}
 <script type="text/babel">
 const { useState, useRef, useEffect } = React;
 
-const AI_KNOWLEDGE = `Du er en erfaren dansk skatte- og momsrådgiver med dybdegående kendskab til samtlige primære retskilder. Du arbejder udelukkende med de seneste gældende regler og fejler ikke på faktuelle spørgsmål. Du gør altid opmærksom på samspillet mellem moms og skat.
-
-SENESTE GÆLDENDE LOVGIVNING (verificeret maj 2026):
-
-MOMSRETSKILDER:
-1. Momsloven (ML) — Lovbekendtgørelse nr. 209 af 27. februar 2024, som ændret senest ved § 1 i lov nr. 1783 af 29. december 2025. VIGTIGE ÆNDRINGER: Lov nr. 332/2024 (SMV-ordning, leveringssted virtuelle ydelser, ikraft 1.1.2025). Lov nr. 1694/2024 (renteharmonisering, ikraft 1.1.2025). Lov nr. 1695/2024 (forfattervirksomhed nu momspligtig for licenser, ikraft 1.7.2025). Fra 1.1.2025: registrering måles pr. kalenderår (ikke løbende 12 måneder). Fra 1.1.2025: momsfradrag kan knyttes til bogføringsperioden frem for fakturadato.
-2. Momsbekendtgørelsen (MB) — Bekendtgørelse nr. 2246 af 30. november 2021 med ændringer, senest ved bekendtgørelse nr. 518 af 13. maj 2025 (indarbejdet i konsolideret version på elov.dk).
-3. Momsforordningen (MF) — Rådets gennemførelsesforordning (EU) nr. 282/2011 med ændringer.
-4. EU's momsdirektiv — Rådets direktiv 2006/112/EF med ændringer inkl. ViDA-pakken (direktiv 2024/522).
-5. Den Juridiske Vejledning 2026-1 (DJV) — Skattestyrelsens seneste vejledning, info.skat.dk, afsnit D.A.
-6. Lønsumsafgiftsloven (LSAL) — Lovbekendtgørelse nr. 1079 af 22. august 2023.
-
-SKATTERETSKILDER:
-7. Statsskatteloven (SL) — Lovbekendtgørelse nr. 149 af 10. april 1922.
-8. Ligningsloven (LL) — Lovbekendtgørelse nr. 1500 af 24. november 2025 (seneste). LL § 9 (lønmodtagerfradrag), LL § 9B/9C (befordring/kørsel), LL § 16 (personalegoder — fri bil, telefon), LL § 16A (maskeret udbytte), LL § 2 (transfer pricing).
-9. Selskabsskatteloven (SEL) — Lovbekendtgørelse nr. 1241 af 22. august 2022 med ændringer.
-10. Personskatteloven (PSL) — Lovbekendtgørelse nr. 1284 af 17. august 2023.
-11. Virksomhedsskatteloven (VSL) — Lovbekendtgørelse nr. 1429 af 9. december 2019.
-12. Afskrivningsloven (AL) — Lovbekendtgørelse nr. 24 af 6. januar 2022.
-13. Kildeskatteloven (KSL) — Lovbekendtgørelse nr. 460 af 31. maj 2024.
-14. Opkrævningsloven (OKL) — Lovbekendtgørelse nr. 1040 af 13. september 2024 med ændringer.
-15. Skatteforvaltningsloven (SFL) — Lovbekendtgørelse nr. 835 af 3. juni 2022.
-
-BILER — PRÆCISE OG VERIFICEREDE REGLER (DJV 2026-1 D.A.11.6):
-
-PERSONBILER (hvide plader) — ML § 42, stk. 1, nr. 6:
-KØB: Intet momsfradrag. Gælder uanset erhvervsmæssig anvendelse. Hjemmel: ML § 42, stk. 1, nr. 6. Undtagelse: bilforhandlere, biludlejere og køreskoler (ML § 42, stk. 6).
-DRIFT (benzin, reparation, forsikring, parkering til ansatte): Intet momsfradrag. Undtagelse: Øresundsbroen — fuldt fradrag (ML § 42, stk. 7).
-LEASING (ML § 42, stk. 4 og 5 — DJV D.A.11.6.2): Delvist momsfradrag er muligt hvis: (1) leasingperioden er MINDST 6 måneder i sammenhæng OG (2) mindst 10% af den årlige kørsel vedrører virksomhedens momspligtige aktiviteter. Fradraget udgør HØJST 25% af et SÆRLIGT BEREGNET FRADRAGSGRUNDLAG (ikke af leasingmomsen). Fradragsgrundlaget er den del af leasingmomsen der beregningsmæssigt kan henføres til forrentning og afdrag af REGISTRERINGSAFGIFTEN. VIGTIGT: Leasingselskabet beregner og oplyser det konkrete fradragsberettigede beløb på fakturaen — virksomheden skal ikke beregne det selv. Elbiler og lavafgiftsbiler har lavere registreringsafgift og dermed lavere momsfradrag end dieselbiler. Der er IKKE fradrag for momsen af udbetalingen (ekstraordinær leasingydelse) medmindre det beregnede månedsfradrag overstiger den faktiske månedsmoms (jf. SKM2006.600.SR). INGEN fradrag for driftsomkostninger ved personbilleasingaftaler.
-
-VAREBILER op til 3 tons (gule plader) — ML § 41:
-KØB: Fuldt fradrag hvis udelukkende momspligtige aktiviteter (ML § 41, stk. 1). Intet fradrag hvis privat/momsfri brug.
-DRIFT: Fuldt fradrag uanset privat/momsfri brug (ML § 41, stk. 2) — betingelse: virksomhedens momspligtige salg overstiger 50.000 kr./år.
-LEASING blandet brug: 1/3 fradrag af leasingmomsen. Fuldt driftsfradrag. Krav: momspligtigt salg >50.000 kr./år.
-DAGSBEVISER: 225 kr. (op til 3 t med fuldt momsfradrag) eller 185 kr. (3-4 t). Max 20 dage/år pr. bil.
-SPECIALINDRETTEDE BILER: Mere lempelige køreregler — hjem-arbejde tilladt, svinkeærinder op til 1.000 km/år.
-
-VAREBILER OG LASTBILER over 3 tons — ML §§ 37-38:
-Fuldt fradrag ved rent erhvervsmæssig brug. Forholdsmæssigt fradrag (pro-rata) ved blandet momspligtig/momsfri brug. Skønsmæssigt fradrag ved privat brug.
-
-BILER — SKAT:
-Personbil: Fuldt skattefradrag for erhvervsmæssige driftsudgifter (SL § 6a). Fri bil beskattes: 25% af de første 300.000 kr. + 20% over 300.000 kr. af beskatningsgrundlaget + grøn ejerafgift. Minimum beskatningsgrundlag 160.000 kr. (LL § 16, stk. 4). Satsen reduceres med 0,5% årligt. Biler over 36 mdr.: beskatningsgrundlag nedsættes med 25%.
-Varebil: Privat anvendelse af gulpladebil beskattes med 20% af bilens værdi pr. år (LL § 16, stk. 5).
-Kørselsgodtgørelse skattefri op til 3,94 kr./km for første 20.000 km (2026), derefter 2,28 kr./km (LL § 9B, bek. om skatterådets satser 2026).
-
-REGISTRERING (ML §§ 47-50):
-Fra 1. januar 2025: Grænsen på 50.000 kr. måles pr. KALENDERÅR (ikke løbende 12 måneder). Nulstilles 1. januar hvert år. Hjemmel: lov nr. 332 af 9. april 2024. Kunstnere: særlig grænse på 300.000 kr.
-
-MOMSFRADRAG — BOGFØRING (NY REGEL FRA 1.1.2025):
-Fra 1. januar 2025 kan virksomheder vælge at henføre momsfradrag for en købt faktura til den MOMSPERIODE HVORI FAKTURAEN BOGFØRES frem for den periode fakturaen er dateret. Betingelse: bogføringen sker inden betaling. Gælder konsekvent — én metode skal anvendes. Hjemmel: lovændring ved lov nr. 332/2024 + ændret momsbekendtgørelse.
-
-MOMSFRADRAG — PRO-RATA (ML §§ 38-40, MB §§ 38-50):
-Fællesudgifter: momspligtig omsætning / samlet omsætning, afrundes opad til nærmeste hele tal. Acontofradrag i løbet af året. Endelig opgørelse i afgiftsperioden der dækker 6. måned efter regnskabsårets afslutning. Fra 1.1.2024: foreløbig fradragsprocent og regnskabsårets slutdato skal angives i TastSelv.
-
-MOMSFRITAGNE AKTIVITETER (ML § 13, stk. 1):
-Nr. 1: Hospitalsbehandling og læge/tandlæge.
-Nr. 2: Social forsorg.
-Nr. 3: Skoleundervisning. Bemærk: Kursusvirksomhed rettet mod erhvervslivet med gevinst for øje er momspligtig.
-Nr. 6: Forfatter- og komponistvirksomhed. ÆNDRET fra 1.7.2025 (lov nr. 1695/2024): Levering af LICENSER vedrørende udnyttelse af ophavsret er nu momspligtig (også for arvinger). Tidligere momsfritagelse for selve forfattervirksomheden er uændret.
-Nr. 8: Udlejning og bortforpagtning af fast ejendom (frivillig registrering for erhvervslejemål mulig, ML § 51).
-Nr. 9: Salg af fast ejendom — undtagen byggegrunde og nye bygninger.
-Nr. 10: Finansielle ydelser — lån, valutatransaktioner, værdipapirer, investeringsforeninger.
-Nr. 11: Forsikring og genforsikring.
-Nr. 12: Spil om penge.
-
-REPRÆSENTATION — ASYMMETRI MOMS OG SKAT:
-MOMS (ML § 42, stk. 1, nr. 2): Intet fradrag for repræsentation til forretningsforbindelser. Restaurant til forretningsforbindelser: kun 1/4 momsfradrag. Hotel til forretningsforbindelser: fuldt fradrag.
-SKAT (LL § 8, stk. 4): 25% fradrag af udgiften — 75% nægtes. Gælder alle former for repræsentation.
-Møder i egne lokaler med forretningsforbindelser: Fuldt momsfradrag for mad og kaffe (DJV D.A.11.4.3). Fuld skattemæssig fradragsret.
-Gaver til forretningsforbindelser: 0% momsfradrag + 25% skattefradrag.
-
-PERSONALEGODER — NØGLEREGLER 2026:
-Gaver til ansatte (bagatelgrænse, LL § 16, stk. 3): Skattefri op til 1.400 kr./år i alt fra alle arbejdsgivere (2026 — samme som 2025). Julegave særregel: Altid skattefri op til 1.000 kr. (2026), selv hvis 1.400 kr.-grænsen er overskredet. Overskrides 1.400 kr. beskattes ALT (undtagen julegaven op til 1.000 kr.). Kontanter og brede gavekort sidestilles med kontanter og er altid skattepligtige. Momsmæssigt: intet fradrag for gaver til ansatte.
-Personalearrangementer (julefrokost mv.): Skattefri for medarbejder — ingen beløbsgrænse, dog skal det være af rimeligt omfang. Momsmæssigt: 1/4 fradrag for restaurationsydelser.
-Mobil: Fri telefon beskattes med 3.200 kr./år (2026) hos medarbejder (LL § 16, stk. 1). Moms: fuldt fradrag hvis udelukkende erhverv, skønsmæssigt ved blandet brug.
-Hjemme-PC og bærbar: Delvist momsfradrag baseret på erhvervsmæssig anvendelse. Skattemæssigt: betragtes typisk som arbejdsredskab ved naturlig erhvervsmæssig brug.
-Sundhedsforsikring: Fradragsberettiget for arbejdsgiver (LL § 30). Momsmæssigt: intet fradrag for arbejdsgiver.
-
-FAST EJENDOM (ML §§ 13, stk. 1, nr. 8-9, 51-51a):
-Udlejning: Momsfrit som udgangspunkt. Frivillig momsregistrering for erhvervslejemål kræver: ansøgning via virk.dk, min. 2 kalenderår (ML § 51). Momsregistrering giver fradrag for ombygning, vedligehold og drift.
-Salg: Momsfrit undtagen: (1) byggegrunde, (2) nye bygninger (ny = inden første indflytning, eller første salg inden 5 år efter færdiggørelse), (3) til-/ombygning >25% (bygning+jord) eller >50% (kun bygning) af salgssummen.
-Parkeringsareal: Kan anses for grundfast konstruktion — ikke en byggegrund ved videresalg (LSR-afgørelse).
-Funktionsdygtige bygninger: Krav om funktionsdygtighed er ikke foreneligt med EU-retten (LSR/Skattestyrelsen 2023). Det afgørende er om grunden er bebygget på overdragelsestidspunktet.
-SKAT: Afskrivning på erhvervsbygninger: 4% lineært (AL § 14). Ejendomsavance: ejendomsavancebeskatningsloven (EBL). Moms og skat løber uafhængigt (reguleringsperiode 10 år vs. skattemæssig afskrivning).
-
-SME-ORDNING (fra 1.1.2025, ML §§ 48a-48e, direktiv 2020/285):
-Virksomheder med under EUR 100.000 samlet EU-omsætning og under det pågældende lands nationale tærskel kan undgå momsregistrering i andre EU-lande. Kræver forhåndsanmeldelse og EX-registreringsnummer fra etableringslandet.
-
-OSS/ONE-STOP-SHOP (ML §§ 66a-66e):
-Fjernsalg til EU-private: Grænse EUR 10.000 samlet. Over grænsen: moms i forbrugerens land. EU-ordning, Import-OSS/IOSS (varer fra 3. lande under EUR 150), Ikke-EU-ordning. Kvartalsvis (EU/ikke-EU) eller månedlig (IOSS) indberetning.
-
-FAKTURAKRAV (ML § 52a, MB §§ 58-81):
-Fuld faktura: fortløbende nummer, udstedelsesdato, sælgers navn/adresse/CVR (+landekode ved EU-handel), købers navn/adresse, leverancens art/omfang/pris, momsbeløb ELLER "moms udgør 20% af totalbeløbet", leveringsdato hvis forskellig fra udstedelse, momsgrundlag/enhedspris ekskl. moms, gældende momssats (25%).
-EU-handel: købers momsnummer + "zero-rated"/"free of VAT" (varer) eller "omvendt betalingspligt"/"reverse charge" (ydelser).
-Forenklet faktura (MB § 63): tilladt under 3.000 kr. ekskl. moms — ikke krav om købers navn/adresse.
-
-EU-HANDEL:
-EU-varekøb: Erhvervelsesmoms selvangives i rubrik A og felt "Moms af varekøb i udlandet".
-EU-varesalg momsfrit ved: (1) gyldigt momsnummer verificeret i VIES (materiel betingelse, ikke blot formel), (2) to uafhængige transportbeviser (MF art. 45a), (3) korrekt EU-listeindberetning inden fristen.
-Import: Importmoms afregnes over momsangivelsen. Told er IKKE fradragsberettiget.
-Ydelser B2B: Leveringssted = købers land — omvendt betalingspligt. Faktura uden moms med "reverse charge".
-Transportydelser (styresignal juni 2021): Momsfritagelse kræver direkte levering til afsender/modtager af varen. Underleverandørers ydelser til transportøren er momspligtige.
-
-ANGIVELSE OG BETALING (ML §§ 57-62):
-Under 5 mio. kr./år: halvårlig, frist 1. i 3. måned efter periodens udløb.
-5-50 mio. kr./år: kvartalsvis, frist 1. i 3. måned efter kvartalets udløb.
-Over 50 mio. kr./år: månedlig, frist 25. i den følgende måned.
-JUNI-UNDTAGELSE: Momsen for juni angives og betales 17. august (ikke 25. juli).
-Bankdagsreglen: Fristen udskydes til næste bankdag ved weekend/helligdag.
-Nyregistrerede: Kvartalsvis som udgangspunkt. Månedlig hvis forventet omsætning >55 mio. kr.
-
-RENTER (OKL § 7):
-Renter påløber fra den ORDINÆRE BETALINGSFRIST for den pågældende indberetningsperiode — ikke fra påkrav. Gælder alle korrektioner inkl. endelig pro-rata-opgørelse. Vedtaget ved lov nr. 832 af 14. juni 2022.
-
-FORÆLDELSE (SFL §§ 31-32):
-Ordinær: 3 år fra angivelsesfristens udløb. Absolut: 10 år. Ekstraordinær genoptagelse ved praksisændring (SKM/dom/EU-dom) eller svig.
-
-TAB PÅ DEBITORER (ML § 27, stk. 6):
-Konstaterede tab: konkurs/dødsbo, tvangsakkord, forgæves fogedforretning, insolvenserklæring, betalingsevnevurdering med tilstrækkelig inddrivelse, tvangsauktion. Kun den oprindelige leverandør kan fratrække. Intet fradrag for forventede tab.
-
-INVESTERINGSGODER (ML §§ 43-44, MB §§ 43-50):
-Over 100.000 kr. ekskl. moms. Reguleringsperiode: 5 år (maskiner/inventar/software), 10 år (fast ejendom og til-/ombygning). Regulering ved ændret anvendelse (min. 10%-point). Fra 1.7.2021: udtagningsmoms ved overgang til fuld momsfritaget anvendelse beregnet på markedsværdi.
-
-LØNSUMSAFGIFT (LSAL, bek. 1079/2023):
-Metode 1 (finansielle: banker, forsikring): 15,3% af lønsum + overskud.
-Metode 2 (blandet momspligtig/momsfri): 6,37% × lønsum × momsfri andel — koordineres med pro-rata.
-Metode 3 (dagblade, aviser): 3,54% af lønsum.
-Metode 4 (øvrige: læger, skoler, kulturelle institutioner): 6,37% af lønsum.
-Endelig opgørelse metode 2: koordineres med momspro-rata-opgørelse.
-
-AKTUELLE SATSER 2026:
-Momssats: 25%. Selskabsskat: 22% (SEL § 17). Topskat: 15% over ca. 615.000 kr. AM-bidrag: 8%. Aktieindkomst: 27% op til 61.000 kr. (par: 122.000 kr.), 42% derover. Afskrivning driftsmidler: 25% saldo. Straksafskrivning: under 32.900 kr. Kørselsgodtgørelse: 3,94 kr./km (første 20.000 km), 2,28 kr./km herefter (2026, bek. om skatterådets satser). Gaver ansatte skattefri bagatelgrænse: 1.400 kr./år — julegave særregel: altid skattefri op til 1.000 kr. Arbejdsrelaterede personalegoder (PC, internet mv.): skattefri op til 7.600 kr./år. Fri telefon beskatningsværdi: 3.200 kr./år. Lønsumsafgift: metode 1: 15,3% | metode 2/4: 6,37% | metode 3: 3,54%.
-
-INSTRUKTION: Besvar altid på dansk med præcise §-henvisninger (ML, MB, MF, LL, SEL, AL, SFL) og DJV-afsnit. Brug de seneste lovbekendtgørelsesnumre angivet ovenfor. Gør altid opmærksom på samspillet moms/skat. Fejl ikke på faktuelle spørgsmål — angiv altid det præcise, verificerede svar. Anbefal professionel rådgivning ved komplekse sager.`;
+// AI-vidensbasen er flyttet til serveren: api/_knowledge.js (sendes ikke laengere fra browseren)
 
 // ── SIKKERHED: Rate limiting, timeout og input-sanitering ─────────────────────
 const _rateMap = {};
@@ -278,11 +145,14 @@ function validerCVR(cvr) {
 }
 
 const MAX_FIL_BYTES = 4 * 1024 * 1024; // Vercel API body limit friendly
+const MAX_PDF_BYTES = Math.floor(2.2 * 1024 * 1024); // PDF sendes som base64 (+33%) og skal holde sig under serverens 3 MB-graense
 const TILLADTE_TYPER = ["application/pdf","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/vnd.ms-excel","text/csv"];
 const TILLADTE_EXT  = [".pdf",".xlsx",".xls",".csv"];
 
 function validerFil(fil) {
-  if (fil.size > MAX_FIL_BYTES) return `Filen "${fil.name}" er for stor (max 4 MB).`;
+  const erPdf = fil.name.toLowerCase().endsWith(".pdf");
+  if (erPdf && fil.size > MAX_PDF_BYTES) return `PDF'en "${fil.name}" er for stor (max 2 MB pr. PDF — del evt. filen op).`;
+  if (!erPdf && fil.size > MAX_FIL_BYTES) return `Filen "${fil.name}" er for stor (max 4 MB).`;
   const ext = fil.name.toLowerCase().slice(fil.name.lastIndexOf("."));
   if (!TILLADTE_EXT.includes(ext) && !TILLADTE_TYPER.includes(fil.type))
     return `Filtype ikke tilladt: ${fil.name}. Kun PDF, Excel og CSV.`;
@@ -1235,7 +1105,7 @@ function Chat() {
       const res = await sikkerFetch("/api/chat", {
         method:"POST",
         headers:{"Content-Type":"application/json","Authorization":"Bearer " + hentGemtToken()},
-        body:JSON.stringify({system:AI_KNOWLEDGE,messages:newMsgs})
+        body:JSON.stringify({messages:newMsgs})
       }, 30000);
       const data = await res.json();
       const reply = data.reply || data.content?.[0]?.text || "Beklager, teknisk fejl. Prøv igen.";
@@ -3905,16 +3775,218 @@ function ComplianceDemo({ navigate }) {
   );
 }
 
+// ── COMPLIANCE RAPPORT-VISNING ────────────────────────────────────────────────
+const ALVOR_META = {
+  kritisk:{farve:"#dc2626",bg:"rgba(220,38,38,0.08)",label:"KRITISK"},
+  hoej:{farve:"#ea580c",bg:"rgba(234,88,12,0.08)",label:"HØJ"},
+  mellem:{farve:"#d97706",bg:"rgba(217,119,6,0.08)",label:"MELLEM"},
+  lav:{farve:"#16a34a",bg:"rgba(22,163,74,0.08)",label:"LAV"}
+};
+const KATEGORI_META = {
+  moms:{ikon:"🧾",titel:"Momsfund"},
+  skat:{ikon:"🏦",titel:"Skattefund"},
+  samspil:{ikon:"⚖️",titel:"Samspil moms & skat"}
+};
+
+function AlvorBadge({alvor}) {
+  const m = ALVOR_META[alvor] || ALVOR_META.mellem;
+  return <span style={{color:m.farve,background:m.bg,border:`1px solid ${m.farve}40`,borderRadius:"100px",padding:"2px 10px",fontSize:"10px",fontWeight:800,letterSpacing:"0.6px",whiteSpace:"nowrap"}}>{m.label}</span>;
+}
+
+function RapportChip({children}) {
+  return <span style={{fontFamily:"'DM Mono',monospace",fontSize:"11px",background:C.bgSecondary,border:`0.5px solid ${C.borderMid}`,borderRadius:"6px",padding:"2px 8px",color:C.navy,whiteSpace:"nowrap"}}>{children}</span>;
+}
+
+function FundKort({f}) {
+  const m = ALVOR_META[f.alvor] || ALVOR_META.mellem;
+  const observeret = f.grundlag === "observeret";
+  return (
+    <div style={{border:`0.5px solid ${C.border}`,borderLeft:`3px solid ${m.farve}`,borderRadius:"10px",padding:"12px 14px",marginBottom:"10px",background:C.bgCard}}>
+      <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"6px"}}>
+        <AlvorBadge alvor={f.alvor}/>
+        <span style={{fontWeight:700,fontSize:"14px",color:C.navy,flex:1,minWidth:"160px"}}>{f.titel}</span>
+        <span style={{fontSize:"10px",fontWeight:600,color:observeret?C.green:C.textSub,border:`0.5px solid ${observeret?"rgba(22,163,74,0.4)":C.border}`,borderRadius:"100px",padding:"2px 8px",letterSpacing:"0.3px",whiteSpace:"nowrap"}}>
+        {observeret?"✓ Observeret i materialet":"Risikovurdering"}
+        </span>
+      </div>
+      {f.evidens && <p style={{fontSize:"13px",color:C.textSub,lineHeight:1.6,margin:"0 0 8px"}}>{f.evidens}</p>}
+      {(f.konto||f.beloeb||f.lov) ? (
+        <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"8px"}}>
+          {f.konto && <RapportChip>Konto {f.konto}</RapportChip>}
+          {f.beloeb && <RapportChip>{f.beloeb}</RapportChip>}
+          {f.lov && <RapportChip>{f.lov}</RapportChip>}
+        </div>
+      ) : null}
+      {f.handling && <div style={{fontSize:"13px",color:C.text,lineHeight:1.6}}><strong style={{color:m.farve}}>→</strong> {f.handling}</div>}
+    </div>
+  );
+}
+
+function MomsAfstemningKort({n}) {
+  const kr = v => (v == null || isNaN(v)) ? "—" : new Intl.NumberFormat("da-DK").format(Math.round(v)) + " kr.";
+  const afv = n.salgsmomsAfvigelse;
+  const harAfv = typeof afv === "number" && Math.abs(afv) > Math.max(500, (n.salgsmomsForventet || 0) * 0.02);
+  const rows = [
+    n.momspligtigOmsaetning != null ? ["Momspligtig omsætning", kr(n.momspligtigOmsaetning)] : null,
+    n.momsfriOmsaetning != null ? ["Momsfri omsætning", kr(n.momsfriOmsaetning)] : null,
+    n.salgsmomsBogfoert != null ? ["Bogført salgsmoms", kr(n.salgsmomsBogfoert)] : null,
+    n.salgsmomsForventet != null ? ["Forventet salgsmoms (25%)", kr(n.salgsmomsForventet)] : null,
+    n.koebsmoms != null ? ["Købsmoms", kr(n.koebsmoms)] : null,
+    n.euKoeb != null ? ["EU-/udlandskøb", kr(n.euKoeb)] : null,
+    (n.euKoeb != null || n.erhvervelsesmoms != null) ? ["Erhvervelsesmoms", kr(n.erhvervelsesmoms)] : null
+  ].filter(Boolean);
+  return (
+    <div style={{border:`0.5px solid ${C.border}`,borderRadius:"12px",overflow:"hidden",marginBottom:"1.25rem",boxShadow:"0 2px 12px rgba(12,31,53,0.06)"}}>
+      <div style={{background:"linear-gradient(135deg,#0c1f35,#1a3558)",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"8px",flexWrap:"wrap"}}>
+        <span style={{color:C.white,fontWeight:700,fontSize:"13px",letterSpacing:"0.3px"}}>🧮 Momsafstemning — beregnet maskinelt</span>
+        <span style={{fontSize:"10px",fontWeight:800,color:harAfv?"#fca5a5":"#86efac",background:harAfv?"rgba(220,38,38,0.25)":"rgba(22,163,74,0.25)",border:`0.5px solid ${harAfv?"rgba(220,38,38,0.5)":"rgba(22,163,74,0.5)"}`,borderRadius:"100px",padding:"3px 10px",letterSpacing:"0.5px"}}>{harAfv?"AFVIGELSE FUNDET":"INGEN VÆSENTLIG AFVIGELSE"}</span>
+      </div>
+      <div style={{background:C.bgCard}}>
+        {rows.map(([l,v],i)=>(
+          <div key={l} style={{display:"flex",justifyContent:"space-between",gap:"12px",padding:"9px 16px",borderTop:i?`0.5px solid ${C.border}`:"none",fontSize:"13px"}}>
+            <span style={{color:C.textSub}}>{l}</span>
+            <span style={{fontFamily:"'DM Mono',monospace",color:C.navy,fontWeight:600}}>{v}</span>
+          </div>
+        ))}
+        {typeof afv === "number" && (
+          <div style={{display:"flex",justifyContent:"space-between",gap:"12px",padding:"10px 16px",borderTop:`1px solid ${C.borderMid}`,fontSize:"13px",background:harAfv?"rgba(220,38,38,0.05)":"rgba(22,163,74,0.05)"}}>
+            <span style={{fontWeight:700,color:C.navy}}>Afvigelse salgsmoms</span>
+            <span style={{fontFamily:"'DM Mono',monospace",fontWeight:800,color:harAfv?"#dc2626":C.green}}>{(afv>0?"+":"")+kr(afv)}</span>
+          </div>
+        )}
+      </div>
+      <div style={{padding:"8px 16px",background:C.bgSecondary,fontSize:"11px",color:C.textSub,borderTop:`0.5px solid ${C.border}`}}>Automatisk fortolket ud fra kontonavne i materialet. Afvigelser under 500 kr. / 2 % ignoreres.</div>
+    </div>
+  );
+}
+
+function VisRapport({data, fmtTekst}) {
+  if (!data) return null;
+  if (data.format === "tekst") return <div>{fmtTekst(data.tekst)}</div>;
+  const r = data.rapport || {};
+  const fund = r.fund || [];
+  const antal = a => fund.filter(f=>f.alvor===a).length;
+  const grupper = ["moms","skat","samspil"].map(k=>({k,liste:fund.filter(f=>f.kategori===k)})).filter(g=>g.liste.length);
+  return (
+    <div>
+      {r.resume && (
+        <div style={{background:"linear-gradient(135deg,rgba(12,31,53,0.04),rgba(196,151,62,0.07))",border:`0.5px solid ${C.border}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"1rem"}}>
+          <p style={{fontSize:"14px",lineHeight:1.7,margin:0,color:C.text}}>{r.resume}</p>
+        </div>
+      )}
+      {r.noegletal && <MomsAfstemningKort n={r.noegletal}/>}
+      {fund.length > 0 && (
+        <div style={{display:"flex",gap:"8px",flexWrap:"wrap",marginBottom:"1.25rem"}}>
+          {["kritisk","hoej","mellem","lav"].map(a => antal(a) > 0 ? (
+            <div key={a} style={{display:"flex",alignItems:"center",gap:"6px",background:ALVOR_META[a].bg,border:`0.5px solid ${ALVOR_META[a].farve}40`,borderRadius:"8px",padding:"6px 12px"}}>
+              <span style={{fontWeight:800,fontSize:"16px",color:ALVOR_META[a].farve}}>{antal(a)}</span>
+              <span style={{fontSize:"11px",fontWeight:700,color:ALVOR_META[a].farve,letterSpacing:"0.5px"}}>{ALVOR_META[a].label}</span>
+            </div>
+          ) : null)}
+        </div>
+      )}
+      {(r.momsprofil || r.skatteprofil) ? (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:"10px",marginBottom:"1.25rem"}}>
+          {r.momsprofil && <div style={{border:`0.5px solid ${C.border}`,borderRadius:"10px",padding:"12px 14px",background:C.bgSecondary}}><div style={{fontSize:"11px",fontWeight:800,letterSpacing:"0.8px",color:C.gold,marginBottom:"4px"}}>MOMSPROFIL</div><p style={{fontSize:"13px",lineHeight:1.6,margin:0,color:C.text}}>{r.momsprofil}</p></div>}
+          {r.skatteprofil && <div style={{border:`0.5px solid ${C.border}`,borderRadius:"10px",padding:"12px 14px",background:C.bgSecondary}}><div style={{fontSize:"11px",fontWeight:800,letterSpacing:"0.8px",color:C.gold,marginBottom:"4px"}}>SKATTEPROFIL</div><p style={{fontSize:"13px",lineHeight:1.6,margin:0,color:C.text}}>{r.skatteprofil}</p></div>}
+        </div>
+      ) : null}
+      {r.datagrundlag && <p style={{fontSize:"12px",color:C.textSub,lineHeight:1.6,marginBottom:"1.25rem"}}><strong style={{color:C.navy}}>Datagrundlag:</strong> {r.datagrundlag}</p>}
+      {grupper.map(g => (
+        <div key={g.k} style={{marginBottom:"1.25rem"}}>
+          <div style={{fontWeight:700,fontSize:"14px",color:C.navy,marginBottom:"8px",display:"flex",alignItems:"center",gap:"6px"}}>
+            <span>{KATEGORI_META[g.k].ikon}</span> {KATEGORI_META[g.k].titel}
+            <span style={{fontSize:"11px",fontWeight:600,color:C.textSub}}>({g.liste.length})</span>
+          </div>
+          {g.liste.map((f,i)=><FundKort key={i} f={f}/>)}
+        </div>
+      ))}
+      {fund.length === 0 && (
+        <div style={{display:"flex",alignItems:"center",gap:"10px",background:"rgba(22,163,74,0.06)",border:"0.5px solid rgba(22,163,74,0.3)",borderRadius:"10px",padding:"12px 16px",marginBottom:"1rem"}}>
+          <span style={{fontSize:"20px"}}>✅</span>
+          <span style={{fontSize:"13px",color:C.text,lineHeight:1.6}}>Ingen konkrete fund i det indsendte materiale.</span>
+        </div>
+      )}
+      {(r.anbefalinger||[]).length > 0 && (
+        <div style={{marginBottom:"1rem"}}>
+          <div style={{fontWeight:700,fontSize:"14px",color:C.navy,marginBottom:"8px"}}>📋 Anbefalede handlinger</div>
+          {r.anbefalinger.map((a,i)=>(
+            <div key={i} style={{display:"flex",gap:"10px",alignItems:"flex-start",padding:"8px 0",borderBottom:i<r.anbefalinger.length-1?`0.5px solid ${C.border}`:"none"}}>
+              <div style={{width:"22px",height:"22px",borderRadius:"50%",background:C.navy,color:C.white,fontSize:"11px",fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:"1px"}}>{a.prioritet||i+1}</div>
+              <div style={{flex:1,fontSize:"13px",lineHeight:1.6,color:C.text}}>{a.tekst}{a.lov ? <span> <RapportChip>{a.lov}</RapportChip></span> : null}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {r.forbehold && <p style={{fontSize:"12px",color:C.textSub,fontStyle:"italic",lineHeight:1.6,margin:0}}>Forbehold: {r.forbehold}</p>}
+    </div>
+  );
+}
+
+function rapportTilMarkdown(titel, data) {
+  if (!data) return "";
+  if (data.format === "tekst") return "## " + titel + "\n\n" + (data.tekst||"") + "\n\n";
+  const r = data.rapport || {};
+  const alvorTxt = {kritisk:"KRITISK",hoej:"HØJ",mellem:"MELLEM",lav:"LAV"};
+  let md = "## " + titel + "\n\n";
+  if (r.resume) md += r.resume + "\n\n";
+  if (r.momsprofil) md += "**Momsprofil:** " + r.momsprofil + "\n\n";
+  if (r.skatteprofil) md += "**Skatteprofil:** " + r.skatteprofil + "\n\n";
+  if (r.datagrundlag) md += "**Datagrundlag:** " + r.datagrundlag + "\n\n";
+  if (r.noegletal) {
+    const kr = v => (v == null || isNaN(v)) ? "—" : new Intl.NumberFormat("da-DK").format(Math.round(v)) + " kr.";
+    const n = r.noegletal;
+    md += "**Momsafstemning (maskinelt beregnet):**\n";
+    if (n.momspligtigOmsaetning != null) md += "- Momspligtig omsætning: " + kr(n.momspligtigOmsaetning) + "\n";
+    if (n.salgsmomsBogfoert != null) md += "- Bogført salgsmoms: " + kr(n.salgsmomsBogfoert) + "\n";
+    if (n.salgsmomsForventet != null) md += "- Forventet salgsmoms (25%): " + kr(n.salgsmomsForventet) + "\n";
+    if (n.salgsmomsAfvigelse != null) md += "- Afvigelse: " + kr(n.salgsmomsAfvigelse) + "\n";
+    if (n.koebsmoms != null) md += "- Købsmoms: " + kr(n.koebsmoms) + "\n";
+    if (n.euKoeb != null) md += "- EU-/udlandskøb: " + kr(n.euKoeb) + " (erhvervelsesmoms: " + kr(n.erhvervelsesmoms) + ")\n";
+    md += "\n";
+  }
+  (r.fund||[]).forEach(f => {
+    md += "- **[" + (alvorTxt[f.alvor]||f.alvor) + " · " + f.kategori + (f.grundlag==="observeret"?" · observeret":"") + "]** " + f.titel;
+    if (f.konto) md += " (konto " + f.konto + ")";
+    if (f.beloeb) md += " (" + f.beloeb + ")";
+    if (f.evidens) md += "\n  " + f.evidens;
+    if (f.handling) md += "\n  → " + f.handling;
+    if (f.lov) md += " [" + f.lov + "]";
+    md += "\n";
+  });
+  if ((r.anbefalinger||[]).length) {
+    md += "\n**Anbefalinger:**\n";
+    r.anbefalinger.forEach((a,i) => { md += (a.prioritet||i+1) + ". " + a.tekst + (a.lov?" ["+a.lov+"]":"") + "\n"; });
+  }
+  if (r.forbehold) md += "\nForbehold: " + r.forbehold + "\n";
+  return md + "\n";
+}
+
+function AnalyseStatus() {
+  const trin = [
+    "📂 Læser bilag og udtrækker posteringer...",
+    "🧾 Krydstjekker mod momsloven og fradragsregler...",
+    "🏦 Vurderer skattemæssig behandling og asymmetrier...",
+    "📋 Strukturerer rapport og prioriterer fund..."
+  ];
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI(x => Math.min(x + 1, trin.length - 1)), 8000);
+    return () => clearInterval(t);
+  }, []);
+  return <span>{trin[i]} <span style={{opacity:0.7}}>Typisk 30–60 sekunder.</span></span>;
+}
+
 function MomsCompliance() {
   const [fase, setFase] = useState("start"); // start | cvr | analyse | upload | rapport
   const [cvr, setCvr] = useState("");
   const [cvrData, setCvrData] = useState(null);
   const [cvrLoading, setCvrLoading] = useState(false);
   const [cvrFejl, setCvrFejl] = useState("");
-  const [aiAnalyse, setAiAnalyse] = useState("");
+  const [aiAnalyse, setAiAnalyse] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [filer, setFiler] = useState([]);
-  const [filAnalyse, setFilAnalyse] = useState("");
+  const [filAnalyse, setFilAnalyse] = useState(null);
   const [filLoading, setFilLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const filRef = useRef(null);
@@ -3924,7 +3996,7 @@ function MomsCompliance() {
     const cleaned = validerCVR(cvr);
     if (!cleaned) { setCvrFejl("CVR-nummer skal være præcis 8 cifre."); return; }
     if (!rateLimit("cvr", 5, 120000)) { setCvrFejl("For mange opslag. Vent et øjeblik og prøv igen."); return; }
-    setCvrFejl(""); setCvrLoading(true); setCvrData(null); setAiAnalyse("");
+    setCvrFejl(""); setCvrLoading(true); setCvrData(null); setAiAnalyse(null);
     try {
       const res = await sikkerFetch("/api/compliance/cvr", {
         method: "POST",
@@ -3955,9 +4027,10 @@ function MomsCompliance() {
         body: JSON.stringify({ virksomhed: virk })
       }, 45000);
       const data = await res.json();
-      setAiAnalyse(data.analyse || data.content?.[0]?.text || "Analyse ikke tilgængelig.");
+      if (data.format === "struktureret" && data.rapport) setAiAnalyse({format:"struktureret", rapport:data.rapport});
+      else setAiAnalyse({format:"tekst", tekst: data.analyse || "Analyse ikke tilgængelig."});
     } catch(e) {
-      setAiAnalyse("Der opstod en fejl ved AI-analysen. Prøv igen.");
+      setAiAnalyse({format:"tekst", tekst:"Der opstod en fejl ved AI-analysen. Prøv igen."});
     }
     setAiLoading(false);
   };
@@ -3978,65 +4051,72 @@ function MomsCompliance() {
   const analyserFiler = async () => {
     if (filer.length === 0) return;
     if (!rateLimit("compliance-fil", 3, 120000)) {
-      setFilAnalyse("⚠️ For mange analyser på kort tid. Vent et øjeblik og prøv igen.");
+      setFilAnalyse({format:"tekst", tekst:"\u26a0\ufe0f For mange analyser p\u00e5 kort tid. Vent et \u00f8jeblik og pr\u00f8v igen."});
       return;
     }
-    setFilLoading(true); setFilAnalyse("");
-
-    const filIndhold = await Promise.all(filer.map(async ({fil, navn, type}) => {
-      if (type === "PDF") {
-        const b64 = await new Promise(res => {
-          const r = new FileReader();
-          r.onload = () => res(r.result.split(",")[1]);
-          r.readAsDataURL(fil);
-        });
-        return { navn, type, b64, erPdf: true };
-      } else if (/\.(xlsx|xls)$/i.test(navn)) {
-        if (!window.XLSX) throw new Error("Excel-læseren kunne ikke indlæses.");
-        const buffer = await new Promise(res => {
-          const r = new FileReader();
-          r.onload = () => res(r.result);
-          r.readAsArrayBuffer(fil);
-        });
-        const workbook = XLSX.read(buffer, { type: "array" });
-        const tekst = workbook.SheetNames.slice(0, 6).map(sheetName => {
-          const sheet = workbook.Sheets[sheetName];
-          return "ARK: " + sheetName + "\n" + XLSX.utils.sheet_to_csv(sheet, { FS: ";", RS: "\n" });
-        }).join("\n\n").substring(0, 16000);
-        return { navn, type: "Excel", tekst, erPdf: false };
-      } else {
-        const tekst = await new Promise(res => {
-          const r = new FileReader();
-          r.onload = () => res(r.result);
-          r.readAsText(fil);
-        });
-        return { navn, type, tekst: tekst.substring(0, 8000), erPdf: false };
-      }
-    }));
-
-    const virksomhedInfo = cvrData ? "Virksomhed: " + saniterTekst(cvrData.navn) + " (CVR: " + cvrData.cvr + "), Branche: " + saniterTekst(cvrData.branche) : "Ukendt virksomhed";
-
-    const content = [];
-    filIndhold.forEach(({navn, type, b64, tekst, erPdf}) => {
-      if (erPdf && b64) {
-        content.push({ type:"document", source:{ type:"base64", media_type:"application/pdf", data:b64 }, title: saniterTekst(navn, 100) });
-      } else if (tekst) {
-        content.push({ type:"text", text:"FILINDHOLD (" + saniterTekst(navn, 100) + "):\n" + tekst });
-      }
-    });
-    content.push({ type:"text", text: virksomhedInfo + "\n\nDu er en erfaren dansk moms- og skatterådgiver. Analyser ovenstående regnskabsmateriale og identificer konkrete fejl og risici inden for BÅDE moms og skat.\n\nStrukturér analysen:\n\nKRITISKE MOMSFEJL - Fejl der giver efterbetaling/bøde (angiv kontonummer/beløb hvis synligt)\n\nKRITISKE SKATTEFEJL - Fejl i skattemæssige fradrag, afskrivninger, personalegoder mv.\n\nASYMMETRI MOMS/SKAT - Poster der behandles forskelligt moms- og skattemæssigt (fx repræsentation, biler)\n\nANBEFALINGER - Konkrete handlinger prioriteret efter risiko\n\nLOVHENVISNINGER - Relevante ML §, MB §, LL §, SEL §, AL § for fundne fejl\n\nVær præcis og henvis til specifikke konti og beløb fra materialet." });
+    setFilLoading(true); setFilAnalyse(null);
 
     try {
+      // Udtraek raadata pr. fil - serveren bygger selv prompten
+      const filData = await Promise.all(filer.map(async ({fil, navn, type}) => {
+        if (type === "PDF") {
+          const b64 = await new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result.split(",")[1]);
+            r.onerror = () => rej(new Error("Kunne ikke l\u00e6se " + navn));
+            r.readAsDataURL(fil);
+          });
+          return { navn, pdfBase64: b64 };
+        }
+        if (/\.(xlsx|xls)$/i.test(navn)) {
+          if (!window.XLSX) throw new Error("Excel-l\u00e6seren kunne ikke indl\u00e6ses. Genindl\u00e6s siden og pr\u00f8v igen.");
+          const buffer = await new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result);
+            r.onerror = () => rej(new Error("Kunne ikke l\u00e6se " + navn));
+            r.readAsArrayBuffer(fil);
+          });
+          const workbook = XLSX.read(buffer, { type: "array" });
+          const PR_ARK = 6000, TOTAL = 18000;
+          let samlet = "";
+          for (const sheetName of workbook.SheetNames.slice(0, 8)) {
+            if (samlet.length >= TOTAL) break;
+            let csv = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName], { FS: ";", RS: "\n", blankrows: false });
+            csv = csv.split("\n").map(l => l.replace(/;+\s*$/, "")).filter(l => l.trim()).join("\n");
+            if (!csv) continue;
+            if (csv.length > PR_ARK) csv = csv.slice(0, PR_ARK) + "\n[AFKORTET]";
+            samlet += "ARK: " + sheetName + "\n" + csv + "\n\n";
+          }
+          if (samlet.length > TOTAL) samlet = samlet.slice(0, TOTAL) + "\n[AFKORTET]";
+          return { navn, tekst: samlet };
+        }
+        const tekst = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.onerror = () => rej(new Error("Kunne ikke l\u00e6se " + navn));
+          r.readAsText(fil);
+        });
+        return { navn, tekst: String(tekst).substring(0, 12000) };
+      }));
+
+      // Samlet payload-vaern foer afsendelse (Vercel-graense ~4,5 MB)
+      const totalChars = filData.reduce((sum, f) => sum + (f.pdfBase64 ? f.pdfBase64.length : 0) + (f.tekst ? f.tekst.length : 0), 0);
+      if (totalChars > 3400000) {
+        throw new Error("Filerne fylder samlet for meget til \u00e9t kald. Analyser f\u00e6rre filer ad gangen, eller del store PDF'er op.");
+      }
+
       const res = await sikkerFetch("/api/compliance/analyze-files", {
         method: "POST",
         headers: {"Content-Type":"application/json","Authorization":"Bearer " + hentGemtToken()},
-        body: JSON.stringify({ content })
-      }, 60000);
+        body: JSON.stringify({ filer: filData, virksomhed: cvrData || undefined })
+      }, 75000);
       const data = await res.json();
-      setFilAnalyse(data.analyse || data.content?.[0]?.text || "Analyse ikke tilgængelig.");
+      if (!data.ok) throw new Error(data.fejl || "Analysen fejlede.");
+      if (data.format === "struktureret" && data.rapport) setFilAnalyse({format:"struktureret", rapport:data.rapport});
+      else setFilAnalyse({format:"tekst", tekst: data.analyse || "Analyse ikke tilg\u00e6ngelig."});
       setFase("rapport");
     } catch(e) {
-      setFilAnalyse("⚠️ " + (e.message || "Teknisk fejl. Prøv igen."));
+      setFilAnalyse({format:"tekst", tekst:"\u26a0\ufe0f " + (e.message || "Teknisk fejl. Pr\u00f8v igen.")});
     }
     setFilLoading(false);
   };
@@ -4126,7 +4206,7 @@ function MomsCompliance() {
                 <span style={{fontSize:"13px",fontWeight:600,color:C.text}}>{v}</span>
               </div>
             ))}
-            <button onClick={()=>{setCvrData(null);setCvr("");setFase("start");setAiAnalyse("");setFiler([]);setFilAnalyse("");}} style={{marginTop:"1rem",background:"none",border:`0.5px solid ${C.borderMid}`,borderRadius:"6px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",color:C.textSub}}>← Søg nyt CVR</button>
+            <button onClick={()=>{setCvrData(null);setCvr("");setFase("start");setAiAnalyse(null);setFiler([]);setFilAnalyse(null);}} style={{marginTop:"1rem",background:"none",border:`0.5px solid ${C.borderMid}`,borderRadius:"6px",padding:"6px 14px",fontSize:"12px",cursor:"pointer",color:C.textSub}}>← Søg nyt CVR</button>
           </Card>
 
           <Card>
@@ -4138,7 +4218,7 @@ function MomsCompliance() {
               </div>
             ) : (
               <div style={{maxHeight:"400px",overflowY:"auto",fontSize:"14px",lineHeight:1.7}}>
-                {fmtTekst(aiAnalyse)}
+                <VisRapport data={aiAnalyse} fmtTekst={fmtTekst}/>
               </div>
             )}
           </Card>
@@ -4191,7 +4271,7 @@ function MomsCompliance() {
           </div>
           {filLoading && (
             <div style={{marginTop:"1rem",padding:"12px 16px",background:"rgba(196,151,62,0.08)",border:`0.5px solid rgba(196,151,62,0.3)`,borderRadius:"8px",fontSize:"13px",color:C.textSub}}>
-              ⏳ AI-en gennemgår dit regnskabsmateriale og leder efter momsfejl... Dette kan tage 15-30 sekunder.
+              <AnalyseStatus/>
             </div>
           )}
         </Card>
@@ -4208,8 +4288,9 @@ function MomsCompliance() {
                 <div style={{color:"rgba(255,255,255,0.6)",fontSize:"13px"}}>CVR {cvrData.cvr} · {cvrData.branche}</div>
               </div>
               <div style={{display:"flex",gap:"10px"}}>
+                <button onClick={()=>{const md=(cvrData?("# Compliance-rapport — "+cvrData.navn+" (CVR "+cvrData.cvr+")\n\n"):"# Compliance-rapport\n\n")+rapportTilMarkdown("Branchebaseret AI-analyse",aiAnalyse)+rapportTilMarkdown("Regnskabsanalyse",filAnalyse)+"---\nGenereret af MomsRevisor. Erstatter ikke professionel rådgivning.\n";navigator.clipboard.writeText(md).then(()=>alert("Rapporten er kopieret som tekst — sæt den ind i mail eller dokument."),()=>alert("Kunne ikke kopiere automatisk. Brug Print i stedet."));}} style={{background:"rgba(255,255,255,0.1)",color:C.white,border:"0.5px solid rgba(255,255,255,0.3)",padding:"8px 18px",borderRadius:"8px",fontSize:"13px",cursor:"pointer"}}>📋 Kopiér</button>
                 <button onClick={()=>window.print()} style={{background:"rgba(255,255,255,0.1)",color:C.white,border:"0.5px solid rgba(255,255,255,0.3)",padding:"8px 18px",borderRadius:"8px",fontSize:"13px",cursor:"pointer"}}>🖨 Print rapport</button>
-                <button onClick={()=>{setCvrData(null);setCvr("");setFase("start");setAiAnalyse("");setFiler([]);setFilAnalyse("");}} style={{background:C.gold,color:C.navy,border:"none",padding:"8px 18px",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer"}}>Ny analyse</button>
+                <button onClick={()=>{setCvrData(null);setCvr("");setFase("start");setAiAnalyse(null);setFiler([]);setFilAnalyse(null);}} style={{background:C.gold,color:C.navy,border:"none",padding:"8px 18px",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer"}}>Ny analyse</button>
               </div>
             </div>
           )}
@@ -4219,7 +4300,7 @@ function MomsCompliance() {
               <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"1.25rem",display:"flex",alignItems:"center",gap:"8px"}}>
                 <span>🤖</span> AI Compliance-analyse — Branchebaseret
               </div>
-              <div style={{fontSize:"14px",lineHeight:1.8}}>{fmtTekst(aiAnalyse)}</div>
+              <div style={{fontSize:"14px",lineHeight:1.8}}><VisRapport data={aiAnalyse} fmtTekst={fmtTekst}/></div>
             </Card>
           )}
 
@@ -4228,7 +4309,7 @@ function MomsCompliance() {
               <div style={{fontWeight:700,fontSize:"16px",color:C.navy,marginBottom:"1.25rem",display:"flex",alignItems:"center",gap:"8px"}}>
                 <span>📊</span> Regnskabsanalyse — Fundne momsfejl og mangler
               </div>
-              <div style={{fontSize:"14px",lineHeight:1.8}}>{fmtTekst(filAnalyse)}</div>
+              <div style={{fontSize:"14px",lineHeight:1.8}}><VisRapport data={filAnalyse} fmtTekst={fmtTekst}/></div>
             </Card>
           )}
 

@@ -1,4 +1,4 @@
-const { methodGuard, readJson, requireAuth, sendJson } = require("../_utils");
+const { enforceRateLimit, methodGuard, readJson, requireAuth, sendJson } = require("../_utils");
 
 function normalizeCVR(value) {
   const cvr = String(value || "").replace(/\D/g, "");
@@ -25,7 +25,7 @@ async function fetchCVRData(cvr) {
   const response = await fetch(url, {
     headers: {
       "Accept": "application/json",
-      "User-Agent": "momsrevisor-compliance/1.0"
+      "User-Agent": process.env.CVR_USER_AGENT || "accai ApS - MomsRevisor compliance - kontakt@accai.dk"
     }
   });
 
